@@ -7,6 +7,7 @@
 
 #include "core/battle/Battle.hpp"
 #include "core/battle/Encounters.hpp"
+#include "core/run/Run.hpp"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -289,6 +290,17 @@ bool playerTurn(Battle& b) {
 }
 
 // ------------------------------------------------------------- satu battle
+// Loop battle yang sudah di-start. false jika pemain menyerah.
+bool battleLoop(Battle& b) {
+    drainEvents(b);
+    while (b.state() == BattleState::WaitingForPlayer) {
+        printState(b);
+        if (!playerTurn(b)) return false;
+    }
+    std::printf("\n Pertarungan selesai dalam %d giliran.\n", b.turnNumber());
+    return true;
+}
+
 void playBattle(EncounterId id) {
     Unit heroes[3];
     int hc = buildParty(heroes, 3);
@@ -298,16 +310,210 @@ void playBattle(EncounterId id) {
     Battle b(heroes, hc, enemies, ec, static_cast<std::uint32_t>(std::time(nullptr)), 3, g_ambush);
     std::printf("\n%s%s⚔  %s%s\n", BOLD, RED, encounterName(id), RST);
     b.start();
-    drainEvents(b);
+    if (!battleLoop(b)) std::printf("\n Party mundur dari pertarungan.\n");
+}
 
-    while (b.state() == BattleState::WaitingForPlayer) {
-        printState(b);
-        if (!playerTurn(b)) {
-            std::printf("\n Party mundur dari pertarungan.\n");
-            return;
+// ============================================================================
+// Mode ekspedisi (run penuh: peta Graph + battle)
+// ============================================================================
+
+void drainRun(Run& run) {
+    BattleEvent e;
+    while (run.pollEvent(e)) {
+        if (e.type == EventType::DsOp) {
+            if (g_trace) std::printf("%s      [DS] %s%s\n", DIM, e.text.c_str(), RST);
+        } else {
+            std::printf(" %s%s%s\n", BLU, e.text.c_str(), RST);
         }
     }
-    std::printf("\n Pertarungan selesai dalam %d giliran.\n", b.turnNumber());
+}
+
+const char* lightName(LightLevel l) {
+    switch (l) {
+        case LightLevel::Bright: return "Terang";
+        case LightLevel::Dim:    return "Redup";
+        case LightLevel::Dark:   return "GELAP";
+    }
+    return "?";
+}
+
+const char* roomColor(RoomType t) {
+    switch (t) {
+        case RoomType::Shrine:   return YEL;
+        case RoomType::Boss:     return RED;
+        case RoomType::Elite:    return MAG;
+        case RoomType::Merchant: return GRN;
+        case RoomType::Treasure: return GRN;
+        case RoomType::Event:    return BLU;
+        default:                 return RST;
+    }
+}
+
+void printParty(const Run& run) {
+    for (int i = 0; i < PARTY_SIZE; ++i) {
+        const Unit& u = run.hero(i);
+        std::printf("   %s%s%s HP %3d/%-3d %s  ", CYN, pad(u.name, 6).c_str(), RST, u.hp, u.maxHp,
+                    bar(u.hp, u.maxHp, 8, GRN).c_str());
+    }
+    std::printf("\n");
+}
+
+// Peta grid: ruang terungkap tampil dengan simbol jenisnya; ruang belum
+// terungkap yang bertetangga dengan posisi sekarang tampil sebagai "?".
+void printMap(Run& run) {
+    Floor& f = run.floor();
+    int cur = f.currentRoom();
+    std::printf("\n   ");
+    for (int c = 0; c < FLOOR_COLS; ++c) std::printf("  %d  ", c);
+    std::printf("\n");
+    for (int r = 0; r < FLOOR_ROWS; ++r) {
+        std::printf(" %d ", r);
+        for (int c = 0; c < FLOOR_COLS; ++c) {
+            int id = roomId(c, r);
+            const Room* room = f.room(id);
+            if (room == nullptr) {
+                std::printf("     ");
+            } else if (id == cur) {
+                std::printf(" %s%s(@)%s ", BOLD, CYN, RST);
+            } else if (id == run.droppedAshRoom()) {
+                std::printf(" %s%s*%c*%s ", BOLD, RED, roomSymbol(room->type), RST);
+            } else if (room->revealed) {
+                bool done = room->cleared && room->type != RoomType::Entrance;
+                std::printf(" %s[%c]%s ", done ? DIM : roomColor(room->type), roomSymbol(room->type), RST);
+            } else if (f.isAdjacent(cur, id)) {
+                std::printf(" %s ? %s ", DIM, RST);
+            } else {
+                std::printf("     ");   // fog of war: belum diketahui sama sekali
+            }
+        }
+        std::printf("\n");
+    }
+    std::printf("%s   @ kamu  x pertarungan  X elite  S shrine  $ pedagang  T harta  ? peristiwa  B boss  * Ash tertinggal%s\n", DIM, RST);
+}
+
+void printAdjacency(Run& run) {
+    std::printf("\n %sAdjacency list (ruang terungkap):%s\n", BOLD, RST);
+    run.floor().graph().forEachVertex([&](Floor::Vertex* v) {
+        if (!v->data.revealed) return;
+        std::printf("   [%2d] %-12s", v->id, roomTypeName(v->data.type));
+        for (auto* e = v->edges; e != nullptr; e = e->next)
+            std::printf(" -> [%d](w%d)", e->to->id, e->weight);
+        std::printf("\n");
+    });
+}
+
+void shrineMenu(Run& run) {
+    std::printf("\n %s%s🜂 Ember Shrine%s — checkpoint tersimpan di sini.\n", BOLD, YEL, RST);
+    std::printf("  %s1)%s Beristirahat (pulih penuh, +40 cahaya, sekali pakai)\n  %s2)%s Lanjut\n", YEL, RST, YEL, RST);
+    std::string in = readLine();
+    if (in == "1") run.rest();
+    run.leaveRoom();
+}
+
+void shopMenu(Run& run) {
+    while (run.state() == RunState::InShop) {
+        std::printf("\n %s%sPedagang Bertudung%s — Ash kamu: %d\n", BOLD, GRN, RST, run.ash());
+        for (int i = 0; i < static_cast<int>(ShopItem::COUNT); ++i) {
+            ShopItem it = static_cast<ShopItem>(i);
+            std::printf("  %s%d)%s %-16s %3d Ash — %s\n", YEL, i + 1, RST, shopItemName(it), run.price(it), shopItemDesc(it));
+        }
+        std::printf("  %s0)%s Pergi\n", YEL, RST);
+        std::string in = readLine();
+        int n = parseInt(in);
+        if (n == 0 || in == "q") { run.leaveRoom(); break; }
+        if (n >= 1 && n <= static_cast<int>(ShopItem::COUNT) && !run.buy(static_cast<ShopItem>(n - 1)))
+            std::printf(" %sAsh tidak cukup.%s\n", RED, RST);
+        drainRun(run);
+    }
+}
+
+void eventMenu(Run& run) {
+    const EventDef& e = run.currentEvent();
+    std::printf("\n %s%s%s%s\n %s\n", BOLD, BLU, e.title, RST, e.text);
+    std::printf("  %s1)%s %s\n  %s2)%s %s\n", YEL, RST, e.options[0], YEL, RST, e.options[1]);
+    while (true) {
+        int n = parseInt(readLine());
+        if (n == 1 || n == 2) { run.chooseEventOption(n - 1); return; }
+    }
+}
+
+void relicMenu(Run& run) {
+    std::printf("\n %s%sBoss tumbang. Pilih satu relic:%s\n", BOLD, YEL, RST);
+    for (int i = 0; i < run.relicOptionCount(); ++i)
+        std::printf("  %s%d)%s %s — %s\n", YEL, i + 1, RST, relicName(run.relicOption(i)), relicDesc(run.relicOption(i)));
+    while (true) {
+        int n = parseInt(readLine());
+        if (run.chooseRelic(n - 1)) return;
+    }
+}
+
+// Satu keputusan di peta. false jika pemain keluar.
+bool exploreTurn(Run& run) {
+    Floor& f = run.floor();
+    std::printf("\n%s════════════════════════════════════════════════════════════════════%s\n", DIM, RST);
+    std::printf(" %sLantai %d%s   Cahaya %s%3d%s (%s)   Ash %d   Hourglass %d   Kematian %d\n",
+                BOLD, f.number(), RST, YEL, run.light(), RST, lightName(run.lightLevel()), run.ash(),
+                run.hourglass(), run.deaths());
+    printParty(run);
+    printMap(run);
+
+    const Room* here = f.room(f.currentRoom());
+    std::printf("\n Posisi: ruang %d (%s)\n Jalan keluar:\n", f.currentRoom(), roomTypeName(here->type));
+    int exits[FLOOR_COLS * FLOOR_ROWS];
+    int n = 0;
+    f.graph().forEachNeighbor(f.currentRoom(), [&](Floor::Vertex* v, int) {
+        exits[n] = v->id;
+        const char* name = v->data.revealed ? roomTypeName(v->data.type) : "???";
+        std::printf("  %s%d)%s ruang %2d  %s%-12s%s  cahaya -%d%s\n", YEL, n + 1, RST, v->id,
+                    v->data.revealed ? roomColor(v->data.type) : DIM, name, RST,
+                    run.lightCost(f.currentRoom(), v->id), v->data.cleared && v->data.revealed ? "  (selesai)" : "");
+        ++n;
+    });
+    std::printf("  %sg <id>)%s auto-travel (Dijkstra)   %ss)%s ke shrine terdekat   %sm)%s adjacency list   %sd)%s trace   %sq)%s keluar\n",
+                YEL, RST, YEL, RST, YEL, RST, YEL, RST, YEL, RST);
+
+    while (true) {
+        std::string in = readLine();
+        if (in == "q") return false;
+        if (in == "d") { g_trace = !g_trace; std::printf(" Trace: %s\n", g_trace ? "ON" : "OFF"); continue; }
+        if (in == "m") { printAdjacency(run); continue; }
+        if (in == "s") { run.travelToNearestShrine(); return true; }
+        if (in.size() > 2 && in[0] == 'g' && in[1] == ' ') {
+            int target = parseInt(in.substr(2));
+            if (target >= 0) run.autoTravel(target);
+            return true;
+        }
+        int k = parseInt(in);
+        if (k >= 1 && k <= n) { run.travelTo(exits[k - 1]); return true; }
+        std::printf(" %sPilihan tidak dikenal.%s\n", RED, RST);
+    }
+}
+
+void playRun() {
+    Run run(static_cast<std::uint32_t>(std::time(nullptr)));
+    std::printf("\n%s%sEkspedisi dimulai. Turuni %d lantai katedral dan padamkan nyala terakhirnya.%s\n",
+                BOLD, YEL, MAX_FLOORS, RST);
+
+    while (run.state() != RunState::RunWon) {
+        drainRun(run);
+        switch (run.state()) {
+            case RunState::Exploring:
+                if (!exploreTurn(run)) return;
+                break;
+            case RunState::InBattle:
+                std::printf("\n%s%s⚔  Pertarungan!%s\n", BOLD, RED, RST);
+                if (!battleLoop(*run.battle())) return;
+                run.finishBattle();
+                break;
+            case RunState::AtShrine:      shrineMenu(run); break;
+            case RunState::InShop:        shopMenu(run); break;
+            case RunState::InEvent:       eventMenu(run); break;
+            case RunState::ChoosingRelic: relicMenu(run); break;
+            case RunState::RunWon:        break;
+        }
+    }
+    drainRun(run);
+    std::printf("\n%s%s★ EKSPEDISI SELESAI ★%s  Kematian: %d, Ash: %d\n", BOLD, GRN, RST, run.deaths(), run.ash());
 }
 
 }  // namespace
@@ -318,7 +524,9 @@ int runConsole() {
     std::printf("%s   Logika & struktur data yang sama dengan versi GUI.%s\n", DIM, RST);
 
     while (true) {
-        std::printf("\n%sPilih pertarungan:%s\n", BOLD, RST);
+        std::printf("\n%sMenu:%s\n", BOLD, RST);
+        std::printf("  %se)%s %sEkspedisi baru (run penuh: peta + pertarungan)%s\n", YEL, RST, BOLD, RST);
+        std::printf("  %sPertarungan cepat:%s\n", DIM, RST);
         for (int i = 0; i < static_cast<int>(EncounterId::COUNT); ++i)
             std::printf("  %s%d)%s %s\n", YEL, i + 1, RST, encounterName(static_cast<EncounterId>(i)));
         std::printf("  %sa)%s Lentera gelap / ambush: %s\n", YEL, RST, g_ambush ? "ON" : "OFF");
@@ -327,6 +535,7 @@ int runConsole() {
 
         std::string in = readLine();
         if (in == "q") break;
+        if (in == "e") { playRun(); continue; }
         if (in == "a") { g_ambush = !g_ambush; continue; }
         if (in == "d") { g_trace = !g_trace; continue; }
         int n = parseInt(in);
