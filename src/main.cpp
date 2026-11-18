@@ -4,13 +4,14 @@
 // Fase 0: hanya membuka jendela raylib untuk memastikan toolchain bekerja.
 //   cinderwake.exe            → jendela game
 //   cinderwake.exe --smoke    → buka jendela ±1 detik lalu keluar (cek build)
-//   cinderwake.exe --console  → mode console (diisi di Fase 1)
+//   cinderwake.exe --console  → mode console (battle lengkap, tanpa GUI)
 // ============================================================================
 
 #include <cstdio>
 #include <cstring>
 #include <cmath>
 #include "raylib.h"
+#include "console/ConsoleGame.hpp"
 
 static const int kScreenW = 1280;
 static const int kScreenH = 720;
@@ -18,10 +19,7 @@ static const int kScreenH = 720;
 int main(int argc, char** argv) {
     bool smoke = false;
     for (int i = 1; i < argc; ++i) {
-        if (std::strcmp(argv[i], "--console") == 0) {
-            std::printf("Mode console belum tersedia (Fase 1).\n");
-            return 0;
-        }
+        if (std::strcmp(argv[i], "--console") == 0) return runConsole();
         if (std::strcmp(argv[i], "--smoke") == 0) smoke = true;
     }
 
