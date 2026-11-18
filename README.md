@@ -3,7 +3,7 @@
 Dungeon crawler turn-based bertema dark fantasy, dibuat untuk **Tugas Besar Struktur Data — Semester Ganjil 2026/2027**.
 Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**. GUI memakai **raylib** sebagai antarmuka saja.
 
-> Status: **Fase 2 — dungeon & run loop** (ekspedisi 3 lantai bisa dimainkan penuh lewat mode console). Rencana lengkap ada di [docs/PLAN.md](docs/PLAN.md).
+> Status: **Fase 3 — GUI** (ekspedisi bisa dimainkan penuh dengan GUI raylib, aset masih placeholder prosedural). Rencana lengkap ada di [docs/PLAN.md](docs/PLAN.md).
 
 ## Mekanik yang direplikasi
 
@@ -39,6 +39,21 @@ mingw32-make run    # build + jalankan game (GUI)
 bin/cinderwake.exe --console   # mode console
 ```
 
+### Kontrol GUI
+
+| Tombol | Fungsi |
+|---|---|
+| Klik ruang | Berjalan ke ruang bertetangga / auto-travel (Dijkstra) ke ruang terungkap |
+| `S` | Auto-travel ke Ember Shrine terdekat |
+| Klik skill / `1`-`3` / `U` | Pilih skill; klik musuh atau sekutu sebagai target |
+| `SELA` di kartu hero | Interject (Resolve 100%) |
+| `R` / tombol Rewind | Kembali ke giliran hero sebelumnya (Stack snapshot) |
+| Tahan `Space` | Percepat animasi |
+| **`Tab`** | **Inspector struktur data**: node Timeline + pointer prev/next, Stack rewind, Event Queue, adjacency list Graph, log operasi |
+| `F11` | Layar penuh |
+
+Logika di GUI dan console sama persis: GUI hanya memanggil `Run`/`Battle` di `src/core` lalu menganimasikan isi Battle Event Queue.
+
 ### Mode console
 
 **Ekspedisi (`e`)** — run penuh 3 lantai:
@@ -60,7 +75,7 @@ Aksi: `1-3` skill, `i` Interject (Resolve 100%), `r` Rewind (Cracked Hourglass),
 
 ```
 src/core/      ADT + logika mekanik (C++ murni, tidak bergantung raylib)
-src/gui/       tampilan raylib
+src/gui/       tampilan raylib (scene peta & battle, Inspector, shader, placeholder art)
 src/console/   mode console (logika yang sama tanpa GUI)
 tests/         unit test
 assets/        aset visual & audio
