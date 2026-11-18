@@ -60,6 +60,14 @@ void testGenerator() {
     }
     CHECK(allOk);
 
+    // setiap lantai punya boss sendiri
+    const EncounterId bosses[3] = {EncounterId::ChoirWarden, EncounterId::SisterOfAsh, EncounterId::LastFlame};
+    for (int n = 1; n <= 3; ++n) {
+        Floor f;
+        f.generateFloor(5, n);
+        CHECK(f.room(f.boss())->encounter == bosses[n - 1]);
+    }
+
     Floor a, b;
     a.generateFloor(77, 1);
     b.generateFloor(77, 1);

@@ -12,6 +12,8 @@ enum class EnemyKind {
     CandleWraith,
     Wisp,
     Gargoyle,
-    ChoirWarden,   // boss floor 1
+    ChoirWarden,   // boss lantai 1
+    SisterOfAsh,   // boss lantai 2
+    LastFlame,     // boss lantai 3
     COUNT
 };

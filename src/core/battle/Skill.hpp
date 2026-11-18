@@ -48,6 +48,7 @@ struct Skill {
     bool        isUltimate;
     int         effectCount;
     Effect      effects[MAX_EFFECTS];
+    bool        lowHpSpecial = false;   // AI: dipakai sekali saat HP < 50%
 };
 
 enum class SkillId {
@@ -60,6 +61,9 @@ enum class SkillId {
     // Musuh
     Claw, Lunge, Mallet, DeathToll, WaxBurn, KindleWisp, Flicker,
     Crush, StoneSkin, HymnLash, Requiem, SummonChoir, Crescendo,
+    // Boss lantai 2 & 3
+    AshVeil, UrnStrike, Mourning, AshenRebirth,
+    Conflagration, SearingHand, Pyre, InfernoAscendant,
     COUNT
 };
 

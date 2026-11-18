@@ -27,6 +27,8 @@ const char* enemySlug(EnemyKind k) {
         case EnemyKind::Wisp:         return "wisp";
         case EnemyKind::Gargoyle:     return "gargoyle";
         case EnemyKind::ChoirWarden:  return "choir_warden";
+        case EnemyKind::SisterOfAsh:  return "sister_of_ash";
+        case EnemyKind::LastFlame:    return "last_flame";
         default:                      return "unknown";
     }
 }
@@ -45,6 +47,8 @@ Vector2 enemySize(EnemyKind k) {
         case EnemyKind::Wisp:        return {120, 150};
         case EnemyKind::Gargoyle:    return {280, 280};
         case EnemyKind::ChoirWarden: return {380, 460};
+        case EnemyKind::SisterOfAsh: return {340, 450};
+        case EnemyKind::LastFlame:   return {420, 470};
         case EnemyKind::BellRinger:  return {200, 300};
         default:                     return {200, 290};
     }

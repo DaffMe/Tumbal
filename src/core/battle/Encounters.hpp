@@ -3,7 +3,7 @@
 
 #include "Unit.hpp"
 
-enum class EncounterId { Thralls, BellChoir, Candlelight, Gargoyle, ChoirWarden, COUNT };
+enum class EncounterId { Thralls, BellChoir, Candlelight, Gargoyle, ChoirWarden, SisterOfAsh, LastFlame, COUNT };
 
 const char* encounterName(EncounterId id);
 

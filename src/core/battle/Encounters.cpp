@@ -7,6 +7,8 @@ const char* encounterName(EncounterId id) {
         case EncounterId::Candlelight: return "Cahaya Lilin";
         case EncounterId::Gargoyle:    return "Penjaga Batu";
         case EncounterId::ChoirWarden: return "BOSS: The Choir Warden";
+        case EncounterId::SisterOfAsh: return "BOSS: Sister of Ash";
+        case EncounterId::LastFlame:   return "BOSS: The Last Flame";
         default:                       return "?";
     }
 }
@@ -48,6 +50,13 @@ int buildEncounter(EncounterId id, Unit out[], int max) {
         case EncounterId::Gargoyle:
             push(out, n, max, EnemyKind::HollowThrall);
             push(out, n, max, EnemyKind::Gargoyle);
+            break;
+        case EncounterId::SisterOfAsh:
+            push(out, n, max, EnemyKind::SisterOfAsh);
+            break;
+        case EncounterId::LastFlame:
+            push(out, n, max, EnemyKind::Wisp);
+            push(out, n, max, EnemyKind::LastFlame);
             break;
         case EncounterId::ChoirWarden:
         default:

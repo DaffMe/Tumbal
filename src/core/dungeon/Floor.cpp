@@ -126,7 +126,8 @@ void Floor::generateFloor(std::uint32_t seed, int floorNo) {
     ent->revealed = ent->visited = ent->cleared = true;
     Room* bos = room(boss_);
     bos->type = RoomType::Boss;
-    bos->encounter = EncounterId::ChoirWarden;
+    bos->encounter = floorNo == 1 ? EncounterId::ChoirWarden
+                   : (floorNo == 2 ? EncounterId::SisterOfAsh : EncounterId::LastFlame);
 
     bool assigned[FLOOR_COLS * FLOOR_ROWS] = {};
     auto pick = [&](int colMin, int colMax) -> Room* {

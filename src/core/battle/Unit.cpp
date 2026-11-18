@@ -128,6 +128,26 @@ Unit makeEnemy(EnemyKind kind) {
             addSkill(u, SkillId::StoneSkin);
             setPattern(u, {0, 0, 1});
             break;
+        case EnemyKind::SisterOfAsh:
+            u.name = "Sister of Ash";
+            u.isBoss = true;
+            setStats(u, 760, 42, 30, 108.0f, 130);
+            addSkill(u, SkillId::AshVeil);
+            addSkill(u, SkillId::UrnStrike);
+            addSkill(u, SkillId::Mourning);
+            addSkill(u, SkillId::AshenRebirth);
+            setPattern(u, {1, 0, 2, 1, 0});
+            break;
+        case EnemyKind::LastFlame:
+            u.name = "The Last Flame";
+            u.isBoss = true;
+            setStats(u, 820, 44, 38, 104.0f, 150);
+            addSkill(u, SkillId::Conflagration);
+            addSkill(u, SkillId::SearingHand);
+            addSkill(u, SkillId::Pyre);
+            addSkill(u, SkillId::InfernoAscendant);
+            setPattern(u, {1, 0, 1, 2, 0});
+            break;
         case EnemyKind::ChoirWarden:
         default:
             u.name = "The Choir Warden";

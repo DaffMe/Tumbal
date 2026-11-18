@@ -547,10 +547,10 @@ void Battle::runEnemyTurn(int idx) {
 }
 
 const Skill* Battle::chooseEnemySkill(Unit& e) {
-    // Skill khusus (ExtraTurn) dipakai sekali saat HP di bawah 50%
+    // Skill khusus dipakai sekali saat HP di bawah 50%
     for (int i = 0; i < e.skillCount; ++i) {
         const Skill* s = e.skills[i];
-        if (s->effects[0].type == EffectType::ExtraTurn && !e.usedSpecial && e.hp * 2 < e.maxHp) {
+        if (s->lowHpSpecial && !e.usedSpecial && e.hp * 2 < e.maxHp) {
             e.usedSpecial = true;
             return s;
         }
@@ -559,7 +559,7 @@ const Skill* Battle::chooseEnemySkill(Unit& e) {
     for (int tries = 0; tries < e.patternLen; ++tries) {
         const Skill* s = e.skills[e.pattern[e.aiStep % e.patternLen]];
         ++e.aiStep;
-        if (s->effects[0].type == EffectType::ExtraTurn) continue;
+        if (s->lowHpSpecial) continue;
         if (s->effects[0].type == EffectType::Summon && aliveCount(Side::Enemy) >= MAX_ENEMIES_ALIVE - 1) continue;
         return s;
     }
