@@ -3,7 +3,7 @@
 Dungeon crawler turn-based bertema dark fantasy, dibuat untuk **Tugas Besar Struktur Data — Semester Ganjil 2026/2027**.
 Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**. GUI memakai **raylib** sebagai antarmuka saja.
 
-> Status: **Fase 0 — fondasi** (ADT + unit test). Rencana lengkap ada di [docs/PLAN.md](docs/PLAN.md).
+> Status: **Fase 1 — battle core** (battle lengkap bisa dimainkan lewat mode console). Rencana lengkap ada di [docs/PLAN.md](docs/PLAN.md).
 
 ## Mekanik yang direplikasi
 
@@ -34,9 +34,20 @@ pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-raylib mingw-w64-ucrt-
 Pastikan `C:\msys64\ucrt64\bin` ada di `PATH`, lalu dari folder proyek:
 
 ```bash
-mingw32-make test   # build + jalankan unit test ADT
-mingw32-make run    # build + jalankan game
+mingw32-make test   # build + jalankan unit test ADT dan mekanik
+mingw32-make run    # build + jalankan game (GUI)
+bin/cinderwake.exe --console   # mode console
 ```
+
+### Mode console
+
+Menu memilih encounter (termasuk boss), lalu setiap giliran hero menampilkan:
+- HP, Resolve, Toughness/Break, dan status setiap unit
+- **Isi node Timeline (Doubly Linked List)** dari HEAD ke TAIL beserta Action Value
+- **Prediksi 8 giliran** berikutnya (simulasi pada salinan timeline)
+- Trace operasi struktur data (`[DS] Timeline.updateAV(...)`, `Stack.push(...)`), bisa dimatikan dengan `d`
+
+Aksi: `1-3` skill, `i` Interject (Resolve 100%), `r` Rewind (Cracked Hourglass), `a` di menu untuk mode lentera gelap (ambush).
 
 ## Struktur folder
 
