@@ -42,6 +42,11 @@ public:
     Battle(const Battle&) = delete;
     Battle& operator=(const Battle&) = delete;
 
+    // Ember awal (relic dapat menambahnya). Hanya berlaku sebelum start().
+    void setStartEmber(int e) {
+        if (state_ == BattleState::Idle) ember_ = e < 0 ? 0 : (e > MAX_EMBER ? MAX_EMBER : e);
+    }
+
     // ---------------------------------------------------------- aksi pemain
     void start();
     bool playerUseSkill(int slot, int targetIdx);   // slot 0..n-1 atau ULT_SLOT
