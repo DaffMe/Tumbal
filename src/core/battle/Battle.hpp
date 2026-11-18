@@ -72,6 +72,12 @@ public:
     int   hourglass() const { return hourglass_; }
     int   turnNumber() const { return turn_; }
     int   historySize() const { return static_cast<int>(history_.size()); }
+    // Isi stack rewind dari puncak ke dasar (nomor giliran tiap snapshot), untuk Inspector.
+    int   snapshotTurns(int out[], int max) const {
+        int n = 0;
+        history_.forEach([&](Snapshot* s) { if (n < max) out[n++] = s->turn; });
+        return n;
+    }
     const Timeline<Unit>& timeline() const { return timeline_; }
     int   indexOf(const Unit* u) const { return static_cast<int>(u - units_); }
 
