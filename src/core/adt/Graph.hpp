@@ -209,6 +209,13 @@ public:
     // Kompleksitas O(V^2) — cukup untuk dungeon ±20 ruangan, tanpa
     // priority queue siap pakai.
     int dijkstra(int startId, int targetId, Stack<int>& pathOut) {
+        return dijkstra(startId, targetId, pathOut, [](Vertex*) { return true; });
+    }
+
+    // Versi dengan filter: hanya vertex yang lolos `passable(Vertex*)` boleh
+    // dilalui (mis. hanya ruangan yang sudah terungkap). Start selalu boleh.
+    template <typename Pass>
+    int dijkstra(int startId, int targetId, Stack<int>& pathOut, Pass passable) {
         pathOut.clear();
         Vertex* start  = findVertex(startId);
         Vertex* target = findVertex(targetId);
@@ -227,6 +234,7 @@ public:
             // relaksasi edge
             for (Edge* e = u->edges; e != nullptr; e = e->next) {
                 Vertex* w = e->to;
+                if (!passable(w)) continue;
                 if (!w->visited && u->dist + e->weight < w->dist) {
                     w->dist = u->dist + e->weight;
                     w->parent = u;
