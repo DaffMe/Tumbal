@@ -5,6 +5,7 @@
 #include "Art.hpp"
 #include "Gfx.hpp"
 #include "Inspector.hpp"
+#include "Sfx.hpp"
 #include "core/battle/Encounters.hpp"
 
 using namespace gfx;
@@ -18,6 +19,7 @@ int App::run(bool smoke, bool shots) {
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
     gfx::init();
+    sfx::init();
 
     int frame = 0;
     while (!WindowShouldClose() && !quit_) {
@@ -33,6 +35,7 @@ int App::run(bool smoke, bool shots) {
 
     battleView_ = BattleView();
     run_.reset();
+    sfx::shutdown();
     gfx::shutdown();
     CloseWindow();
     return 0;
@@ -60,6 +63,8 @@ void App::update(float dt) {
     updateEffects(dt);
 
     if (IsKeyPressed(KEY_F11)) ToggleBorderlessWindowed();
+    if (IsKeyPressed(KEY_M)) sfx::setMuted(!sfx::muted());
+    sfx::updateAmbience(true, scene_ == Scene::Battle ? 1.0f : 0.7f);
     if (IsKeyPressed(KEY_TAB) && (scene_ == Scene::Map || scene_ == Scene::Battle)) inspector_ = !inspector_;
     inspSlide_ = approach(inspSlide_, inspector_ ? 1.0f : 0.0f, 12.0f, dt);
 

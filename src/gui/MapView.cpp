@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include "Art.hpp"
+#include "Sfx.hpp"
 
 using namespace gfx;
 
@@ -102,6 +103,7 @@ void MapView::update(Run& run, float dt, DsLog& dsLog) {
     }
 
     if (hovered_ >= 0 && clicked()) {
+        sfx::play(sfx::Id::Step);
         if (f.isAdjacent(f.currentRoom(), hovered_)) run.travelTo(hovered_);
         else if (f.room(hovered_)->revealed) run.autoTravel(hovered_);
         pathFor_ = -1;

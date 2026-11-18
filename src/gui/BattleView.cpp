@@ -3,6 +3,7 @@
 #include <cmath>
 #include "Art.hpp"
 #include "Gfx.hpp"
+#include "Sfx.hpp"
 
 using namespace gfx;
 
@@ -69,6 +70,7 @@ float BattleView::process(const BattleEvent& e) {
             banner_ = e.text;
             bannerT_ = 1.6f;
             if (e.source >= 0) vis_[e.source].lunge = 1.0f;
+            sfx::play(sfx::Id::Skill, 0.7f);
             return 0.42f;
         case EventType::Damage: {
             if (e.target < 0) return 0.1f;
@@ -81,6 +83,7 @@ float BattleView::process(const BattleEvent& e) {
                                hero ? Color{255, 120, 100, 255} : col::ink, e.amount >= 60 ? 46.0f : 36.0f, 0});
             burst(c, hero ? col::blood : col::ember, 14, 220);
             shake(hero ? 7.0f : 4.0f);
+            sfx::play(e.amount >= 60 ? sfx::Id::HeavyHit : sfx::Id::Hit);
             return 0.3f;
         }
         case EventType::Heal: {
@@ -89,6 +92,7 @@ float BattleView::process(const BattleEvent& e) {
             Vector2 c = unitCenter(e.target);
             floats_.push_back({c, "+" + std::to_string(e.amount), Color{150, 230, 130, 255}, 32, 0});
             burst(c, Color{150, 230, 130, 255}, 10, 120);
+            sfx::play(sfx::Id::Heal, 0.8f);
             return 0.25f;
         }
         case EventType::Break: {
@@ -97,6 +101,7 @@ float BattleView::process(const BattleEvent& e) {
             burst(c, col::gold, 40, 320);
             shake(12.0f);
             flash_ = 0.25f;
+            sfx::play(sfx::Id::Break);
             return 0.6f;
         }
         case EventType::AvShift: {
@@ -116,6 +121,7 @@ float BattleView::process(const BattleEvent& e) {
             if (e.target >= 0) {
                 vis_[e.target].dying = true;
                 burst(unitCenter(e.target), col::emberHot, 50, 260);
+                sfx::play(sfx::Id::Death, 0.8f);
             }
             return 0.6f;
         case EventType::Summon:
@@ -128,6 +134,7 @@ float BattleView::process(const BattleEvent& e) {
                 v.x = enemyFoot(e.target).x;
                 v.tokenY = -1;
                 burst(unitCenter(e.target), Color{140, 180, 255, 255}, 30, 200);
+                sfx::play(sfx::Id::Summon);
             }
             return 0.45f;
         case EventType::Interject:
@@ -135,19 +142,24 @@ float BattleView::process(const BattleEvent& e) {
             banner_ = e.text;
             bannerT_ = 1.6f;
             flash_ = 0.18f;
+            sfx::play(sfx::Id::Bell, 0.8f);
             return 0.5f;
         case EventType::Rewind:
             syncAll();
             banner_ = "Pasir waktu berbalik...";
             bannerT_ = 1.6f;
             flash_ = 0.5f;
+            sfx::play(sfx::Id::Bell);
             return 0.6f;
         case EventType::Info:
             banner_ = e.text;
             bannerT_ = 1.8f;
             return 0.5f;
         case EventType::Victory:
+            sfx::play(sfx::Id::Victory);
+            return 0.8f;
         case EventType::Defeat:
+            sfx::play(sfx::Id::Defeat);
             return 0.8f;
         default:
             return 0.08f;

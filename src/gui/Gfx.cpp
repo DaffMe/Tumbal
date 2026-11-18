@@ -1,5 +1,6 @@
 #include "Gfx.hpp"
 #include "rlgl.h"
+#include "Sfx.hpp"
 
 #include <cmath>
 #include <unordered_map>
@@ -301,7 +302,9 @@ bool button(Rectangle r, const std::string& label, bool enabled, bool selected, 
     DrawRectangleLinesEx(r, selected ? 2.0f : 1.5f, enabled ? edge : col::inkFaint);
     Color tc = enabled ? (h || selected ? col::emberHot : col::ink) : col::inkFaint;
     text(head(), label, r.x + r.width / 2, r.y + (r.height - fontSize) / 2 - 1, fontSize, tc, Center);
-    return h && clicked();
+    bool c = h && clicked();
+    if (c) sfx::play(sfx::Id::Click);
+    return c;
 }
 
 void bar(Rectangle r, float frac, Color fill, Color back, float ghost) {
