@@ -5,6 +5,9 @@ bin/*
 *.exe
 *.dll
 
+# Screenshot otomatis (--shots)
+shot_*.png
+
 # Editor / OS
 .vscode/
 .idea/
