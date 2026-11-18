@@ -7,6 +7,7 @@ bin/*
 
 # Screenshot otomatis (--shots)
 shot_*.png
+gallery_*.png
 
 # Editor / OS
 .vscode/
