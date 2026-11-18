@@ -3,7 +3,7 @@
 Dungeon crawler turn-based bertema dark fantasy, dibuat untuk **Tugas Besar Struktur Data — Semester Ganjil 2026/2027**.
 Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**. GUI memakai **raylib** sebagai antarmuka saja.
 
-> Status: **Fase 1 — battle core** (battle lengkap bisa dimainkan lewat mode console). Rencana lengkap ada di [docs/PLAN.md](docs/PLAN.md).
+> Status: **Fase 2 — dungeon & run loop** (ekspedisi 3 lantai bisa dimainkan penuh lewat mode console). Rencana lengkap ada di [docs/PLAN.md](docs/PLAN.md).
 
 ## Mekanik yang direplikasi
 
@@ -19,7 +19,7 @@ Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**. GUI mem
 | File | ADT | Operasi |
 |---|---|---|
 | `src/core/adt/Timeline.hpp` | Doubly Linked List terurut | insertSorted, insertFront, remove, popFront, search, updateAV (relink), subtractAll, traversal maju/mundur |
-| `src/core/adt/Graph.hpp` | Graph tak berarah berbobot | addVertex, removeVertex, addEdge, removeEdge, findVertex, neighbors, BFS, Dijkstra, isConnected |
+| `src/core/adt/Graph.hpp` | Graph tak berarah berbobot | addVertex, removeVertex, addEdge, removeEdge, findVertex, neighbors, BFS, Dijkstra (dengan filter ruang terungkap), isConnected |
 | `src/core/adt/Queue.hpp` | Queue (linked) | enqueue, dequeue, peek, traversal |
 | `src/core/adt/Stack.hpp` | Stack (linked) | push, pop, peek, traversal |
 
@@ -41,7 +41,14 @@ bin/cinderwake.exe --console   # mode console
 
 ### Mode console
 
-Menu memilih encounter (termasuk boss), lalu setiap giliran hero menampilkan:
+**Ekspedisi (`e`)** — run penuh 3 lantai:
+- Peta grid dengan fog of war; ruang terungkap lewat **BFS** dengan radius sesuai cahaya lentera (terang 2, redup 1, gelap 0)
+- Setiap koridor menghabiskan cahaya sesuai **bobot edge**; makin gelap, makin besar peluang musuh menyergap (giliran musuh dimajukan di Timeline)
+- `g <id>` auto-travel lewat jalur **Dijkstra**, `s` ke Ember Shrine terdekat, `m` cetak **adjacency list** graph
+- Ember Shrine = checkpoint. Party tumbang → bangkit di checkpoint, Ash tertinggal di ruang kematian dan bisa dipungut kembali
+- Pedagang, peristiwa (termasuk koridor runtuh = `removeEdge` + cek `isConnected`), boss, dan relic
+
+**Pertarungan cepat (`1-5`)** — langsung ke satu encounter. Setiap giliran hero menampilkan:
 - HP, Resolve, Toughness/Break, dan status setiap unit
 - **Isi node Timeline (Doubly Linked List)** dari HEAD ke TAIL beserta Action Value
 - **Prediksi 8 giliran** berikutnya (simulasi pada salinan timeline)
