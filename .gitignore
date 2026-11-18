@@ -1,0 +1,16 @@
+# Hasil build
+bin/*
+!bin/.gitkeep
+*.o
+*.exe
+*.dll
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+
+# Aset mentah besar yang belum dipakai boleh disimpan lokal saja
+assets/raw/_scratch/
