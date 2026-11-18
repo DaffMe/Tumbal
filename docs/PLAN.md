@@ -141,16 +141,21 @@ cinderwake/
 │  │  ├─ adt/               Timeline(DLL), Queue, Stack, Graph
 │  │  ├─ battle/            Unit, Skill, Battle, StatusEffect, AI musuh sederhana
 │  │  ├─ dungeon/           Room, Floor, generator, light
-│  │  └─ run/               RunState (party, ash, relic, checkpoint)
-│  ├─ gui/                  raylib: scene Title/Map/Battle/Shrine/Death, UI, VFX, Inspector
+│  │  ├─ run/               Run (party, ash, relic, checkpoint)
+│  │  └─ util/              Rng, Format
+│  ├─ gui/                  raylib: App, MapView, BattleView, Inspector, Gfx, Art, Sfx, Gallery
 │  ├─ console/              mode console: menjalankan core yang sama lewat menu teks
 │  └─ main.cpp
-├─ tests/                   unit test ADT + mekanik (assert sederhana)
-├─ assets/  raw/ (output Codex) · final/ (siap pakai) · shaders/ · audio/
-├─ docs/   PLAN.md, ART_BIBLE.md, DEMO_SCRIPT.md
+├─ tests/                   unit test ADT + mekanik (framework CHECK sederhana)
+├─ tools/                   process_assets.py (post-process aset Codex)
+├─ assets/  raw/ (output Codex) · final/ (siap pakai)
+├─ docs/   PLAN.md, ARCHITECTURE.md, ART_BIBLE.md
+├─ CLAUDE.md                aturan proyek untuk AI agent
 ├─ Makefile
 └─ README.md
 ```
+
+Peta file dan tabel struktur data → fungsi → mekanik yang selalu diperbarui ada di [ARCHITECTURE.md](ARCHITECTURE.md).
 
 - **Mode console (`cinderwake --console`)** menjalankan logika yang sama tanpa GUI. Ini bukti kuat untuk dosen bahwa GUI bukan tempat logika.
 - **Inspector struktur data (tombol `Tab`)** menampilkan node Timeline dengan panah `prev/next` dan nilai AV (beranimasi saat relink), graph peta beserta adjacency list, isi Stack snapshot, isi Event Queue, dan log operasi (`insertSorted(Sable, av=72.7)`). Fitur ini yang paling menolong saat demo.

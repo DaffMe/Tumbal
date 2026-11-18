@@ -51,6 +51,7 @@ bin/cinderwake.exe --console   # mode console
 | Tahan `Space` | Percepat animasi |
 | **`Tab`** | **Inspector struktur data**: node Timeline + pointer prev/next, Stack rewind, Event Queue, adjacency list Graph, log operasi |
 | `F11` | Layar penuh |
+| `M` | Bisukan / nyalakan suara |
 
 Logika di GUI dan console sama persis: GUI hanya memanggil `Run`/`Battle` di `src/core` lalu menganimasikan isi Battle Event Queue.
 
@@ -71,6 +72,17 @@ Logika di GUI dan console sama persis: GUI hanya memanggil `Run`/`Battle` di `sr
 
 Aksi: `1-3` skill, `i` Interject (Resolve 100%), `r` Rewind (Cracked Hourglass), `a` di menu untuk mode lentera gelap (ambush).
 
+## Aset visual & audio
+
+- Aset visual dibuat dengan **Codex (image generation)** mengikuti [docs/ART_BIBLE.md](docs/ART_BIBLE.md), disimpan mentah di `assets/raw/`.
+- `tools/process_assets.py` membersihkan tepi transparan, crop, resize, dan menyeragamkan warna ke `assets/final/` (butuh Python + Pillow + NumPy):
+  ```bash
+  python tools/process_assets.py
+  ```
+- Game memakai `assets/final/` bila ada, dan kembali ke gambar prosedural bila tidak ada.
+- Efek suara dan ambience **disintesis prosedural** di `src/gui/Sfx.cpp` (tanpa file audio).
+- `bin/cinderwake.exe --gallery` menampilkan semua aset dan menyimpan screenshot untuk pengecekan.
+
 ## Struktur folder
 
 ```
@@ -78,6 +90,7 @@ src/core/      ADT + logika mekanik (C++ murni, tidak bergantung raylib)
 src/gui/       tampilan raylib (scene peta & battle, Inspector, shader, placeholder art)
 src/console/   mode console (logika yang sama tanpa GUI)
 tests/         unit test
+tools/         skrip post-process aset
 assets/        aset visual & audio
 docs/          rencana, art bible, skrip demo
 ```
