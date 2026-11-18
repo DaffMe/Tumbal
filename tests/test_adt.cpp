@@ -1,25 +1,13 @@
 // ============================================================================
 // Unit test ADT manual (Queue, Stack, Timeline, Graph).
-// Framework test minimal buatan sendiri: CHECK(kondisi) mencatat gagal/lulus.
-// Jalankan: mingw32-make test
 // ============================================================================
 
-#include <cstdio>
 #include <string>
+#include "TestFramework.hpp"
 #include "../src/core/adt/Queue.hpp"
 #include "../src/core/adt/Stack.hpp"
 #include "../src/core/adt/Timeline.hpp"
 #include "../src/core/adt/Graph.hpp"
-
-static int g_pass = 0, g_fail = 0;
-
-#define CHECK(cond)                                                          \
-    do {                                                                     \
-        if (cond) { ++g_pass; }                                              \
-        else { ++g_fail; std::printf("  GAGAL %s:%d  %s\n", __FILE__, __LINE__, #cond); } \
-    } while (0)
-
-#define SECTION(name) std::printf("[%s]\n", name)
 
 // Unit tiruan untuk Timeline
 struct FakeUnit { std::string name; };
@@ -220,11 +208,9 @@ static void testGraph() {
 }
 
 // ---------------------------------------------------------------------------
-int main() {
+void runAdtTests() {
     testQueue();
     testStack();
     testTimeline();
     testGraph();
-    std::printf("\n%d lulus, %d gagal\n", g_pass, g_fail);
-    return g_fail == 0 ? 0 : 1;
 }

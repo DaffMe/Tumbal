@@ -35,6 +35,7 @@ CORE_HDR := $(wildcard src/core/*/*.hpp)
 CORE_SRC := $(wildcard src/core/*/*.cpp)
 GUI_SRC  := $(wildcard src/gui/*.cpp)
 CON_SRC  := $(wildcard src/console/*.cpp)
+TEST_SRC := $(wildcard tests/*.cpp)
 
 GAME := bin/cinderwake.exe
 TEST := bin/cinderwake_tests.exe
@@ -50,8 +51,8 @@ bin/%.dll:
 	$(call CP,$(MSYS_BIN)$*.dll,$@)
 
 # Test hanya memakai core → tidak di-link dengan raylib
-$(TEST): tests/test_adt.cpp $(CORE_SRC) $(CORE_HDR)
-	$(CXX) $(CXXFLAGS) tests/test_adt.cpp $(CORE_SRC) -o $@ -static-libgcc -static-libstdc++
+$(TEST): $(TEST_SRC) $(CORE_SRC) $(CORE_HDR) tests/TestFramework.hpp
+	$(CXX) $(CXXFLAGS) $(TEST_SRC) $(CORE_SRC) -o $@ -static-libgcc -static-libstdc++
 
 test: $(TEST)
 	$(RUN_PREFIX)$(subst /,$(if $(RUN_PREFIX),/,\),$(TEST))
