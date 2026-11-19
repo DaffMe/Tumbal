@@ -39,7 +39,18 @@ TILESETS = {
     'pasir':   ('pasir_garam.png', 1, 1),
     'bambu':   ('bamboo.png', 8, 80),
     'kanopi':  ('auto_bambu_atas.png', 8, 48),
+    'rumput_rawa':  ('auto_rumput_rawa.png', 8, 48),
+    'hutan_rawa':   ('auto_hutan_rawa.png', 8, 48),
+    'tanah_rawa':   ('auto_tanah_rawa.png', 8, 48),
+    'rumput_sarang': ('auto_rumput_sarang.png', 8, 48),
+    'hutan_sarang':  ('auto_hutan_sarang.png', 8, 48),
+    'dekor':   ('dekor.png', 8, 16),
 }
+# indeks tile dekor.png (lihat build_decor_tiles di tools/build_assets.py)
+DEKOR_SEMANGGI = (0, 1, 2)
+DEKOR_DAUN = (3, 4, 5)
+DEKOR_TENGKORAK, DEKOR_TULANG, DEKOR_RANTING = 6, 7, 8
+DEKOR_BATU = (9, 10)
 ANIMATED = {'lumpur': (4, 48, 260), 'laut': (4, 48, 300)}   # frame, tile per frame, durasi ms
 LAYERS = ('lantai', 'tanah', 'air', 'tembok', 'semak', 'hiasan', 'atap', 'collision')
 
@@ -125,8 +136,10 @@ class MapBuilder:
                 around = [self.ch(x + dx, y + dy) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))]
                 row[x] = '.' if around.count('.') >= 2 else '"'
             self.rows[y] = ''.join(row)
-        AUTO = {'.': ('tanah', 'tanah', False), '~': ('air', water_ts, True),
-                '&': ('semak', 'semak', True), '%': ('semak', 'hutan', True)}
+        path_ts = getattr(self, 'path_ts', 'tanah')
+        forest_ts = getattr(self, 'forest_ts', 'hutan')
+        AUTO = {'.': ('tanah', path_ts, False), '~': ('air', water_ts, True),
+                '&': ('semak', 'semak', True), '%': ('semak', forest_ts, True)}
         for y in range(self.h):
             for x in range(self.w):
                 self.set('lantai', x, y, base_ts, 0 if base_ts == 'pasir' else full)
@@ -149,6 +162,40 @@ class MapBuilder:
                 c = original[y][x]
                 if c in marks:
                     marks[c](self, x, y)
+
+    def scatter(self, grass, path=(), grass_rate=0.10, path_rate=0.04, seed=None):
+        """Hiasan kecil acak (deterministik) di layer `hiasan`: tidak menghalangi, digambar di bawah karakter.
+        grass/path = daftar indeks tile dekor untuk petak rumput / jalan tanah."""
+        import random
+        rnd = random.Random(seed or self.name)
+        taken = {(o['x'], o['y']) for o in self.objects if not o.get('pixel')}
+        for y in range(self.h):
+            for x in range(self.w):
+                if (x, y) in taken or self.layers['collision'][y * self.w + x] or self.layers['hiasan'][y * self.w + x]:
+                    continue
+                c = self.ch(x, y)
+                pool, rate = (grass, grass_rate) if c == '"' else (path, path_rate) if c == '.' else ((), 0)
+                if pool and rnd.random() < rate:
+                    self.set('hiasan', x, y, 'dekor', rnd.choice(pool))
+
+    def scatter_props(self, images, count, seed=None, solid=False, avoid=2):
+        """Sebar props kecil (gelagah, ranting) di petak rumput kosong, jauh dari jalan & objek."""
+        import random
+        rnd = random.Random((seed or self.name) + 'props')
+        taken = {(o['x'], o['y']) for o in self.objects if not o.get('pixel')}
+        placed, tries = 0, 0
+        while placed < count and tries < count * 60:
+            tries += 1
+            x, y = rnd.randrange(1, self.w - 1), rnd.randrange(2, self.h - 1)
+            ok = all(self.ch(x + dx, y + dy) == '"' and not self.layers['collision'][(y + dy) * self.w + x + dx]
+                     and (x + dx, y + dy) not in taken
+                     for dx in range(-avoid, avoid + 1) for dy in range(-avoid, avoid + 1)
+                     if 0 <= x + dx < self.w and 0 <= y + dy < self.h)
+            if not ok:
+                continue
+            self.prop(rnd.choice(images), x, y, foot=(0, 1, 1), solid=solid)
+            taken.add((x, y))
+            placed += 1
 
     # ---- dungeon: tembok + lantai
     def build_dungeon(self, marks):
@@ -431,7 +478,7 @@ def map_desa():
     g[24][28] = 'M'; g[9][35] = 'M'; g[27][10] = 'M'
     rows = [''.join(r) for r in g]
 
-    b = MapBuilder('Desa Karangtumbal', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'tabrak'])
+    b = MapBuilder('Desa Karangtumbal', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'dekor', 'tabrak'])
     b.props.update(nama='Desa Karangtumbal', musik='desa', gelap=0.62, battleback='assets/battlebacks/hutan.png')
     loots = {(26, 20): 'jamu', (36, 25): 'sukma_kecil', (20, 6): 'penawar'}
     marks = {
@@ -470,6 +517,7 @@ def map_desa():
     b.prop('alang_alang.png', 11, 8, solid=False)
     b.prop('alang_alang.png', 35, 25, solid=False)
     b.prop('rak_bambu.png', 28, 22, foot=(0, 2, 1))
+    b.scatter(grass=DEKOR_SEMANGGI * 3 + DEKOR_DAUN + DEKOR_BATU, path=DEKOR_DAUN)
     b.save('desa.tmj')
 
 
@@ -506,7 +554,7 @@ def map_ladang():
     g[30][28] = 'L'; g[7][8] = 'L'; g[25][44] = 'L'
     rows = [''.join(r) for r in g]
 
-    b = MapBuilder('Ladang Timun Busuk', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'tabrak'])
+    b = MapBuilder('Ladang Timun Busuk', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'dekor', 'tabrak'])
     b.props.update(nama='Ladang Timun Busuk', musik='ladang', gelap=0.58, battleback='assets/battlebacks/hutan.png')
     troops = {(10, 16): TR_BELALANG_2, (26, 9): TR_TIMUN_BELALANG, (12, 28): TR_TIMUN_2,
               (30, 27): TR_BELALANG_2, (36, 17): TR_TIMUN_BELALANG}
@@ -553,6 +601,7 @@ def map_ladang():
     b.prop('orang_orangan.png', 4, 12, foot=(1, 2, 1))
     b.prop('pohon_mati_c.png', 46, 30, foot=(1, 1, 1))
     b.prop('pohon_mati_a.png', 3, 28, foot=(1, 1, 1))
+    b.scatter(grass=DEKOR_SEMANGGI * 3 + DEKOR_DAUN + DEKOR_BATU, path=DEKOR_DAUN + (DEKOR_RANTING,), path_rate=0.06)
     b.save('ladang.tmj')
 
 
@@ -592,7 +641,7 @@ def map_hutan_bambu():
     g[27][18] = 'J'
     g[7][30] = 'K'; g[27][39] = 'K'; g[23][15] = 'K'
     rows = [''.join(r) for r in g]
-    b = MapBuilder('Hutan Bambu Jarum', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'bambu', 'kanopi', 'tabrak'])
+    b = MapBuilder('Hutan Bambu Jarum', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'bambu', 'kanopi', 'dekor', 'tabrak'])
     b.props.update(nama='Hutan Bambu Jarum', musik='lumbung', gelap=0.7, battleback='assets/battlebacks/hutan_bambu.png')
     troops = {(24, 7): TR_ARWAH_2, (38, 15): TR_GAGAK, (33, 27): TR_ULAR_ARWAH, (20, 23): TR_GAGAK, (12, 14): TR_ARWAH_2}
     walk = {TR_ARWAH_2: 'assets/chars/arwah.png', TR_GAGAK: 'assets/chars/gagak.png', TR_ULAR_ARWAH: 'assets/chars/ular.png'}
@@ -619,6 +668,7 @@ def map_hutan_bambu():
                           (20, 26, 'bambu_tinggi_b.png'), (39, 22, 'bambu_tinggi_a.png')]:
         b.prop(img, tx, ty, foot=(0, 1, 1))
     b.prop('orang_orangan.png', 17, 26, foot=(1, 2, 1))
+    b.scatter(grass=DEKOR_DAUN * 2 + DEKOR_SEMANGGI + (DEKOR_RANTING, DEKOR_TULANG), path=DEKOR_DAUN, grass_rate=0.14)
     b.save('hutan_bambu.tmj')
 
 
@@ -636,14 +686,13 @@ def map_laut_garam():
     fill(30, 0, W - 1, 14, '~')                  # teluk timur
     fill(36, 15, W - 1, 18, '~')
     fill(0, 7, 1, H - 1, '%'); fill(0, H - 2, W - 1, H - 1, '%')
-    fill(10, 10, 14, 12, '&'); fill(22, 20, 26, 22, '&')
     g[8][3] = 'S'
-    g[8][19] = 'T'                               # Timun Mas di ujung dermaga
+    g[3][19] = 'T'                               # Timun Mas di ujung dermaga
     g[H - 3][28] = 'R'                           # ke rawa
     g[14][8] = 'M'; g[18][30] = 'M'; g[24][14] = 'M'; g[12][24] = 'M'
     g[20][6] = 'K'; g[10][28] = 'K'; g[25][38] = 'K'
     rows = [''.join(r) for r in g]
-    b = MapBuilder('Laut Garam', rows, ['pasir', 'tanah', 'semak', 'hutan', 'laut', 'tabrak'])
+    b = MapBuilder('Laut Garam', rows, ['pasir', 'tanah', 'semak', 'hutan', 'laut', 'dekor', 'tabrak'])
     b.base_ts = 'pasir'
     b.water_ts = 'laut'
     b.props.update(nama='Laut Garam', musik='laut', gelap=0.55, battleback='assets/battlebacks/pantai_garam.png')
@@ -671,9 +720,21 @@ def map_laut_garam():
     b.rows = [''.join(r) for r in g]
     b.build_outdoor(marks)
     b.prop('rumah_panggung_tua.png', 6, 16, foot=(1, 8, 2))
+    b.obj('event', 10, 16, name='rumah_nelayan', event='rumah_nelayan', trigger='action', w=3)
     for (tx, ty, img) in [(16, 18, 'pohon_mati_a.png'), (34, 26, 'pohon_mati_b.png'), (24, 15, 'pohon_mati_c.png')]:
         b.prop(img, tx, ty, foot=(1, 2, 1))
-    b.prop('pagar.png', 17, 10, solid=False)
+    # dermaga ke utara: papan di atas air bisa dipijak (collision air dibuka)
+    b.prop('dermaga.png', 18, 7, solid=False, name='dermaga')
+    b.objects[-1]['props']['flat'] = True
+    for yy in range(1, 7):
+        for xx in (18, 19):
+            b.block(xx, yy, False)
+    b.prop('tong.png', 16, 8, foot=(0, 1, 1))
+    b.prop('tong.png', 21, 9, foot=(0, 1, 1))
+    b.prop('jemuran_jala.png', 9, 12, foot=(0, 5, 1))
+    b.prop('jemuran_jala.png', 22, 22, foot=(0, 5, 1))
+    b.prop('pagar.png', 26, 13, solid=False)
+    b.scatter(grass=DEKOR_BATU * 2 + (DEKOR_TULANG, DEKOR_TENGKORAK, DEKOR_RANTING), grass_rate=0.05)
     b.save('laut_garam.tmj')
 
 
@@ -698,12 +759,13 @@ def map_rawa_terasi():
     g[16][12] = 'T'
     g[H - 4][43] = 'Z'
     g[10][22] = 'M'; g[17][32] = 'M'; g[25][22] = 'M'; g[22][43] = 'M'; g[16][6] = 'M'
-    g[29][23] = 'J'; g[5][40] = 'K'; g[30][12] = 'K'
+    g[29][23] = 'J'; g[5][29] = 'K'; g[30][12] = 'K'
     rows = [''.join(r) for r in g]
-    b = MapBuilder('Rawa Terasi', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'tabrak'])
+    b = MapBuilder('Rawa Terasi', rows, ['rumput_rawa', 'tanah_rawa', 'semak', 'hutan_rawa', 'lumpur', 'dekor', 'tabrak'])
+    b.base_ts, b.path_ts, b.forest_ts = 'rumput_rawa', 'tanah_rawa', 'hutan_rawa'
     b.props.update(nama='Rawa Terasi', musik='rawa', gelap=0.72, battleback='assets/battlebacks/rawa.png')
     troops = {(22, 10): TR_AKAR_2, (32, 17): TR_BUAYA, (22, 25): TR_AKAR_BELATUNG, (43, 22): TR_BUAYA, (6, 16): TR_AKAR_2}
-    loots = {(40, 5): 'jamu', (12, 30): 'bom_minyak'}
+    loots = {(29, 5): 'jamu', (12, 30): 'bom_minyak'}
     marks = {
         'S': lambda b, x, y: (b.obj('spawn', x, y, name='dari_laut', dir=0),
                               [b.obj('door', xx, 0, to=LAUT_GARAM, spawn='dari_rawa') for xx in (26, 27, 28)],
@@ -717,15 +779,26 @@ def map_rawa_terasi():
         'K': lambda b, x, y: b.obj('loot', x, y, item=loots.get((x, y), 'sukma_kecil')),
     }
     b.build_outdoor(marks)
-    for (tx, ty, img) in [(5, 5, 'tunggul_rawa.png'), (36, 6, 'pohon_mati_b.png'), (25, 26, 'pohon_mati_a.png'),
-                          (14, 31, 'pohon_mati_c.png'), (45, 12, 'pohon_mati_a.png'), (17, 18, 'tunggul_rawa.png')]:
-        b.prop(img, tx, ty, foot=(1, 2, 1))
-    b.prop('orang_orangan.png', 40, 28, foot=(1, 2, 1))
+    # tunggul raksasa berlubang di timur laut (sebagian tertutup hutan tepi peta)
+    b.prop('tunggul_rawa.png', 31, 7, foot=(2, 8, 2))
+    for (tx, ty, img) in [(36, 30, 'pohon_mati_b.png'), (25, 26, 'pohon_mati_a.png'), (14, 31, 'pohon_mati_c.png'),
+                          (45, 12, 'pohon_mati_a.png'), (16, 19, 'pohon_akar.png'), (3, 13, 'pohon_akar.png')]:
+        b.prop(img, tx, ty, foot=(1, 1, 1))
+    b.prop('orang_orangan.png', 37, 21, foot=(1, 2, 1))
+    b.prop('tiang_tengkorak.png', 41, 30, solid=False)
+    b.prop('tiang_tengkorak.png', 45, 30, solid=False)
+    b.prop('pagar_tali.png', 4, 14, solid=False)
+    # pemuda desa yang disuruh mengintip Buto, berjaga di dekat Tungku rawa
+    b.obj('npc', 15, 15, name='pemuda_rawa', event='pemuda_rawa', walker='assets/chars/warga_lelaki.png', dir=0)
+    b.block(15, 15)
+    b.scatter_props(['gelagah.png', 'gelagah_b.png', 'gelagah.png', 'ranting_mati.png'], 18, avoid=1)
+    b.scatter(grass=DEKOR_DAUN * 2 + DEKOR_BATU + (DEKOR_TULANG, DEKOR_TENGKORAK, DEKOR_RANTING), path=DEKOR_DAUN,
+              grass_rate=0.14)
     b.save('rawa_terasi.tmj')
 
 
 def map_sarang_buto():
-    W, H = 32, 24
+    W, H = 34, 40
     g = [['%'] * W for _ in range(H)]
 
     def fill(x0, y0, x1, y1, c):
@@ -734,26 +807,42 @@ def map_sarang_buto():
                 if 0 <= xx < W and 0 <= yy < H:
                     g[yy][xx] = c
 
-    fill(4, 3, 27, 20, '"')
-    fill(9, 4, 22, 11, '~')                        # kolam terasi tempat Buto bangkit
-    fill(14, 12, 17, 20, '.')
-    fill(14, 0, 17, 3, '"')
-    g[2][15] = 'S'
+    fill(14, 0, 19, 15, '"')                       # lereng masuk yang sempit
+    fill(4, 15, 29, 36, '"')                       # lembah sarang
+    fill(9, 27, 24, 35, '~')                       # kolam terasi tempat Buto tidur
+    fill(16, 0, 17, 25, '.')                       # jejak seretan menuju kolam
+    fill(3, 20, 4, 30, '%'); fill(29, 18, 30, 31, '%')
+    g[2][16] = 'S'
     rows = [''.join(r) for r in g]
-    b = MapBuilder('Sarang Buto', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'tabrak'])
-    b.props.update(nama='Sarang Buto', musik='rawa', gelap=0.6, battleback='assets/battlebacks/sarang_buto.png')
+    b = MapBuilder('Sarang Buto', rows, ['rumput_sarang', 'tanah_rawa', 'semak', 'hutan_sarang', 'lumpur', 'dekor', 'tabrak'])
+    b.base_ts, b.path_ts, b.forest_ts = 'rumput_sarang', 'tanah_rawa', 'hutan_sarang'
+    b.props.update(nama='Sarang Buto', musik='rawa', gelap=0.66, battleback='assets/battlebacks/sarang_buto.png')
     marks = {
         'S': lambda b, x, y: (b.obj('spawn', x, y, name='dari_rawa', dir=0),
                               b.obj('event', 0, 0, name='sarang_masuk', event='sarang_masuk', trigger='auto',
                                     once='sarang_masuk')),
     }
     b.build_outdoor(marks)
-    b.prop('buto_peta.png', 11, 11, solid=False, name='buto')
+    # Buto: kepala menyembul dari kolam
+    b.prop('buto_peta.png', 15, 29, solid=False, name='buto')
     b.objects[-1]['props']['hideIf'] = 'buto_mati'
     b.objects[-1]['props']['glow'] = 110
-    b.obj('event', 13, 13, name='buto', event='buto_bangun', trigger='touch', w=6, once='buto_mati')
-    for (tx, ty, img) in [(5, 8, 'pohon_mati_b.png'), (24, 18, 'tunggul_rawa.png'), (25, 7, 'pohon_mati_c.png')]:
-        b.prop(img, tx, ty, foot=(1, 2, 1))
+    b.obj('event', 10, 24, name='buto', event='buto_bangun', trigger='touch', w=14, once='buto_mati')
+    # tiang tengkorak berbaris di kiri-kanan lereng: peringatan bagi yang turun
+    for yy in (5, 9, 13):
+        b.prop('tiang_tengkorak.png', 14, yy, solid=False)
+        b.prop('tiang_tengkorak.png', 19, yy, solid=False)
+    b.obj('event', 16, 18, name='tumpukan_tulang', event='tumpukan_tulang', trigger='action')
+    b.prop('tunggul_rawa.png', -2, 24, foot=(2, 8, 2))
+    for (tx, ty, img) in [(25, 20, 'pohon_mati_b.png'), (26, 34, 'pohon_akar.png'), (5, 34, 'pohon_mati_c.png'),
+                          (21, 17, 'pohon_mati_a.png')]:
+        b.prop(img, tx, ty, foot=(1, 1, 1))
+    b.prop('pagar_tali.png', 7, 25, solid=False)
+    b.prop('pagar_tali.png', 22, 25, solid=False)
+    b.prop('orang_orangan.png', 10, 19, foot=(1, 2, 1))
+    b.scatter_props(['gelagah.png', 'gelagah_b.png', 'ranting_mati.png'], 8, avoid=1)
+    b.scatter(grass=(DEKOR_TULANG, DEKOR_TULANG, DEKOR_TENGKORAK, DEKOR_RANTING) + DEKOR_DAUN + DEKOR_BATU,
+              path=(DEKOR_TULANG, DEKOR_TENGKORAK) + DEKOR_DAUN, grass_rate=0.18, path_rate=0.12)
     b.save('sarang_buto.tmj')
 
 
