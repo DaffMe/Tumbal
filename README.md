@@ -5,7 +5,8 @@ JRPG turn-based bernuansa **cerita rakyat Nusantara versi kelam**, dibuat untuk
 (RPG Maker VX Ace): battle front-view ATB, loop Tungku/Sukma ala Souls, dan dunia top-down yang saling terhubung.
 Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**; GUI memakai **raylib** sebagai antarmuka saja.
 
-> Status: **v2 hari 3 — eksplorasi, battle, cerita.** Peta Tiled, jalan 8 arah, perpindahan peta lewat Graph dunia,
+> Status: **v2 hari 4 — lumbung + desa.** Menu Tungku (naik level dengan sukma, warp antar-Tungku lewat BFS),
+> peta Desa Karangtumbal sebagai hub dengan Mbok Srini. Sebelumnya: Peta Tiled, jalan 8 arah, perpindahan peta lewat Graph dunia,
 > musuh terlihat yang mengejar, battle front-view ATB dengan antrean giliran, dialog & pilihan lewat interpreter
 > event, barang (Ramuan Jamu dll.), istirahat di Tungku, sukma tercecer saat mati, Inspector (F1), mode console.
 > Rencana lengkap: [docs/PLAN_V2.md](docs/PLAN_V2.md) · Bedah sistem acuan: [docs/research/black-souls-1-analysis.md](docs/research/black-souls-1-analysis.md)
@@ -15,7 +16,7 @@ Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**; GUI mem
 | Mekanik | Dari Black Souls 1 | Struktur data | Status |
 |---|---|---|---|
 | M1 Battle ATB mode *wait* + antrean giliran | skrip ATB (gauge AP, rapal, stun) | Doubly Linked List terurut (`Timeline`) + Queue `BattleEvent` | **berjalan** (gauge AP dari AGI, rapal & buyar rapal, tunda giliran, Elak/Tangkis, AI musuh, prediksi antrean) |
-| M2 Dunia saling terhubung & Tungku | hub + rantai peta, bonfire, warp, jalan pintas, musuh terlihat | Graph berarah (adjacency multi linked list) | **berjalan** (pindah peta, kunci jalan pintas, BFS Tungku, respawn musuh lewat traversal) |
+| M2 Dunia saling terhubung & Tungku | hub + rantai peta, bonfire, warp, jalan pintas, musuh terlihat | Graph berarah (adjacency multi linked list) | **berjalan** (pindah peta, kunci jalan pintas, warp hanya ke Tungku yang terjangkau lewat BFS, respawn musuh lewat traversal) |
 | M3 Interpreter event & dialog | perintah event RPG Maker (teks, pilihan, if, panggil, battle, barang) | Stack (frame eksekusi) + Queue (notifikasi) | **berjalan** (cabang bersarang, panggil skrip lain, flag cerita, battle dari event) |
 
 ## Struktur data (semua manual, tanpa container STL di `src/core`)

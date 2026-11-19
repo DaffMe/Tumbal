@@ -60,6 +60,8 @@ GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari, Z = a
 - Peta = berkas Tiled JSON (`assets/maps/*.tmj`, tileset embedded) + `assets/maps/world.json` (daftar peta).
   Konvensi: layer `collision` (≠0 = terhalang), property layer `above` = digambar di atas karakter, objek bertipe
   `spawn`, `door` (`to`, `spawn`, `locked`, `oneway`), `tungku`, `loot`. Property peta `nama`, `gelap` (0..1).
+- Objek `prop` = gambar besar (rumah, pohon) dari `assets/props/` (dibuat `build_props()`), digambar terurut-y
+  bersama karakter; generator memblokir tapak bawahnya (`MapBuilder.prop`).
 - Objek peta lain: `npc` (`event`, `walker`, `dir`, `once`, `after`), `event` (`event`, `trigger` = action/touch/auto,
   `once` = flag yang menandai sudah terjadi), `loot` (`item` + `n`, atau `event`), `enemy` (`troop`, `walker`, `dir`).
 - Skrip event = JSON di `assets/events/*.json` (perintah: text, choice, item, sukma, flag, if_flag, if_item, battle,

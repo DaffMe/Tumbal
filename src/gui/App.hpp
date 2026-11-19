@@ -12,6 +12,7 @@
 #include "DialogView.hpp"
 #include "MapView.hpp"
 #include "MenuView.hpp"
+#include "TungkuView.hpp"
 #include "core/game/Game.hpp"
 
 class App {
@@ -28,6 +29,7 @@ private:
     MapView    mapView_;
     DialogView dialog_;
     MenuView   menu_;
+    TungkuView tungku_;
     BattleSystem battle_;
     BattleView battleView_;
     RenderTexture2D screen_{};

@@ -1,7 +1,9 @@
 #include "MapView.hpp"
 
 #include <cmath>
+#include <algorithm>
 #include <utility>
+#include <vector>
 #include "rlgl.h"
 #include "Assets.hpp"
 
@@ -175,40 +177,43 @@ void MapView::draw(const Field& field, double time, bool showCollision, const Bl
     long long ms = static_cast<long long>(time * 1000.0);
     drawLayers(*m, false, ms);
     drawObjects(field, time, blood);
-    // karakter diurut berdasarkan y agar yang di depan menutupi yang di belakang
-    int order[Field::MAX_ENEMIES + 1 + 16];
-    int n = 0;
-    for (int i = 0; i < field.enemyCount(); ++i)
-        if (field.enemy(i).alive) order[n++] = i;
-    order[n++] = -1;   // pemain
-    // NPC (objek "npc" dengan sprite) ikut diurut; disimpan sebagai -100 - urutan
-    const MapObject* npcs[16];
-    int npcCount = 0;
-    for (const MapObject* o = m->objects(); o != nullptr && npcCount < 16; o = o->next)
-        if (o->type == "npc" && !o->props.getString("walker").empty()) {
-            npcs[npcCount] = o;
-            order[n++] = -100 - npcCount;
-            ++npcCount;
-        }
-    auto yOf = [&](int k) {
-        if (k <= -100) return npcs[-100 - k]->y / TS;
-        return k < 0 ? field.player().drawY() : field.enemy(k).actor.drawY();
+    // karakter, NPC, dan properti besar (rumah, pohon) diurut menurut garis
+    // kaki (y bawah) agar yang di depan menutupi yang di belakang
+    struct Drawable {
+        float y;                  // garis kaki dalam satuan tile
+        int   kind;               // 0 pemain, 1 musuh, 2 npc, 3 prop
+        int   index;
+        const MapObject* obj;
     };
-    for (int i = 1; i < n; ++i)
-        for (int j = i; j > 0 && yOf(order[j - 1]) > yOf(order[j]); --j) std::swap(order[j], order[j - 1]);
-    for (int i = 0; i < n; ++i) {
-        if (order[i] <= -100) {
-            const MapObject* o = npcs[-100 - order[i]];
+    std::vector<Drawable> list;
+    list.push_back({field.player().drawY() + 1.0f, 0, 0, nullptr});
+    for (int i = 0; i < field.enemyCount(); ++i)
+        if (field.enemy(i).alive) list.push_back({field.enemy(i).actor.drawY() + 1.0f, 1, i, nullptr});
+    for (const MapObject* o = m->objects(); o != nullptr; o = o->next) {
+        if (o->type == "npc" && !o->props.getString("walker").empty())
+            list.push_back({o->y / TS + 1.0f, 2, 0, o});
+        else if (o->type == "prop")
+            list.push_back({(o->y + o->h) / TS - 0.01f, 3, 0, o});
+    }
+    std::stable_sort(list.begin(), list.end(), [](const Drawable& l, const Drawable& r) { return l.y < r.y; });
+    for (const Drawable& d : list) {
+        if (d.kind == 0) {
+            drawActor(field.player(), "assets/chars/tumbal.png");
+        } else if (d.kind == 1) {
+            const FieldEnemy& e = field.enemy(d.index);
+            drawActor(e.actor, e.walker.c_str(), e.cooldown > 0 ? 0.55f : 1.0f);
+        } else if (d.kind == 2) {
             Actor a;
-            a.x = static_cast<int>(o->x) / TS;
-            a.y = static_cast<int>(o->y) / TS;
-            a.facing = o->props.getInt("dir", 0);
-            drawActor(a, o->props.getString("walker").c_str());
-            continue;
+            a.x = static_cast<int>(d.obj->x) / TS;
+            a.y = static_cast<int>(d.obj->y) / TS;
+            a.facing = d.obj->props.getInt("dir", 0);
+            drawActor(a, d.obj->props.getString("walker").c_str());
+        } else {
+            float px = d.obj->x - cam_.x, py = d.obj->y - cam_.y;
+            if (px > viewW_ || py > viewH_ || px + d.obj->w < 0 || py + d.obj->h < 0) continue;
+            Texture2D t = Assets::get().texture(d.obj->props.getString("image"));
+            DrawTexture(t, static_cast<int>(std::floor(px)), static_cast<int>(std::floor(py)), WHITE);
         }
-        if (order[i] < 0) { drawActor(field.player(), "assets/chars/tumbal.png"); continue; }
-        const FieldEnemy& e = field.enemy(order[i]);
-        drawActor(e.actor, e.walker.c_str(), e.cooldown > 0 ? 0.55f : 1.0f);
     }
     // tanda "!" saat musuh menyadari pemain
     for (int i = 0; i < field.enemyCount(); ++i) {

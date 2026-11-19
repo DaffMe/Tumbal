@@ -170,10 +170,40 @@ void flushNotices(Game& game) {
     while (game.popNotice(n)) std::printf("  >> %s\n", n.c_str());
 }
 
+// Menu Tungku versi teks: naik level, warp (BFS Graph), pergi.
+void consoleTungku(Game& game) {
+    std::string line;
+    while (game.tungkuMenuOpen()) {
+        flushNotices(game);
+        std::printf("\n  == TUNGKU ==  Level %d   Sukma %d\n  1) Naik level (butuh %d sukma)\n  2) Warp\n  3) Pergi\n  pilih: ",
+                    game.state().level(), game.state().sukma(), game.state().levelUpCost());
+        if (!std::getline(std::cin, line)) { game.closeTungkuMenu(); return; }
+        if (line == "1") {
+            std::printf("  %s\n", game.levelUp().c_str());
+        } else if (line == "2") {
+            int maps[16], depth[16];
+            int n = game.warpTargets(maps, depth, 16);
+            for (int i = 0; i < n; ++i)
+                std::printf("   %d) %s  (%d jalan)\n", i + 1, game.world().info(maps[i])->name.c_str(), depth[i]);
+            std::printf("  tujuan (0 = batal): ");
+            int k = 0;
+            if (!std::getline(std::cin, line)) return;
+            std::sscanf(line.c_str(), "%d", &k);
+            if (k >= 1 && k <= n && maps[k - 1] != game.field().mapId()) game.warpTo(maps[k - 1]);
+        } else {
+            game.closeTungkuMenu();
+        }
+    }
+}
+
 // Tuntaskan permintaan Game setelah setiap langkah (dialog, battle, pindah peta).
 void settle(Game& game) {
     for (int guard = 0; guard < 50; ++guard) {
         flushNotices(game);
+        if (game.tungkuMenuOpen()) {
+            consoleTungku(game);
+            continue;
+        }
         if (game.inDialog()) {
             consoleDialog(game);
             continue;
@@ -199,8 +229,8 @@ int runConsole() {
     Game game;
     std::string err;
     std::string root = findAssets();
-    std::string events[] = {root + "events/lumbung.json"};
-    if (!game.load(root + "maps/world.json", events, 1, &err)) {
+    std::string events[] = {root + "events/lumbung.json", root + "events/desa.json"};
+    if (!game.load(root + "maps/world.json", events, 2, &err)) {
         std::printf("Gagal memuat dunia: %s\n", err.c_str());
         return 1;
     }

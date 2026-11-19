@@ -9,8 +9,8 @@
 
 bool App::boot(std::string& error) {
     std::string worldPath = Assets::get().path("assets/maps/world.json");
-    std::string events[] = {Assets::get().path("assets/events/lumbung.json")};
-    if (!game_.load(worldPath, events, 1, &error)) return false;
+    std::string events[] = {Assets::get().path("assets/events/lumbung.json"), Assets::get().path("assets/events/desa.json")};
+    if (!game_.load(worldPath, events, 2, &error)) return false;
     game_.newGame("Tumbal", KL_PENDEKAR);
     mapView_.snapCamera(game_.field());
     return true;
@@ -75,6 +75,13 @@ void App::updateField(float dt) {
         bannerTime_ = 3.0f;
     }
 
+    if (game_.tungkuMenuOpen()) {
+        std::string r = tungku_.update(game_);
+        if (!r.empty()) { toast_ = r; toastTime_ = 2.4f; }
+        if (game_.transferPending()) fadeDir_ = 1;
+        mapView_.updateCamera(game_.field(), dt);
+        return;
+    }
     if (menu_.open()) {
         std::string r = menu_.update(game_);
         if (!r.empty()) { toast_ = r; toastTime_ = 2.2f; }
@@ -191,6 +198,7 @@ void App::drawFrame() {
         mapView_.draw(game_.field(), time_, showCollision_, &game_.state().bloodstain());
         dialog_.draw(game_.interpreter(), time_);
         menu_.draw(game_, time_);
+        tungku_.draw(game_, time_);
         drawHud();
         if (mode_ == ModeBattleIntro) {
             // transisi masuk battle: kilat putih lalu tirai hitam dari tengah
@@ -253,29 +261,41 @@ int App::run(bool smoke, bool shots) {
         if (shots) {
             // skenario screenshot otomatis
             Interpreter& it = game_.interpreter();
-            if (frame == 100) TakeScreenshot("shot_dialog.png");          // teks pembuka
-            if (frame > 100 && frame < 140 && it.state() == Interpreter::WaitMessage && frame % 4 == 0) it.resume();
+            if (frame > 10 && frame < 60 && it.state() == Interpreter::WaitMessage && frame % 4 == 0) it.resume();
+            if (frame == 70) {
+                // langsung ke desa (peta 3) di depan pintu lumbung
+                game_.field().enterAtSpawn(3, "dari_lumbung");
+                mapView_.snapCamera(game_.field());
+            }
+            if (frame == 140) TakeScreenshot("shot_desa.png");
             if (frame == 150) {
-                // bicara dengan Lelaki Tua
-                game_.field().enter(1, 23, 6, FACE_UP);
+                // alun-alun: bicara dengan Mbok Srini
+                game_.field().enter(3, 21, 16, FACE_UP);
                 mapView_.snapCamera(game_.field());
-                it.runEvent("lelaki_tua");
+                it.runEvent("mbok_srini");
             }
-            if (frame == 200 || frame == 205) it.resume();
-            if (frame == 240) TakeScreenshot("shot_choice.png");
-            if (frame == 250) it.choose(1);
-            if (frame > 250 && frame < 300 && it.state() == Interpreter::WaitMessage && frame % 5 == 0) it.resume();
-            if (frame == 310) menu_.show();
-            if (frame == 330) TakeScreenshot("shot_menu.png");
-            if (frame == 335) menu_ = MenuView();
-            if (frame == 340) {
-                // mati di lorong: ceceran sukma muncul
-                game_.state().addSukma(120);
-                game_.field().enter(1, 12, 13, FACE_RIGHT);
-                game_.state().die(1, 14, 13);
+            if (frame == 200) TakeScreenshot("shot_mbok.png");
+            if (frame > 200 && frame < 260 && game_.inDialog() && frame % 6 == 0) {
+                if (it.state() == Interpreter::WaitChoice) it.choose(3); else it.resume();
+            }
+            if (frame == 270) {
+                // istirahat di Tungku desa → menu Tungku
+                game_.state().addSukma(150);
+                game_.world().lightTungku(2);
+                game_.field().enter(3, 22, 16, FACE_RIGHT);
+                GameInput in;
+                in.action = true;
+                game_.update(0.0f, in);
+            }
+            if (frame == 300) TakeScreenshot("shot_tungku_menu.png");
+            if (frame == 305) { game_.levelUp(); }
+            if (frame == 340) TakeScreenshot("shot_tungku_level.png");
+            if (frame == 345) game_.closeTungkuMenu();
+            if (frame == 360) {
+                game_.field().enter(3, 34, 12, FACE_DOWN);
                 mapView_.snapCamera(game_.field());
             }
-            if (frame == 380) TakeScreenshot("shot_bloodstain.png");
+            if (frame == 380) TakeScreenshot("shot_desa2.png");
             if (frame >= 382) break;
         }
         if (smoke && frame > 30) break;
