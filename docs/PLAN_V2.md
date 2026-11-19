@@ -168,7 +168,7 @@ setiap pembuat. Tile 32×32 gaya RPG Maker XP, cocok dengan nuansa BS1.
 | Font | m5x7 atau Pixel Operator | CC0 | Alternatif OFL: Pixelify Sans. |
 | Musik | cynicmusic Dark Forest, qubodup Dark Shrine Loop, SubspaceAudio Horror Atmosphere, Pro Sensory Boss Battle Loop, tema rawa/desa Ninja Adventure | CC0 | — |
 | SFX | Kenney RPG Audio, artisticdude RPG Sound Pack (ada raungan raksasa), SubspaceAudio 512 SFX | CC0 | — |
-| Gamelan | Sampel CC0 di Freesound (saron/demung pelog, loop gamelan Bali) | CC0 | Musik khas disusun dari sampel ini. |
+| Gamelan | ~~Sampel CC0 Freesound~~ → disintesis sendiri (`tools/make_gamelan.py`) | orisinal | Musik Desa: gending pelog muram + lesung. |
 
 **Dihindari:** paket share-alike (LPC, Nighthawking, dll.), paket "dilarang didistribusikan ulang"
 (Pipoya, Mystic Woods, Aekashics Librarium untuk file satuan), dan aset bawaan RPG Maker.

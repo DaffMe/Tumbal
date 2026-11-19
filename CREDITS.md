@@ -58,12 +58,14 @@ Musik (semua CC0, lisensi dicek di halaman OpenGameArt masing-masing):
 |---|---|---|---|---|
 | `music/judul.ogg` | Dark Intro | Nikke | https://opengameart.org/content/dark-intro | CC0 |
 | `music/lumbung.ogg` | Dungeon Ambience | yd | https://opengameart.org/content/dungeon-ambience | CC0 |
-| `music/desa.ogg` | Lost in a Bad Place (horror ambience loop) | congusbongus | https://opengameart.org/content/lost-in-a-bad-place-horror-ambience-loop | CC0 |
 | `music/ladang.mp3` | Dark Forest Theme | cynicmusic | https://opengameart.org/content/dark-forest-theme | CC0 |
 | `music/laut.ogg` | Whispers in the Fog | Ruhinre | https://opengameart.org/content/whispers-in-the-fog | CC0 |
 | `music/rawa.ogg` | A Lurking Evil (horror ambience) | congusbongus | https://opengameart.org/content/a-lurking-evil-horror-ambience | CC0 |
 | `music/battle.mp3` | Battle Theme B (for RPG) | cynicmusic | https://opengameart.org/content/battle-theme-b-for-rpg | CC0 |
 | `music/boss.ogg` | Battle RPG Theme (Var) | CleytonKauffman | https://opengameart.org/content/boss-battle-theme | CC0 |
+
+`music/desa.ogg` (gending gamelan pelog dengan bunyi lesung) adalah komposisi orisinal tim yang disintesis oleh
+`tools/make_gamelan.py` (tanpa sampel pihak ketiga).
 
 Efek suara (`assets/audio/sfx/`, CC0, lisensi di `LICENSE_Kenney.txt`): Kenney — Interface Sounds
 (https://kenney.nl/assets/interface-sounds), Impact Sounds (https://kenney.nl/assets/impact-sounds),
