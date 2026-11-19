@@ -3,7 +3,7 @@
 Dungeon crawler turn-based bertema dark fantasy, dibuat untuk **Tugas Besar Struktur Data — Semester Ganjil 2026/2027**.
 Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**. GUI memakai **raylib** sebagai antarmuka saja.
 
-> Status: **Fase 3 — GUI** (ekspedisi bisa dimainkan penuh dengan GUI raylib, aset masih placeholder prosedural). Rencana lengkap ada di [docs/PLAN.md](docs/PLAN.md).
+> Status: **Fase 4 — aset & audio** (ekspedisi 3 lantai bisa dimainkan penuh dengan GUI raylib, aset visual final dari Codex, audio prosedural). Rencana lengkap ada di [docs/PLAN.md](docs/PLAN.md).
 
 ## Mekanik yang direplikasi
 
