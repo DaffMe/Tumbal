@@ -1,6 +1,6 @@
 # Rencana v2 — TUMBAL
 
-> Status: **disetujui 2026-11-19; eksekusi berjalan** (demo lengkap 8 peta sampai tamat sudah dapat dimainkan; lihat docs/DEMO.md). Disusun 2026-11-19 dari brainstorming dan
+> Status: **disetujui 2026-11-19; fase 1–11 dikerjakan dengan beberapa sisa, fase 12–13 belum** (demo lengkap 8 peta sampai tamat sudah dapat dimainkan; lihat docs/DEMO.md dan bagian 8). Disusun 2026-11-19 dari brainstorming dan
 > [bedah sistem Black Souls 1](research/black-souls-1-analysis.md).
 > Judul game: **TUMBAL** (disepakati 2026-11-19).
 
@@ -185,25 +185,28 @@ Diperiksa saat aset diunduh pada hari 1.
 
 ---
 
-## 8. Jadwal (14 hari, mulai 2026-11-19)
+## 8. Fase pengerjaan
 
-| Hari | Target | Hasil yang bisa dicoba |
-|---|---|---|
-| 1 | Bersihkan kode v1 dari `main` (backup sudah ada), kerangka baru, impor aset, loader Tiled | Jendela + peta tampil |
-| 2 | Jalan 8 arah, kamera, collision, pindah peta lewat Graph | Bisa keliling 2 peta |
-| 3 | Core battle ATB wait + DLL + rumus + status dasar (+ test) | Battle di console |
-| 4 | Battle GUI front-view: gauge, panel antrean, menu perintah, damage pop-up | Battle di GUI |
-| 5 | Musuh terlihat di peta, transisi ke battle, Tungku, sukma, mati/ambil sukma | Loop Souls jalan |
-| 6 | Interpreter event (dialog, pilihan, loot), menu (Barang/Jurus/Status/Save), save/load | Tutorial bisa dimainkan |
-| 7 | **Vertical slice**: tutorial + desa + ladang + mini-boss. **Playtest kamu** | ±15 menit main |
-| 8–9 | Peta 4–5, pendamping Timun Mas, pandai besi, toko | ±35 menit |
-| 10 | Rawa + boss Buto Ijo (3 bagian, telegraf) | Demo tamat |
-| 11 | Audio, cahaya/kabut, getar layar, transisi, judul & ending | Terasa "jadi" |
-| 12 | Balancing (`--balance`), playtest penuh, perbaikan | — |
-| 13 | README, dokumentasi struktur data, skrip demo, bahan Pendampingan | — |
-| 14 | Cadangan | — |
+Semula ditulis sebagai jadwal 14 hari, tetapi pengerjaan berjalan per fase (fase 1–11 selesai dalam satu
+hari kerja, 2026-11-19). Status di bawah dicocokkan dengan kode pada commit `e030b0c`.
 
-Kalau waktu hanya 1 minggu: berhenti di hari 7 + boss sederhana di ujung ladang.
+| Fase | Target | Hasil yang bisa dicoba | Status |
+|---|---|---|---|
+| 1 | Bersihkan kode v1 dari `main` (backup sudah ada), kerangka baru, impor aset, loader Tiled | Jendela + peta tampil | Selesai |
+| 2 | Jalan 8 arah, kamera, collision, pindah peta lewat Graph | Bisa keliling 2 peta | Selesai |
+| 3 | Core battle ATB wait + DLL + rumus + status dasar (+ test) | Battle di console | Selesai |
+| 4 | Battle GUI front-view: gauge, panel antrean, menu perintah, damage pop-up | Battle di GUI | Selesai |
+| 5 | Musuh terlihat di peta, transisi ke battle, Tungku, sukma, mati/ambil sukma | Loop Souls jalan | Selesai |
+| 6 | Interpreter event (dialog, pilihan, loot), menu (Barang/Jurus/Status/Save), save/load | Tutorial bisa dimainkan | Selesai |
+| 7 | **Vertical slice**: tutorial + desa + ladang + mini-boss. **Playtest pemilik proyek** | ±15 menit main | Konten selesai; **playtest belum** |
+| 8 | Peta 4–5, pendamping Timun Mas, pandai besi, toko | ±35 menit | Peta & Timun Mas selesai; **pandai besi & toko belum** |
+| 9 | Rawa + boss Buto Ijo (3 bagian, telegraf) | Demo tamat | Selesai, kecuali **telegraf serangan besar** |
+| 10 | Audio, cahaya/kabut, getar layar, transisi, judul & ending | Terasa "jadi" | Selesai, kecuali **kabut** |
+| 11 | Polish visual tiap wilayah, kejelasan battle, teks cerita reaktif | — | Selesai |
+| 12 | Balancing, playtest penuh, perbaikan | — | Balancing lewat simulasi sekali pakai; **`--balance` & playtest penuh belum** |
+| 13 | README, dokumentasi struktur data, skrip demo, bahan Pendampingan | — | `docs/DEMO.md` ada; **tabel tim README & bahan Pendampingan belum** |
+
+Kalau waktu sempit: fase 8 (pandai besi & toko) boleh dicoret, asal tabel ini diperbarui.
 
 ---
 
@@ -214,7 +217,7 @@ Kalau waktu hanya 1 minggu: berhenti di hari 7 + boss sederhana di ujung ladang.
 | Battler musuh front-view gratis yang gelap & bergaya sama sulit dicari | Pilih paket paling konsisten; celah via Codex dengan prompt satu gaya |
 | Membuat peta padat memakan waktu | Tiled + 6–7 peta saja; tim planning ikut menyusun peta |
 | Pendampingan 1 belum terjadi; mekanik bisa mirip kelompok lain | Siapkan penjelasan perbedaan; ATB+DLL+Graph dunia+interpreter event cukup khas |
-| Scope melebar | Vertical slice hari 7 jadi patokan; fitur di luar tabel ini ditunda |
+| Scope melebar | Vertical slice fase 7 jadi patokan; fitur di luar tabel ini ditunda |
 
 ---
 
