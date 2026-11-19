@@ -96,34 +96,34 @@ Unit makeEnemy(EnemyKind kind) {
     switch (kind) {
         case EnemyKind::HollowThrall:
             u.name = "Hollow Thrall";
-            setStats(u, 120, 26, 15, 90.0f, 30);
+            setStats(u, 150, 35, 15, 90.0f, 30);
             addSkill(u, SkillId::Claw);
             addSkill(u, SkillId::Lunge);
             setPattern(u, {0, 0, 1});
             break;
         case EnemyKind::BellRinger:
             u.name = "Bell-Ringer";
-            setStats(u, 140, 20, 20, 100.0f, 40);
+            setStats(u, 175, 29, 20, 100.0f, 40);
             addSkill(u, SkillId::Mallet);
             addSkill(u, SkillId::DeathToll);
             setPattern(u, {0, 1, 0});
             break;
         case EnemyKind::CandleWraith:
             u.name = "Candle Wraith";
-            setStats(u, 110, 30, 10, 105.0f, 30);
+            setStats(u, 140, 40, 10, 105.0f, 30);
             addSkill(u, SkillId::WaxBurn);
             addSkill(u, SkillId::KindleWisp);
             setPattern(u, {1, 0, 0});
             break;
         case EnemyKind::Wisp:
             u.name = "Wisp";
-            setStats(u, 40, 18, 0, 130.0f, 10);
+            setStats(u, 50, 24, 0, 130.0f, 10);
             addSkill(u, SkillId::Flicker);
             setPattern(u, {0});
             break;
         case EnemyKind::Gargoyle:
             u.name = "Gargoyle";
-            setStats(u, 260, 38, 50, 75.0f, 70);
+            setStats(u, 330, 63, 45, 85.0f, 70);
             addSkill(u, SkillId::Crush);
             addSkill(u, SkillId::StoneSkin);
             setPattern(u, {0, 0, 1});
@@ -131,7 +131,7 @@ Unit makeEnemy(EnemyKind kind) {
         case EnemyKind::SisterOfAsh:
             u.name = "Sister of Ash";
             u.isBoss = true;
-            setStats(u, 760, 42, 30, 108.0f, 130);
+            setStats(u, 920, 52, 30, 108.0f, 130);
             addSkill(u, SkillId::AshVeil);
             addSkill(u, SkillId::UrnStrike);
             addSkill(u, SkillId::Mourning);
@@ -141,7 +141,7 @@ Unit makeEnemy(EnemyKind kind) {
         case EnemyKind::LastFlame:
             u.name = "The Last Flame";
             u.isBoss = true;
-            setStats(u, 820, 44, 38, 104.0f, 150);
+            setStats(u, 920, 42, 38, 104.0f, 150);
             addSkill(u, SkillId::Conflagration);
             addSkill(u, SkillId::SearingHand);
             addSkill(u, SkillId::Pyre);
@@ -152,7 +152,7 @@ Unit makeEnemy(EnemyKind kind) {
         default:
             u.name = "The Choir Warden";
             u.isBoss = true;
-            setStats(u, 900, 40, 35, 100.0f, 120);
+            setStats(u, 1050, 70, 35, 100.0f, 120);
             addSkill(u, SkillId::HymnLash);
             addSkill(u, SkillId::Requiem);
             addSkill(u, SkillId::SummonChoir);

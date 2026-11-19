@@ -11,8 +11,8 @@ static const Skill kSkills[] = {
      0, 1, TT::SingleEnemy, 10, false, 1, {{ET::Damage, 1.0f, 0}}},
     {"Shield Bash", "Hantam perisai dan tunda giliran target 25%.",
      1, 0, TT::SingleEnemy, 20, false, 2, {{ET::Damage, 0.8f, 0}, {ET::Delay, 0.25f, 0}}},
-    {"Bulwark", "Taunt dan DEF +40% selama 2 giliran.",
-     1, 0, TT::Self, 0, false, 2, {{ET::Taunt, 0.0f, 2}, {ET::DefUp, 0.4f, 2}}},
+    {"Bulwark", "Taunt dan DEF +30% selama 2 giliran.",
+     1, 0, TT::Self, 0, false, 2, {{ET::Taunt, 0.0f, 2}, {ET::DefUp, 0.3f, 2}}},
     {"Oathbreaker", "ULTIMATE: hantam semua musuh dan tunda giliran mereka 15%.",
      0, 0, TT::AllEnemies, 20, true, 2, {{ET::Damage, 1.4f, 0}, {ET::Delay, 0.15f, 0}}},
 
@@ -65,8 +65,8 @@ static const Skill kSkills[] = {
      0, 0, TT::Self, 0, false, 2, {{ET::ExtraTurn, 0.0f, 0}, {ET::SpdUp, 0.20f, 3}}, true},
 
     // --------------------------------------------- Boss 2: Sister of Ash
-    {"Ash Veil", "Tirai abu: damage ke seluruh party dan tunda giliran mereka 20%.",
-     0, 0, TT::AllEnemies, 0, false, 2, {{ET::Damage, 0.55f, 0}, {ET::Delay, 0.20f, 0}}},
+    {"Ash Veil", "Tirai abu: damage ke seluruh party dan tunda giliran mereka 15%.",
+     0, 0, TT::AllEnemies, 0, false, 2, {{ET::Damage, 0.5f, 0}, {ET::Delay, 0.15f, 0}}},
     {"Urn Strike", "Hantaman guci batu.",
      0, 0, TT::SingleEnemy, 0, false, 1, {{ET::Damage, 1.5f, 0}}},
     {"Mourning", "Ratapan memanggil Candle Wraith.",
@@ -76,13 +76,13 @@ static const Skill kSkills[] = {
 
     // --------------------------------------------- Boss 3: The Last Flame
     {"Conflagration", "Lautan api: damage dan Burn ke seluruh party.",
-     0, 0, TT::AllEnemies, 0, false, 2, {{ET::Damage, 0.7f, 0}, {ET::Burn, 0.3f, 3}}},
+     0, 0, TT::AllEnemies, 0, false, 2, {{ET::Damage, 0.55f, 0}, {ET::Burn, 0.18f, 2}}},
     {"Searing Hand", "Genggaman membara pada satu target.",
      0, 0, TT::SingleEnemy, 0, false, 1, {{ET::Damage, 1.7f, 0}}},
     {"Pyre", "Membakar bara menjadi Wisp.",
      0, 0, TT::None, 0, false, 1, {{ET::Summon, static_cast<float>(EnemyKind::Wisp), 0}}},
     {"Inferno Ascendant", "Saat HP < 50%: bertindak lagi segera, SPD dan DEF naik.",
-     0, 0, TT::Self, 0, false, 3, {{ET::ExtraTurn, 0.0f, 0}, {ET::SpdUp, 0.25f, 3}, {ET::DefUp, 0.3f, 3}}, true},
+     0, 0, TT::Self, 0, false, 3, {{ET::ExtraTurn, 0.0f, 0}, {ET::SpdUp, 0.15f, 3}, {ET::DefUp, 0.3f, 3}}, true},
 };
 
 static_assert(sizeof(kSkills) / sizeof(kSkills[0]) == static_cast<int>(SkillId::COUNT),
