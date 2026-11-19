@@ -13,7 +13,7 @@ Lisensi diperiksa di halaman aslinya pada 2026-11-19.
 | Batak House | Sevarihk | https://opengameart.org/content/batak-house-pixel-tileset | CC-BY 4.0 | rumah desa (sementara) |
 | Ground and Foliage Autotiles | Sevarihk | https://opengameart.org/content/ground-and-foliage-autotiles | CC-BY 4.0 | rumput, semak |
 | Animated Water Tiles | Sevarihk | https://opengameart.org/content/animated-water-tiles-0 | CC-BY 4.0 | air |
-| Fisher's Hut / Tree Trunk / Palm | Sevarihk | https://opengameart.org/users/sevarihk | CC-BY 4.0 | properti peta |
+| Fisher's Hut / Tree Trunk / Palm | Sevarihk | https://opengameart.org/users/sevarihk | CC-BY 4.0 | rumah panggung desa (dipotong, digelapkan), properti peta |
 | NPC Faceset | Sevarihk | https://opengameart.org/content/npc-faceset | CC-BY 4.0 | potret NPC |
 | Tribal Hide and Wood UI | Sevarihk | https://opengameart.org/content/tribal-hide-and-wood-ui | CC-BY 4.0 | bingkai UI |
 | Aurora Character Generator (potongan sprite) | Sevarihk; generator oleh RedoxGames | https://redoxgames.itch.io/aurora-character-generator | CC-BY 4.0 | sprite karakter (dirakit & diwarnai ulang oleh `tools/build_assets.py`) |

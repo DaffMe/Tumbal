@@ -1,0 +1,53 @@
+{
+  "mbok_srini": [
+    {"cmd": "if_flag", "name": "mbok_kenal", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "Perempuan Tua", "text": "...Kau keluar dari lumbung. Belum pernah ada yang keluar dari lumbung."},
+        {"cmd": "text", "who": "Perempuan Tua", "text": "Jangan berdiri di situ seperti hantu. Duduklah dekat Tungku. Baranya kunyalakan dari kayu nangka dan... yang lain."},
+        {"cmd": "flag", "name": "mbok_kenal", "value": 1}
+      ],
+      "else": [
+        {"cmd": "text", "who": "Mbok Srini", "text": "Tungku ini tidak pernah padam. Kalau padam, desa ini akan ingat semua yang sudah dilakukannya."}
+      ]},
+    {"cmd": "choice", "options": ["Siapa kau?", "Tentang Buto Ijo", "Tentang Tungku", "Pergi"], "branches": [
+      [
+        {"cmd": "text", "who": "Mbok Srini", "text": "Orang memanggilku Mbok Srini. Dulu aku punya seorang anak perempuan. Kulitnya kuning keemasan, seperti timun yang matang di pohon."},
+        {"cmd": "text", "who": "Mbok Srini", "text": "Ia lari, membawa empat bekal yang kuselipkan ke tangannya. Sejak itu desa ini membayar larinya dengan anak-anak lain."},
+        {"cmd": "text", "who": "Mbok Srini", "text": "Jangan menatapku begitu. Aku tidak meminta maaf kepada tumbal."}
+      ],
+      [
+        {"cmd": "text", "who": "Mbok Srini", "text": "Orang bilang ia tenggelam di rawa terasi. Raksasa tidak tenggelam, Nak. Mereka hanya lapar lebih lama."},
+        {"cmd": "text", "who": "Mbok Srini", "text": "Ladang di timur tumbuh dari biji timun yang dilempar anakku. Tanahnya masih ingat rasa daging. Hutan bambu di selatan dulunya segenggam jarum."},
+        {"cmd": "flag", "name": "tahu_bekal", "value": 1}
+      ],
+      [
+        {"cmd": "text", "who": "Mbok Srini", "text": "Beristirahatlah di sana bila tubuhmu remuk. Ramuanmu akan terisi, lukamu menutup."},
+        {"cmd": "text", "who": "Mbok Srini", "text": "Bawa sukma yang kau rampas ke bara itu. Tungku akan menukarnya menjadi tenaga. Dan Tungku yang sudah menyala akan saling memanggil, selama jalannya tidak tertutup."}
+      ],
+      []
+    ]}
+  ],
+
+  "warga_lesung": [
+    {"cmd": "if_flag", "name": "lesung_kenal", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "Penumbuk Lesung", "text": "Tok... tok... tok... Lesung tidak boleh berhenti. Kalau sepi, ia tahu ada yang lari."},
+        {"cmd": "text", "who": "Penumbuk Lesung", "text": "Kau... kau seharusnya sudah di perutnya. Ambil ini dan pergilah sebelum orang lain melihatmu."},
+        {"cmd": "item", "item": "penawar", "n": 2},
+        {"cmd": "flag", "name": "lesung_kenal", "value": 1}
+      ],
+      "else": [
+        {"cmd": "text", "who": "Penumbuk Lesung", "text": "Tok... tok... Jangan bicara padaku. Anakku dipanen dua musim lalu. Aku masih menumbuk untuknya."}
+      ]}
+  ],
+
+  "jalan_ladang": [
+    {"cmd": "text", "who": "", "text": "Jalan setapak ke timur menuju Ladang Timun Busuk. Bau manis yang membusuk terbawa angin dari sana."},
+    {"cmd": "text", "who": "", "text": "(Wilayah ini belum dibuka pada versi demo ini.)"}
+  ],
+
+  "jalan_bambu": [
+    {"cmd": "text", "who": "", "text": "Di selatan, batang-batang bambu berdiri rapat seperti jarum yang ditancapkan ke tanah."},
+    {"cmd": "text", "who": "", "text": "(Wilayah ini belum dibuka pada versi demo ini.)"}
+  ]
+}

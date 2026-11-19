@@ -113,6 +113,7 @@ def build_tiles():
         'auto_semak.png': ('leafs.png', 1),
         'auto_semak2.png': ('leafs2.png', 1),
         'auto_rumput_liar.png': ('dschungel-gras.png', 1),
+        'auto_tanah.png': ('dschungel-gras-b.png', 1),
         'auto_bambu_atas.png': ('bamboo-top.png', 1),
         'auto_air_rawa.png': ('swamp-bruhe_animated-v5.png', 4),
     }
@@ -181,6 +182,103 @@ def build_battle():
     grade_battleback('battleback1.png', 'hutan.png', dark=0.45, desat=0.5, tint=(0.9, 1.0, 0.9))
 
 
+# ------------------------------------------------------------------ props desa
+PROPS = os.path.join(ROOT, 'assets', 'props')
+
+
+def _crop(name, box):
+    return Image.open(os.path.join(SEV, name)).convert('RGBA').crop(box)
+
+
+def _night(im, dark=0.82, sat=0.75):
+    """Sedikit gelap & pudar agar cocok dengan desa malam."""
+    from PIL import ImageEnhance
+    a = im.split()[3]
+    rgb = ImageEnhance.Color(im.convert('RGB')).enhance(sat)
+    rgb = ImageEnhance.Brightness(rgb).enhance(dark)
+    out = rgb.convert('RGBA')
+    out.putalpha(a)
+    return out
+
+
+def _hue_shift(im, rgb_mul):
+    a = im.split()[3]
+    r, g, b = im.convert('RGB').split()
+    r = r.point(lambda v: min(255, int(v * rgb_mul[0])))
+    g = g.point(lambda v: min(255, int(v * rgb_mul[1])))
+    b = b.point(lambda v: min(255, int(v * rgb_mul[2])))
+    out = Image.merge('RGB', (r, g, b)).convert('RGBA')
+    out.putalpha(a)
+    return out
+
+
+def save_prop(im, name):
+    im.save(os.path.join(PROPS, name))
+
+
+def build_props():
+    os.makedirs(PROPS, exist_ok=True)
+    swamp = 'dead-swamp-v4.png'
+    # rumah panggung (Fisher's Hut Sevarihk tanpa dermaga panjang)
+    rumah = _crop('mini-fishers-hut.png', (16, 18, 304, 314))
+    # buang percikan air biru di kaki tiang (rumah ini berdiri di tanah)
+    px = rumah.load()
+    for yy in range(rumah.height):
+        for xx in range(rumah.width):
+            r, g, b, a = px[xx, yy]
+            if a > 0 and b > r + 30 and b > g:
+                px[xx, yy] = (52, 36, 28, int(a * 0.6))
+    save_prop(_night(rumah), 'rumah_panggung.png')
+    save_prop(_night(_hue_shift(rumah, (0.78, 0.74, 0.70)), 0.75, 0.6), 'rumah_panggung_tua.png')
+
+    # gubuk bambu: dinding bambu + atap ijuk + tirai pintu
+    wall_src = _crop(swamp, (0, 119, 96, 224))           # tekstur bambu tegak
+    roof = _crop(swamp, (22, 230, 169, 364))             # atap ijuk
+    door = _crop(swamp, (175, 48, 238, 128))             # pintu tirai
+    W, H = 160, 200
+    g = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    wall = Image.new('RGBA', (128, 96), (0, 0, 0, 0))
+    for x in range(0, 128, wall_src.width):
+        wall.alpha_composite(wall_src.crop((0, 0, min(wall_src.width, 128 - x), 96)), (x, 0))
+    g.alpha_composite(wall, (16, H - 96))
+    g.alpha_composite(door, (W // 2 - door.width // 2, H - door.height))
+    roof2 = roof.resize((int(roof.width * 1.15), roof.height), Image.NEAREST)
+    g.alpha_composite(roof2, (W // 2 - roof2.width // 2, 0))
+    save_prop(_night(g), 'gubuk.png')
+
+    # bangunan lumbung Buto: dinding batu lumbung + gerbang tengkorak + atap ijuk lebar
+    dung = Image.open(os.path.join(SRC, 'sevarihk', 'evildungeon_0.png')).convert('RGBA')
+    T = 32
+    def tile(i):
+        return dung.crop(((i % 8) * T, (i // 8) * T, (i % 8) * T + T, (i // 8) * T + T))
+    cols = 7
+    body = Image.new('RGBA', (cols * T, 3 * T), (0, 0, 0, 0))
+    plain = [[24, 29, 30, 31, 24, 29, 30], [32, 37, 38, 39, 32, 37, 38], [40, 45, 46, 47, 40, 45, 46]]
+    for r in range(3):
+        for c in range(cols):
+            body.alpha_composite(tile(plain[r][c]), (c * T, r * T))
+    arch = [[52, 53, 54], [60, 61, 62], [68, 69, 70]]
+    for r in range(3):
+        for c in range(3):
+            body.alpha_composite(tile(arch[r][c]), ((2 + c) * T, r * T))
+    roofw = roof.resize((cols * T + 48, int(roof.height * 1.25)), Image.NEAREST)
+    lum = Image.new('RGBA', (roofw.width, roofw.height + 3 * T - 40), (0, 0, 0, 0))
+    lum.alpha_composite(body, (24, lum.height - 3 * T))
+    lum.alpha_composite(roofw, (0, 0))
+    save_prop(_night(lum, 0.8), 'lumbung.png')
+
+    # pohon mati & tiang tengkorak
+    save_prop(_crop(swamp, (164, 1222, 251, 1332)), 'pohon_mati_a.png')
+    save_prop(_crop(swamp, (4, 1231, 128, 1360)), 'pohon_mati_b.png')
+    save_prop(_crop(swamp, (4, 1391, 159, 1496)), 'pohon_mati_c.png')
+    save_prop(_crop(swamp, (102, 1120, 230, 1216)), 'orang_orangan.png')
+    save_prop(_crop(swamp, (44, 1024, 215, 1054)), 'pagar.png')
+    save_prop(_crop(swamp, (0, 1538, 64, 1616)), 'alang_alang.png')
+    save_prop(_crop(swamp, (192, 227, 256, 350)), 'rak_bambu.png')
+
+
 if __name__ == '__main__':
     build_battle()
+    build_props()
     print('battler:', sorted(os.listdir(BATTLERS)), 'battleback:', sorted(os.listdir(BACKS)))
+    print('props:', sorted(os.listdir(PROPS)))

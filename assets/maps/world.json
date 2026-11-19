@@ -13,6 +13,11 @@
       "id": 2,
       "name": "Lorong Lumbung",
       "file": "lorong_lumbung.tmj"
+    },
+    {
+      "id": 3,
+      "name": "Desa Karangtumbal",
+      "file": "desa.tmj"
     }
   ]
 }
