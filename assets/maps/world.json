@@ -23,6 +23,26 @@
       "id": 4,
       "name": "Ladang Timun Busuk",
       "file": "ladang.tmj"
+    },
+    {
+      "id": 5,
+      "name": "Hutan Bambu Jarum",
+      "file": "hutan_bambu.tmj"
+    },
+    {
+      "id": 6,
+      "name": "Laut Garam",
+      "file": "laut_garam.tmj"
+    },
+    {
+      "id": 7,
+      "name": "Rawa Terasi",
+      "file": "rawa_terasi.tmj"
+    },
+    {
+      "id": 8,
+      "name": "Sarang Buto",
+      "file": "sarang_buto.tmj"
     }
   ]
 }

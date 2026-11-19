@@ -1,0 +1,95 @@
+{
+  "bambu_masuk": [
+    {"cmd": "text", "who": "", "text": "Bambu-bambu di sini tumbuh terlalu rapat, terlalu lurus, seperti jarum yang ditancapkan dari langit."},
+    {"cmd": "text", "who": "", "text": "Angin lewat di antara batangnya dan berbisik dengan suara banyak orang."},
+    {"cmd": "flag", "name": "bambu_masuk", "value": 1}
+  ],
+
+  "tebas_bambu": [
+    {"cmd": "text", "who": "", "text": "Di balik rumpun bambu ini terdengar suara lesung desa. Batang-batangnya bisa ditebas."},
+    {"cmd": "choice", "options": ["Tebas", "Biarkan"], "branches": [
+      [
+        {"cmd": "text", "who": "", "text": "Kamu menebas bambu sampai tanganmu berdarah. Cahaya Tungku desa terlihat di ujung jalan."},
+        {"cmd": "unlock", "a": 3, "b": 5},
+        {"cmd": "flag", "name": "jalan_pintas_desa", "value": 1}
+      ],
+      []
+    ]}
+  ],
+
+  "makam_jarum": [
+    {"cmd": "text", "who": "", "text": "Gundukan tanah kecil dikelilingi bambu yang tumbuh melingkar. Di puncaknya menancap sebatang jarum emas."},
+    {"cmd": "text", "who": "", "text": "Dulu jarum ini dilempar seorang gadis yang berlari. Seluruh hutan tumbuh dari lukanya."},
+    {"cmd": "item", "item": "jarum", "n": 1},
+    {"cmd": "notice", "text": "Bekal kedua: Jarum Timun Mas"}
+  ],
+
+  "laut_masuk": [
+    {"cmd": "text", "who": "", "text": "Laut ini tidak berombak. Airnya pekat, asin sampai pedih di mata, dan tidak ada satu pun burung di atasnya."},
+    {"cmd": "text", "who": "", "text": "Di ujung dermaga busuk, seseorang berdiri memandangi air."},
+    {"cmd": "flag", "name": "laut_masuk", "value": 1}
+  ],
+
+  "timun_mas": [
+    {"cmd": "text", "who": "Gadis di Dermaga", "text": "...Kau juga lari dari lumbung? Aku bisa mencium bau jerami dan darah di tubuhmu."},
+    {"cmd": "text", "who": "Gadis di Dermaga", "text": "Dulu aku melempar segenggam garam ke tanah, dan tanah berubah menjadi laut ini. Raksasa itu tenggelam... lalu merangkak keluar lagi."},
+    {"cmd": "text", "who": "Timun Mas", "text": "Namaku Timun Mas. Desa memujaku sebagai anak yang selamat. Mereka tidak tahu, sejak hari itu aku tidak pernah benar-benar hidup."},
+    {"cmd": "choice", "options": ["Ikutlah denganku", "Kenapa kau di sini?"], "branches": [
+      [],
+      [
+        {"cmd": "text", "who": "Timun Mas", "text": "Menunggu. Selama Buto lapar, desa akan terus menanam anak-anak. Aku sudah terlalu lelah untuk lari lagi, tapi belum cukup berani untuk kembali."}
+      ]
+    ]},
+    {"cmd": "text", "who": "Timun Mas", "text": "Kau punya bekal-bekalku. Biji, jarum... Aku akan ikut. Panggil aku di Tungku bila kau membutuhkanku."},
+    {"cmd": "join"},
+    {"cmd": "item", "item": "garam", "n": 1},
+    {"cmd": "flag", "name": "timun_bergabung", "value": 1},
+    {"cmd": "notice", "text": "Timun Mas bergabung. Bekal ketiga: Garam Timun Mas"}
+  ],
+
+  "rawa_masuk": [
+    {"cmd": "text", "who": "", "text": "Bau udang membusuk menusuk hidung. Lumpur rawa ini hangat, dan sesekali bergelembung seperti bernapas."},
+    {"cmd": "if_flag", "name": "timun_bergabung", "value": 1,
+      "then": [
+        {"cmd": "text", "who": "Timun Mas", "text": "Di sinilah aku melempar bekal terakhir. Sarangnya ada di selatan. Sekali turun, tidak ada jalan kembali sampai salah satu dari kita mati."}
+      ],
+      "else": []},
+    {"cmd": "flag", "name": "rawa_masuk", "value": 1}
+  ],
+
+  "terasi_bekal": [
+    {"cmd": "text", "who": "", "text": "Sebongkah terasi kering terbungkus daun pisang, tidak tersentuh lumpur di sekitarnya."},
+    {"cmd": "item", "item": "terasi", "n": 1},
+    {"cmd": "notice", "text": "Bekal keempat: Terasi Timun Mas"}
+  ],
+
+  "sarang_masuk": [
+    {"cmd": "text", "who": "", "text": "Kamu tergelincir menuruni lereng lumpur. Di atas, jalan kembali tertutup."},
+    {"cmd": "text", "who": "", "text": "Kolam terasi di tengah sarang bergolak. Sesuatu yang sangat besar sedang tidur di bawahnya."},
+    {"cmd": "flag", "name": "sarang_masuk", "value": 1}
+  ],
+
+  "buto_bangun": [
+    {"cmd": "text", "who": "", "text": "Kolam terasi terbelah. Kepala hijau sebesar rumah bangkit, disusul dua tangan yang mencengkeram tepi lumpur."},
+    {"cmd": "text", "who": "Buto Ijo", "text": "HMMMM... BAU TIMUN... BAU TUMBAL YANG LEPAS DARI LUMBUNGKU..."},
+    {"cmd": "if_flag", "name": "timun_bergabung", "value": 1,
+      "then": [
+        {"cmd": "text", "who": "Buto Ijo", "text": "DAN KAU, GADIS EMAS. SUDAH KUBILANG, TIDAK ADA YANG LARI DARIKU SELAMANYA."},
+        {"cmd": "text", "who": "Timun Mas", "text": "Aku tidak lari lagi. Kali ini aku yang datang."}
+      ],
+      "else": [
+        {"cmd": "text", "who": "Buto Ijo", "text": "DESA BERJANJI MEMBERIKANMU KEPADAKU. AKU HANYA MENAGIH JANJI."}
+      ]},
+    {"cmd": "battle", "troop": 19},
+    {"cmd": "flag", "name": "buto_mati", "value": 1},
+    {"cmd": "text", "who": "", "text": "Raksasa itu tenggelam untuk terakhir kalinya. Kolam terasi mengering menjadi kerak hitam."},
+    {"cmd": "if_flag", "name": "timun_bergabung", "value": 1,
+      "then": [
+        {"cmd": "text", "who": "Timun Mas", "text": "...Sudah. Untuk pertama kalinya sejak musim itu, aku tidak mendengar langkahnya."},
+        {"cmd": "text", "who": "Timun Mas", "text": "Pulanglah ke desa, Tumbal. Katakan pada Mbok Srini: tidak ada lagi yang perlu ditanam."}
+      ],
+      "else": []},
+    {"cmd": "text", "who": "", "text": "Tapi di kejauhan, lesung desa masih berbunyi. Tok... tok... tok..."},
+    {"cmd": "flag", "name": "tamat", "value": 1}
+  ]
+}

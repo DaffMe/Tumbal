@@ -21,6 +21,8 @@
     {"cmd": "item", "item": "biji_timun", "n": 1},
     {"cmd": "item", "item": "sukma_sedang", "n": 1},
     {"cmd": "flag", "name": "memedi_mati", "value": 1},
+    {"cmd": "unlock", "a": 4, "b": 5},
+    {"cmd": "text", "who": "", "text": "Di ujung timur ladang, sulur-sulur timun layu dan rebah. Jalan ke hutan bambu terbuka."},
     {"cmd": "notice", "text": "Bekal pertama: Biji Timun Mas"}
   ],
 
@@ -28,7 +30,7 @@
     {"cmd": "if_flag", "name": "memedi_mati", "value": 1,
       "then": [
         {"cmd": "text", "who": "", "text": "Di balik ladang, bambu-bambu tumbuh rapat dan tajam. Hutan Bambu Jarum menunggu."},
-        {"cmd": "text", "who": "", "text": "(Akhir versi demo ini. Terima kasih sudah bermain.)"}
+        {"cmd": "text", "who": "", "text": "Angin dari sana berbau besi dan getah."}
       ],
       "else": [
         {"cmd": "text", "who": "", "text": "Jalan setapak tertutup sulur timun yang menggeliat. Sesuatu di tengah ladang menahannya."}

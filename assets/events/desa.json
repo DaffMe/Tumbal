@@ -42,12 +42,11 @@
   ],
 
   "jalan_ladang": [
-    {"cmd": "text", "who": "", "text": "Jalan setapak ke timur menuju Ladang Timun Busuk. Bau manis yang membusuk terbawa angin dari sana."},
-    {"cmd": "text", "who": "", "text": "(Wilayah ini belum dibuka pada versi demo ini.)"}
+    {"cmd": "text", "who": "", "text": "Jalan setapak ke timur menuju Ladang Timun Busuk. Bau manis yang membusuk terbawa angin dari sana."}
   ],
 
   "jalan_bambu": [
     {"cmd": "text", "who": "", "text": "Di selatan, batang-batang bambu berdiri rapat seperti jarum yang ditancapkan ke tanah."},
-    {"cmd": "text", "who": "", "text": "(Wilayah ini belum dibuka pada versi demo ini.)"}
+    {"cmd": "text", "who": "", "text": "Terlalu rapat untuk ditembus dari sisi ini."}
   ]
 }
