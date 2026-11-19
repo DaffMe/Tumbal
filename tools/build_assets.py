@@ -76,6 +76,12 @@ def build_characters():
         ('full_beard.png', (190, 186, 176)),
         ('short_receding.png', (190, 186, 176)),
     ])
+    # Timun Mas: gadis berkulit kuning keemasan, kain lurik kusam, rambut panjang
+    character('timun_mas.png', body((206, 168, 96)) + [
+        ('long_skirt+nl-tt.png', (110, 90, 52)),
+        ('medieval_blouse+nt+na+sb.png', (150, 120, 60)),
+        ('long_hair1.png', (30, 26, 24)),
+    ])
     # Musuh di peta (sprite simbol)
     KULIT_MAYAT = (128, 138, 112)
     character('tumbal_gagal.png', body(KULIT_MAYAT) + [
@@ -98,6 +104,19 @@ def build_characters():
     ])
 
 
+def _tint_water(im, mul=(0.75, 0.9, 0.82), desat=0.5):
+    from PIL import ImageEnhance
+    a = im.split()[3]
+    rgb = ImageEnhance.Color(im.convert('RGB')).enhance(1.0 - desat)
+    r, g, b = rgb.split()
+    r = r.point(lambda v: min(255, int(v * mul[0])))
+    g = g.point(lambda v: min(255, int(v * mul[1])))
+    b = b.point(lambda v: min(255, int(v * mul[2])))
+    out = Image.merge('RGB', (r, g, b)).convert('RGBA')
+    out.putalpha(a)
+    return out
+
+
 def build_tiles():
     os.makedirs(TILES, exist_ok=True)
     # tileset objek dipakai apa adanya
@@ -117,6 +136,18 @@ def build_tiles():
         'auto_bambu_atas.png': ('bamboo-top.png', 1),
         'auto_air_rawa.png': ('swamp-bruhe_animated-v5.png', 4),
     }
+    # laut garam: air rawa beranimasi diwarnai biru-kelabu pucat (air mati, asin)
+    sea = _tint_water(Image.open(os.path.join(SEV, 'swamp-bruhe_animated-v5.png')).convert('RGBA'), (0.7, 1.05, 1.2), 0.2)
+    tmp = os.path.join(TILES, '_laut.png')
+    sea.save(tmp)
+    autotile.bake(tmp, os.path.join(TILES, 'auto_air_laut.png'), 4)
+    os.remove(tmp)
+    # pasir garam: tekstur pasir dari pratinjau Sevarihk, diputihkan seperti kerak garam
+    sand = Image.open(os.path.join(SEV, 'water-tiles.png')).convert('RGBA').crop((20, 20, 52, 52))
+    sand = _tint_water(sand, (1.05, 1.05, 1.08), 0.35)
+    sand.save(os.path.join(TILES, 'pasir_garam.png'))
+    # rumpun bambu: muka batang (3x3 tile kiri lembar bambu)
+    shutil.copy(os.path.join(SEV, 'bamboo.png'), os.path.join(TILES, 'bamboo.png'))
     for out, (src, frames) in autos.items():
         autotile.bake(os.path.join(SEV, src), os.path.join(TILES, out), frames)
 
@@ -182,6 +213,21 @@ def build_battle():
     # tikus: frame samping charset Sevarihk, menghadap ke kiri (ke arah party)
     rat = Image.open(os.path.join(SEV, 'rat-charset-with-shadow.png')).convert('RGBA').crop((0, 58, 71, 116))
     rat.resize((142, 116), Image.NEAREST).save(os.path.join(BATTLERS, 'tikus_lumbung.png'))
+    cut(os.path.join(RED, 'more_rpg_enemies.PNG'), (9, 207, 51, 269), 3, 'arwah_jarum.png')
+    cut(os.path.join(RED, '9RPGenemies.PNG'), (91, 190, 159, 308), 2, 'gagak_bangkai.png')
+    cut(os.path.join(RED, 'rpgcritters2.png'), (55, 51, 83, 96), 3, 'ular_bambu.png')
+    cut(os.path.join(RED, '9RPGenemies.PNG'), (4, 10, 91, 50), 2, 'hantu_laut.png')
+    cut(os.path.join(RED, 'rpgcritters2.png'), (56, 151, 85, 186), 3, 'tengkorak_nelayan.png')
+    cut(os.path.join(RED, 'more_rpg_enemies.PNG'), (72, 193, 125, 281), 2, 'akar_rawa.png')
+    cut(os.path.join(RED, 'fossils3.PNG'), (234, 43, 347, 81), 2, 'buaya_bangkai.png')
+    # warna agar sesuai wilayah: ular & akar lebih kusam
+    for n, mul in [('ular_bambu.png', (0.9, 0.62, 0.4)), ('akar_rawa.png', (0.8, 0.85, 0.6))]:
+        im = Image.open(os.path.join(BATTLERS, n)).convert('RGBA')
+        _hue_shift(im, mul).save(os.path.join(BATTLERS, n))
+    grade_battleback('battleback2.png', 'pantai_garam.png', dark=0.55, desat=0.75, tint=(0.85, 0.92, 1.0))
+    grade_battleback('battleback1.png', 'rawa.png', dark=0.35, desat=0.4, tint=(0.95, 0.9, 0.55))
+    grade_battleback('battleback5.png', 'sarang_buto.png', dark=0.4, desat=0.3, tint=(0.8, 1.0, 0.7))
+    grade_battleback('battleback6.png', 'hutan_bambu.png', dark=0.38, desat=0.65, tint=(0.8, 1.0, 0.85))
     grade_battleback('battleback8.png', 'lumbung.png', dark=0.42, desat=0.55, tint=(1.0, 0.9, 0.8))
     grade_battleback('battleback5.png', 'gua.png', dark=0.5, desat=0.4)
     grade_battleback('battleback1.png', 'hutan.png', dark=0.45, desat=0.5, tint=(0.9, 1.0, 0.9))
@@ -280,6 +326,9 @@ def build_props():
     save_prop(_crop(swamp, (44, 1024, 215, 1054)), 'pagar.png')
     save_prop(_crop(swamp, (0, 1538, 64, 1616)), 'alang_alang.png')
     save_prop(_crop(swamp, (192, 227, 256, 350)), 'rak_bambu.png')
+    save_prop(_night(_crop('bamboo.png', (160, 128, 224, 320)), 0.8), 'bambu_tinggi_a.png')
+    save_prop(_night(_crop('bamboo.png', (200, 128, 256, 320)), 0.8), 'bambu_tinggi_b.png')
+    save_prop(_night(_crop('tree-trunk-32x32swamp.png', (70, 164, 256, 494)), 0.7), 'tunggul_rawa.png')
 
 
 # ------------------------------------------------------------------ aset Codex
@@ -356,6 +405,14 @@ def build_codex():
     t = timun.resize((int(timun.width * 0.6), int(timun.height * 0.6)), Image.NEAREST)
     t.resize((t.width * 2, t.height * 2), Image.NEAREST).save(os.path.join(BATTLERS, 'timun_busuk.png'))
 
+    # Buto Ijo: tiga bagian (tangan kiri, kepala, tangan kanan) dengan palet sama
+    for src, out, k in [('buto_kepala.png', 'buto_kepala.png', 0.8), ('buto_tangan_kiri.png', 'buto_kiri.png', 0.6),
+                        ('buto_tangan_kanan.png', 'buto_kanan.png', 0.6)]:
+        im = _trim(_degrid(os.path.join(CODEX, src), 8))
+        im = im.resize((int(im.width * k), int(im.height * k)), Image.NEAREST)
+        im.resize((im.width * 2, im.height * 2), Image.NEAREST).save(os.path.join(BATTLERS, out))
+    head = _trim(_degrid(os.path.join(CODEX, 'buto_kepala.png'), 8))
+    save_prop(_night(head, 0.8), 'buto_peta.png')
     # lembar props ladang: grid 4 -> 1 sel = 1 px, sudah seskala tile 32 px
     sheet = _degrid(os.path.join(CODEX, 'ladang_props.png'), 4)
     names = ['ajir.png', 'ajir_roboh.png', 'gubuk_sawah.png', 'timun_tumpuk.png', 'ember.png', 'cangkul.png',
@@ -364,7 +421,9 @@ def build_codex():
     for name, box in zip(names, boxes):
         save_prop(_night(sheet.crop(box), 0.85), name)
     # sprite peta musuh ladang: battler diperkecil, 4 frame x 4 arah (bergoyang tipis)
-    for src, out, size in [('belalang_sangit.png', 'belalang.png', 40), ('timun_busuk.png', 'timun_busuk.png', 44)]:
+    for src, out, size in [('belalang_sangit.png', 'belalang.png', 40), ('timun_busuk.png', 'timun_busuk.png', 44),
+                           ('arwah_jarum.png', 'arwah.png', 46), ('gagak_bangkai.png', 'gagak.png', 50),
+                           ('ular_bambu.png', 'ular.png', 40)]:
         b = Image.open(os.path.join(BATTLERS, src)).convert('RGBA')
         k = size / max(b.width, b.height)
         small = b.resize((max(1, int(b.width * k)), max(1, int(b.height * k))), Image.NEAREST)
