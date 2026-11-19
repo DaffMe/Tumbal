@@ -88,8 +88,12 @@ void Game::interact() {
     const int tiles[2][2] = {{fx, fy}, {p.x, p.y}};
     for (const auto& t : tiles) {
         for (const MapObject* o = m->objects(); o != nullptr; o = o->next) {
+            // objek bisa lebih lebar dari 1 tile (mis. pintu rumah selebar 3 tile)
             int ox = o->tileX(m->tileW()), oy = o->tileY(m->tileH());
-            if (ox != t[0] || oy != t[1]) continue;
+            int ow = o->w > m->tileW() ? static_cast<int>((o->w + m->tileW() - 1) / m->tileW()) : 1;
+            int oh = o->h > m->tileH() ? static_cast<int>((o->h + m->tileH() - 1) / m->tileH()) : 1;
+            if (o->type == "prop") continue;
+            if (t[0] < ox || t[0] >= ox + ow || t[1] < oy || t[1] >= oy + oh) continue;
             if (hidden(*o)) continue;
             if (o->type == "tungku") { restAt(*o); return; }
             if (o->type == "loot" && tryLoot(o)) return;

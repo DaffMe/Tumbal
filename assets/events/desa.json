@@ -9,6 +9,36 @@
       "else": [
         {"cmd": "text", "who": "Mbok Srini", "text": "Tungku ini tidak pernah padam. Kalau padam, desa ini akan ingat semua yang sudah dilakukannya."}
       ]},
+    {"cmd": "if_flag", "name": "memedi_mati", "value": 1,
+      "then": [
+        {"cmd": "if_flag", "name": "mbok_memedi", "value": 0,
+          "then": [
+            {"cmd": "text", "who": "Mbok Srini", "text": "Bajumu bau jerami terbakar. Kau membakar penjaga ladang itu?"},
+            {"cmd": "text", "who": "Mbok Srini", "text": "Aku yang menjahit kepalanya dari labu, dulu, waktu desa masih percaya ia hanya untuk menakuti burung."},
+            {"cmd": "flag", "name": "mbok_memedi", "value": 1}
+          ],
+          "else": []}
+      ],
+      "else": []},
+    {"cmd": "if_flag", "name": "timun_bergabung", "value": 1,
+      "then": [
+        {"cmd": "if_flag", "name": "mbok_timun", "value": 0,
+          "then": [
+            {"cmd": "text", "who": "Mbok Srini", "text": "Kau bertemu dengannya. Jangan bohong, aku bisa mencium garam di rambutmu."},
+            {"cmd": "text", "who": "Mbok Srini", "text": "...Apa ia masih membenciku?"},
+            {"cmd": "choice", "options": ["Ia sudah memaafkanmu", "Ia tidak menyebut namamu"], "branches": [
+              [
+                {"cmd": "text", "who": "Mbok Srini", "text": "Bohong. Tapi terima kasih. Sudah lama tidak ada yang mau berbohong demi aku."}
+              ],
+              [
+                {"cmd": "text", "who": "Mbok Srini", "text": "...Ya. Itu lebih mirip anakku."}
+              ]
+            ]},
+            {"cmd": "flag", "name": "mbok_timun", "value": 1}
+          ],
+          "else": []}
+      ],
+      "else": []},
     {"cmd": "choice", "options": ["Siapa kau?", "Tentang Buto Ijo", "Tentang Tungku", "Pergi"], "branches": [
       [
         {"cmd": "text", "who": "Mbok Srini", "text": "Orang memanggilku Mbok Srini. Dulu aku punya seorang anak perempuan. Kulitnya kuning keemasan, seperti timun yang matang di pohon."},

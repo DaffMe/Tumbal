@@ -240,7 +240,48 @@ static void testBossGate() {
     if (door) CHECK(g.world().travel(4, *door).ok);
 }
 
+static void testWideEventAndNpc() {
+    SECTION("Periksa objek event selebar 3 tile + NPC baru Rawa & Sarang");
+    Game g;
+    std::string err;
+    std::string root = std::string(worldPath()).substr(0, std::string(worldPath()).find("maps/world.json"));
+    std::string ev[] = {root + "events/akhir.json"};
+    CHECK(g.load(worldPath(), ev, 1, &err));
+    g.newGame("Tumbal", KL_PENDEKAR);
+    g.state().setFlag("laut_masuk", 1);
+    // pintu rumah nelayan: event lebar 3 tile di (10..12, 16); diperiksa dari ubin tengah bawahnya
+    CHECK(g.field().enter(6, 11, 17, FACE_UP));
+    GameInput in;
+    in.action = true;
+    g.update(0.016f, in);
+    CHECK(g.interpreter().busy());
+    // selesaikan dialog: sukma diberikan sekali saja
+    for (int i = 0; i < 20 && g.interpreter().busy(); ++i) { g.interpreter().resume(); g.update(0.016f, GameInput{}); }
+    CHECK(g.state().flag("rumah_nelayan") == 1);
+    int sedang = g.state().count(itemIdByKey("sukma_sedang"));
+    CHECK(sedang == 1);
+    g.update(0.016f, in);
+    for (int i = 0; i < 20 && g.interpreter().busy(); ++i) { g.interpreter().resume(); g.update(0.016f, GameInput{}); }
+    CHECK(g.state().count(itemIdByKey("sukma_sedang")) == sedang);
+    // ubin di luar lebar event tidak memicu apa pun
+    CHECK(g.field().enter(6, 14, 17, FACE_UP));
+    g.update(0.016f, in);
+    CHECK(!g.interpreter().busy());
+    // NPC rawa memberi jamu sekali
+    g.state().setFlag("rawa_masuk", 1);
+    CHECK(g.field().enter(7, 15, 16, FACE_UP));
+    int jamu = g.state().count(IT_JAMU);
+    g.update(0.016f, in);
+    CHECK(g.interpreter().busy());
+    for (int i = 0; i < 30 && g.interpreter().busy(); ++i) {
+        if (g.interpreter().state() == Interpreter::WaitChoice) g.interpreter().choose(1); else g.interpreter().resume();
+        g.update(0.016f, GameInput{});
+    }
+    CHECK(g.state().count(IT_JAMU) == jamu + 1 && g.state().flag("pemuda_beri") == 1);
+}
+
 void runWorldTests() {
+    testWideEventAndNpc();
     testBossGate();
     testSaveLoad();
     testTungkuWarp();

@@ -57,6 +57,48 @@
     {"cmd": "flag", "name": "rawa_masuk", "value": 1}
   ],
 
+  "rumah_nelayan": [
+    {"cmd": "text", "who": "", "text": "Pintu rumah nelayan terkunci dari dalam. Lewat celah papan tercium bau ikan asin yang sudah lama menjadi debu."},
+    {"cmd": "if_flag", "name": "rumah_nelayan", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "", "text": "Di bawah tangga terselip sebuah kendi. Isinya garam kasar dan beberapa butir sukma yang menggumpal seperti kristal."},
+        {"cmd": "item", "item": "sukma_sedang", "n": 1},
+        {"cmd": "flag", "name": "rumah_nelayan", "value": 1}
+      ],
+      "else": []}
+  ],
+
+  "pemuda_rawa": [
+    {"cmd": "if_flag", "name": "pemuda_kenal", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "Pemuda Desa", "text": "Jangan mendekat! ...Oh. Kau bukan dia. Kau cuma tumbal."},
+        {"cmd": "text", "who": "Pemuda Desa", "text": "Kepala desa menyuruhku memastikan Buto masih tidur. Kalau ia bangun sebelum musim panen, desa harus mengirim dua anak, bukan satu."},
+        {"cmd": "if_flag", "name": "timun_bergabung", "value": 1,
+          "then": [
+            {"cmd": "text", "who": "Pemuda Desa", "text": "Bau garam itu... Kau bertemu gadis di dermaga? Kakekku bilang ia sudah mati tujuh musim lalu. Di desa, namanya kami nyanyikan setiap panen."}
+          ],
+          "else": []},
+        {"cmd": "flag", "name": "pemuda_kenal", "value": 1}
+      ],
+      "else": [
+        {"cmd": "text", "who": "Pemuda Desa", "text": "Kau masih di sini? Sarangnya di tenggara, di ujung jalan yang menurun. Sekali turun, lumpurnya tidak akan membiarkanmu naik lagi."}
+      ]},
+    {"cmd": "choice", "options": ["Kenapa tidak lari saja?", "Pergi"], "branches": [
+      [
+        {"cmd": "text", "who": "Pemuda Desa", "text": "Lari ke mana? Ladang, hutan bambu, laut, rawa ini... semuanya tumbuh dari bekal gadis itu. Semua tanah di sekeliling desa adalah jejak larinya."},
+        {"cmd": "text", "who": "Pemuda Desa", "text": "Tidak ada jalan keluar dari sebuah pelarian. Hanya jalan yang lebih panjang."}
+      ],
+      []
+    ]},
+    {"cmd": "if_flag", "name": "pemuda_beri", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "Pemuda Desa", "text": "...Ini. Kalau kau memang mau turun, kau lebih butuh daripada aku."},
+        {"cmd": "item", "item": "jamu", "n": 1},
+        {"cmd": "flag", "name": "pemuda_beri", "value": 1}
+      ],
+      "else": []}
+  ],
+
   "terasi_bekal": [
     {"cmd": "text", "who": "", "text": "Sebongkah terasi kering terbungkus daun pisang, tidak tersentuh lumpur di sekitarnya."},
     {"cmd": "item", "item": "terasi", "n": 1},
@@ -67,6 +109,18 @@
     {"cmd": "text", "who": "", "text": "Kamu tergelincir menuruni lereng lumpur. Di atas, jalan kembali tertutup."},
     {"cmd": "text", "who": "", "text": "Kolam terasi di tengah sarang bergolak. Sesuatu yang sangat besar sedang tidur di bawahnya."},
     {"cmd": "flag", "name": "sarang_masuk", "value": 1}
+  ],
+
+  "tumpukan_tulang": [
+    {"cmd": "text", "who": "", "text": "Tulang-tulang kecil ditumpuk rapi seperti padi di lumbung. Terlalu rapi untuk pekerjaan seekor raksasa."},
+    {"cmd": "if_flag", "name": "tulang_sarang", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "", "text": "Di puncaknya terikat gelang benang merah, sama dengan yang dulu diikatkan ke pergelanganmu sebelum kau dibawa ke lumbung."},
+        {"cmd": "text", "who": "", "text": "Desa tidak hanya menyerahkan anak-anak. Desa menyusun mereka."},
+        {"cmd": "item", "item": "sukma_sedang", "n": 1},
+        {"cmd": "flag", "name": "tulang_sarang", "value": 1}
+      ],
+      "else": []}
   ],
 
   "buto_bangun": [
