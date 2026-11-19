@@ -17,6 +17,8 @@
 #include "../adt/Graph.hpp"
 #include "TileMap.hpp"
 
+class JsonValue;
+
 struct MapInfo {
     std::string name;
     std::string file;
@@ -86,6 +88,11 @@ public:
     // terdekat; mengembalikan jumlahnya. Tungku di wilayah yang jalannya
     // masih terkunci tidak muncul: warp mengikuti keterhubungan Graph.
     int warpTargets(int fromMap, int* outMap, int* outDepth, int max);
+
+    // Simpan/muat status dunia: peta dikunjungi, Tungku menyala, musuh kalah,
+    // loot diambil, dan status buka/kunci setiap edge Graph.
+    std::string toJson() const;
+    bool fromJson(const JsonValue* v);
 
     // Tandai peta dikunjungi.
     void markVisited(int mapId);

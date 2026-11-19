@@ -3,6 +3,7 @@
 #include <string>
 #include "TestFramework.hpp"
 #include "../src/core/util/Json.hpp"
+#include "../src/core/game/Game.hpp"
 #include "../src/core/world/Field.hpp"
 
 static void testJson() {
@@ -179,7 +180,69 @@ static void testTungkuWarp() {
     CHECK(world.warpTargets(2, maps, depth, 8) == 1 && depth[0] == 0);
 }
 
+static void testSaveLoad() {
+    SECTION("Simpan & muat: GameState + status Graph dunia");
+    Game a;
+    std::string err;
+    std::string root = std::string(worldPath()).substr(0, std::string(worldPath()).find("maps/world.json"));
+    std::string ev[] = {root + "events/lumbung.json"};
+    CHECK(a.load(worldPath(), ev, 1, &err));
+    a.newGame("Tumbal", KL_MALING);
+    a.giveStartingGift(2);
+    a.state().addSukma(77);
+    a.state().setFlag("uji", 3);
+    a.state().hero().hp = 99;
+    a.state().joinCompanion();
+    a.world().lightTungku(2);
+    a.world().markDefeated(1, 0);
+    a.world().graph().setOpen(1, 2, false);
+    a.state().die(1, 6, 6);                 // sukma tercecer ikut tersimpan
+    std::string path = "uji_simpan.json";
+    CHECK(a.saveTo(path, &err));
+    CHECK(!Game::describeSave(path).empty());
+
+    Game b;
+    CHECK(b.load(worldPath(), ev, 1, &err));
+    b.newGame("Lain", KL_PENDEKAR);
+    CHECK(b.loadFrom(path, &err));
+    CHECK(b.state().classId() == KL_MALING);
+    CHECK(b.state().count(IT_BOM_MINYAK) == 3);
+    CHECK(b.state().flag("uji") == 3);
+    CHECK(b.state().bloodstain().active && b.state().bloodstain().sukma == 177);
+    CHECK(b.state().companionJoined());
+    CHECK(b.world().info(2)->tungkuLit);
+    CHECK(b.world().isDefeated(1, 0));
+    CHECK(!b.world().graph().isOpen(1, 2) && !b.world().graph().isOpen(2, 1));   // setOpen menutup dua arah
+    CHECK(b.field().mapId() == a.field().mapId() && b.field().player().x == a.field().player().x);
+    Battler party[4];
+    CHECK(b.state().party(party) == 2);     // pemain + Timun Mas
+    std::remove(path.c_str());
+    CHECK(!b.loadFrom("tidak_ada.json", &err));
+}
+
+static void testBossGate() {
+    SECTION("M2: gerbang boss - ladang ke hutan bambu terkunci sampai Memedi tumbang");
+    Game g;
+    std::string err;
+    std::string root = std::string(worldPath()).substr(0, std::string(worldPath()).find("maps/world.json"));
+    std::string ev[] = {root + "events/ladang.json"};
+    CHECK(g.load(worldPath(), ev, 1, &err));
+    g.newGame("Tumbal", KL_PENDEKAR);
+    CHECK(!g.world().graph().isOpen(4, 5) && !g.world().graph().isOpen(5, 4));
+    // jalan ke Sarang Buto hanya satu arah (Rawa -> Sarang)
+    CHECK(g.world().graph().isOpen(7, 8) && !g.world().graph().isOpen(8, 7));
+    const TileMap* ladang = g.world().map(4);
+    CHECK(ladang != nullptr);
+    const MapObject* door = ladang ? ladang->objectAt(ladang->width() - 1, 9, "door") : nullptr;
+    CHECK(door != nullptr && !door->props.getString("pesan", "").empty());
+    if (door) CHECK(g.world().travel(4, *door).locked);
+    CHECK(g.world().unlockShortcut(4, 5));    // perintah event "unlock" setelah Memedi kalah
+    if (door) CHECK(g.world().travel(4, *door).ok);
+}
+
 void runWorldTests() {
+    testBossGate();
+    testSaveLoad();
     testTungkuWarp();
     testJson();
     testGraphLocks();

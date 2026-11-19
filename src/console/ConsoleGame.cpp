@@ -1,6 +1,7 @@
 #include "ConsoleGame.hpp"
 
 #include <cstdio>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include "core/battle/BattleSystem.hpp"
@@ -175,8 +176,13 @@ void consoleTungku(Game& game) {
     std::string line;
     while (game.tungkuMenuOpen()) {
         flushNotices(game);
-        std::printf("\n  == TUNGKU ==  Level %d   Sukma %d\n  1) Naik level (butuh %d sukma)\n  2) Warp\n  3) Pergi\n  pilih: ",
+        std::printf("\n  == TUNGKU ==  Level %d   Sukma %d\n  1) Naik level (butuh %d sukma)\n  2) Warp\n  3) Pergi\n",
                     game.state().level(), game.state().sukma(), game.state().levelUpCost());
+        if (game.state().companionJoined())
+            std::printf("  4) Timun Mas naik level (Lv %d, butuh %d sukma)\n  5) Panggil / lepas Timun Mas (%s)\n",
+                        game.state().companionLevel(), game.state().companionLevelUpCost(),
+                        game.state().companionActive() ? "ikut" : "menunggu");
+        std::printf("  pilih: ");
         if (!std::getline(std::cin, line)) { game.closeTungkuMenu(); return; }
         if (line == "1") {
             std::printf("  %s\n", game.levelUp().c_str());
@@ -190,6 +196,10 @@ void consoleTungku(Game& game) {
             if (!std::getline(std::cin, line)) return;
             std::sscanf(line.c_str(), "%d", &k);
             if (k >= 1 && k <= n && maps[k - 1] != game.field().mapId()) game.warpTo(maps[k - 1]);
+        } else if (line == "4" && game.state().companionJoined()) {
+            std::printf("  %s\n", game.companionLevelUp().c_str());
+        } else if (line == "5" && game.state().companionJoined()) {
+            std::printf("  %s\n", game.toggleCompanion().c_str());
         } else {
             game.closeTungkuMenu();
         }
@@ -212,6 +222,7 @@ void settle(Game& game) {
             if (consoleBattle(game) == BattleSystem::Defeat) std::printf("\n  KAMU MATI. Sukmamu tercecer di tempat itu.\n");
             continue;
         }
+        if (game.state().flag("tamat") != 0 && !game.interpreter().busy()) break;
         if (game.transferPending()) {
             game.finishTransfer();
             std::printf("-- %s --\n", game.world().info(game.field().mapId())->name.c_str());
@@ -229,26 +240,41 @@ int runConsole() {
     Game game;
     std::string err;
     std::string root = findAssets();
-    std::string events[] = {root + "events/lumbung.json", root + "events/desa.json", root + "events/ladang.json"};
-    if (!game.load(root + "maps/world.json", events, 3, &err)) {
+    std::string events[] = {root + "events/lumbung.json", root + "events/desa.json", root + "events/ladang.json",
+                            root + "events/akhir.json"};
+    if (!game.load(root + "maps/world.json", events, 4, &err)) {
         std::printf("Gagal memuat dunia: %s\n", err.c_str());
         return 1;
     }
     game.newGame("Tumbal", KL_PENDEKAR);
     std::printf("\nTUMBAL - mode console\n"
                 "Perintah: w/a/s/d (+angka langkah, mis. 'd 5'), q/e/z/c = diagonal, x = periksa/bicara,\n"
-                "          jamu, graph, tungku, buka <a> <b>, lihat, keluar\n"
+                "          jamu, graph, tungku, buka <a> <b>, lihat, simpan <1-3>, muat <1-3>, keluar\n"
                 "Peta: @ kamu, M musuh, N orang, ? periksa, * barang, T Tungku, D pintu, ~ sukma tercecer\n");
     settle(game);
     printView(game.field(), &game.state().bloodstain());
 
     std::string line;
-    while (std::printf("\n[HP %d/%d  Jamu %d  Sukma %d] > ", game.state().hero().hp, game.state().hero().stats.mhp,
+    while (game.state().flag("tamat") == 0 &&
+           std::printf("\n[HP %d/%d  Jamu %d  Sukma %d] > ", game.state().hero().hp, game.state().hero().stats.mhp,
                        game.state().count(IT_JAMU), game.state().sukma()),
            std::getline(std::cin, line)) {
         if (line.empty()) continue;
         std::string cmd = line.substr(0, line.find(' '));
         if (cmd == "keluar") break;
+        if (cmd == "simpan" || cmd == "muat") {
+            int slot = 1;
+            std::sscanf(line.c_str() + cmd.size(), "%d", &slot);
+            if (slot < 1 || slot > 3) slot = 1;
+            std::filesystem::create_directories(root + "../saves");
+            std::string path = root + "../saves/slot" + std::to_string(slot) + ".json";
+            std::string e;
+            bool ok = cmd == "simpan" ? game.saveTo(path, &e) : game.loadFrom(path, &e);
+            if (ok) std::printf("  %s slot %d.\n", cmd == "simpan" ? "Tersimpan di" : "Dimuat dari", slot);
+            else std::printf("  Gagal: %s\n", e.c_str());
+            if (ok && cmd == "muat") printView(game.field(), &game.state().bloodstain());
+            continue;
+        }
         if (cmd == "graph") { printGraph(game.world(), game.field().mapId()); continue; }
         if (cmd == "lihat") { printView(game.field(), &game.state().bloodstain()); continue; }
         if (cmd == "tungku") {
@@ -295,6 +321,10 @@ int runConsole() {
             flushNotices(game);
         }
         printView(game.field(), &game.state().bloodstain());
+    }
+    if (game.state().flag("tamat") != 0) {
+        std::printf("\n\n        T A M A T\n\n  Buto Ijo runtuh. Desa Karangtumbal tidak lagi memberi tumbal.\n"
+                    "  Kematian: %d   Level: %d\n\n", game.state().deaths(), game.state().level());
     }
     return 0;
 }

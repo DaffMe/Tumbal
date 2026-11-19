@@ -78,7 +78,9 @@ enum SkillIdList {
     SKL_PANAH_SUKMA, SKL_API_TUNGKU, SKL_SEMBUH,
     // jurus musuh
     SKL_GIGIT, SKL_CAKAR_BUSUK, SKL_LUDAH_RACUN, SKL_RAUNG, SKL_HANTAM_GUNCANG, SKL_RAPAL_KUTUK,
-    SKL_RAHANG_SANGIT, SKL_PECAH_BUSUK, SKL_CAKAR_JERAMI, SKL_TEBAR_BIJI, SKL_RITUAL_PANEN, SKL_LOLONG_SAWAH,
+    SKL_LEMPAR_GARAM, SKL_SULUR_TIMUN, SKL_RAHANG_SANGIT, SKL_PECAH_BUSUK, SKL_CAKAR_JERAMI, SKL_TEBAR_BIJI, SKL_RITUAL_PANEN, SKL_LOLONG_SAWAH,
+    SKL_HUJAN_JARUM, SKL_PATUK, SKL_OMBAK_ASIN, SKL_BELIT, SKL_SABET_JALA, SKL_LILIT_AKAR, SKL_TERKAM,
+    SKL_RAUNG_BUTO, SKL_LAPAR_BUTO, SKL_NAPAS_TERASI, SKL_CENGKERAM, SKL_HANTAM_GADA,
     SKL_COUNT
 };
 const SkillDef* skillDef(int id);
@@ -100,11 +102,14 @@ struct EnemyDef {
     int         actionCount;
     const char* battler;            // gambar battler (assets/battlers/...)
     const char* walker;             // sprite peta (assets/chars/...)
+    bool        core = false;       // inti boss: bila tumbang, semua bagian lain ikut runtuh
 };
 
 enum EnemyIdList {
     EN_TUMBAL_GAGAL = 1, EN_TIKUS_LUMBUNG, EN_BELATUNG, EN_PENJAGA_LUMBUNG,
     EN_BELALANG_SANGIT, EN_TIMUN_BUSUK, EN_MEMEDI_SAWAH,
+    EN_ARWAH_JARUM, EN_GAGAK_BANGKAI, EN_ULAR_BAMBU, EN_HANTU_LAUT, EN_TENGKORAK_NELAYAN,
+    EN_AKAR_RAWA, EN_BUAYA_BANGKAI, EN_BUTO_KEPALA, EN_BUTO_KIRI, EN_BUTO_KANAN,
     EN_COUNT
 };
 const EnemyDef* enemyDef(int id);
@@ -118,12 +123,14 @@ struct TroopDef {
 enum TroopIdList {
     TR_TUMBAL_GAGAL = 1, TR_TIKUS_2, TR_TUMBAL_TIKUS, TR_BELATUNG_3, TR_PENJAGA,
     TR_BELALANG_2, TR_TIMUN_BELALANG, TR_TIMUN_2, TR_MEMEDI,
+    TR_ARWAH_2, TR_GAGAK, TR_ULAR_ARWAH, TR_HANTU_LAUT, TR_TENGKORAK_2, TR_HANTU_TENGKORAK,
+    TR_AKAR_2, TR_BUAYA, TR_AKAR_BELATUNG, TR_BUTO,
     TR_COUNT
 };
 const TroopDef* troopDef(int id);
 
 // ---------------------------------------------------------------- kelas
-enum ClassId { KL_PENDEKAR = 0, KL_MALING, KL_PAWANG, KL_COUNT };
+enum ClassId { KL_PENDEKAR = 0, KL_MALING, KL_PAWANG, KL_TIMUN_MAS, KL_COUNT };
 struct ClassDef {
     const char* name;
     const char* desc;
@@ -153,7 +160,7 @@ struct ItemDef {
 
 enum ItemIdList {
     IT_JAMU = 1, IT_PENAWAR, IT_SUKMA_KECIL, IT_SUKMA_SEDANG, IT_BOM_MINYAK, IT_ABU_PULANG, IT_KUNCI_SEL,
-    IT_BIJI_TIMUN, IT_COUNT
+    IT_BIJI_TIMUN, IT_JARUM, IT_GARAM, IT_TERASI, IT_COUNT
 };
 const ItemDef* itemDef(int id);
 int itemIdByKey(const char* key);   // 0 bila tidak ada

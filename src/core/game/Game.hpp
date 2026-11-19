@@ -38,6 +38,14 @@ public:
     // Muat dunia (world.json) dan semua berkas event di daftar `eventFiles`.
     bool load(const std::string& worldJson, const std::string* eventFiles, int eventFileCount, std::string* error);
     void newGame(const std::string& heroName, int classId);
+    // Hadiah awal (seperti BS1): 0 jamu ekstra, 1 sukma, 2 bom, 3 abu Tungku.
+    void giveStartingGift(int gift);
+
+    // Simpan di mana saja (seperti BS1). Mati TIDAK pernah menyimpan otomatis.
+    bool saveTo(const std::string& path, std::string* error = nullptr) const;
+    bool loadFrom(const std::string& path, std::string* error = nullptr);
+    // Ringkasan isi berkas simpan (untuk daftar slot); kosong bila tidak ada.
+    static std::string describeSave(const std::string& path);
 
     // Satu langkah permainan di peta. Dibekukan saat dialog/battle/transfer.
     void update(float dt, const GameInput& in);
@@ -67,6 +75,9 @@ public:
     void closeTungkuMenu() { tungkuMenu_ = false; }
     // Naik level dengan sukma. Mengembalikan teks hasil.
     std::string levelUp();
+    // Pendamping: naik level dengan sukma, atau panggil/lepas.
+    std::string companionLevelUp();
+    std::string toggleCompanion();
     // M2 subprogram: daftar tujuan warp (Tungku menyala & terjangkau).
     int warpTargets(int* outMap, int* outDepth, int max);
     // M2 subprogram: warp ke Tungku di peta mapId (lewat transfer).

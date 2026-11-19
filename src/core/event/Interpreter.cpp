@@ -114,6 +114,10 @@ void Interpreter::execute(const Command* c) {
             host_.hostTransfer(c->n1, c->s1);
             break;
         case CMD_NOTICE: notices_.enqueue(c->s1); break;
+        case CMD_JOIN:
+            gs_.joinCompanion();
+            dsOp("GameState.joinCompanion() -> party 2 orang");
+            break;
         case CMD_END:
             stack_.clear();
             state_ = Idle;

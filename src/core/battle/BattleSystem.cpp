@@ -499,6 +499,10 @@ void BattleSystem::kill(Battler& t) {
     timeline_.remove(&t);
     ds("Timeline.remove(" + t.name + ")");
     emit(BattleEvent::Death, -1, t.slot, 0, t.name + (t.enemy ? " tumbang." : " roboh!"));
+    if (t.enemy && t.def != nullptr && t.def->core) {
+        for (int i = 0; i < count_; ++i)
+            if (b_[i].enemy && b_[i].alive()) kill(b_[i]);
+    }
 }
 
 void BattleSystem::checkEnd() {

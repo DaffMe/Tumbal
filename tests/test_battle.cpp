@@ -210,6 +210,19 @@ static void testNoEscape() {
     CHECK(!bs.tryEscape());
     CHECK(bs.phase() == BattleSystem::Input);     // tetap giliran pemain
     CHECK(!bs.over());
+    // boss tiga bagian: kepala (inti) tumbang -> tangan ikut runtuh
+    BattleSystem b2;
+    b2.setup(&hero, 1, TR_BUTO, INIT_PREEMPTIVE, 3);
+    CHECK(b2.count() == 4);
+    CHECK(enemyDef(EN_BUTO_KEPALA)->core && !enemyDef(EN_BUTO_KIRI)->core);
+    b2.battler(2).hp = 1;
+    untilInput(b2);
+    if (b2.phase() == BattleSystem::Input) {
+        b2.battler(2).hp = 1;
+        b2.submit(BattleAction{SKL_SERANG, 2, 0});
+        CHECK(!b2.battler(1).alive() && !b2.battler(3).alive());
+        CHECK(b2.phase() == BattleSystem::Victory);
+    }
     // Memedi lemah api: Bom Minyak masuk x2
     CHECK(enemyDef(EN_MEMEDI_SAWAH)->elementRate[EL_API] == 2.0f);
 }

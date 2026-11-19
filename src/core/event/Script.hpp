@@ -32,6 +32,7 @@ enum CommandOp {
     CMD_TRANSFER,    // n1 = peta, s1 = spawn                          (menunggu)
     CMD_NOTICE,      // s1 = teks notifikasi singkat (tidak menunggu)
     CMD_END,         // hentikan skrip
+    CMD_JOIN,        // Timun Mas bergabung ke party
     CMD_COUNT
 };
 

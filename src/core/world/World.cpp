@@ -196,3 +196,52 @@ int World::warpTargets(int fromMap, int* outMap, int* outDepth, int max) {
     dsOp("Graph.bfs(" + std::to_string(fromMap) + ") -> " + std::to_string(n) + " Tungku bisa dituju");
     return n;
 }
+
+std::string World::toJson() const {
+    std::string o = "{\"maps\":[";
+    bool first = true;
+    graph_.forEachVertex([&](MapGraph::Vertex* v) {
+        if (!first) o += ",";
+        first = false;
+        o += "[" + std::to_string(v->id) + "," + std::to_string(v->data.visited ? 1 : 0) + "," +
+             std::to_string(v->data.tungkuLit ? 1 : 0) + "," + std::to_string(v->data.defeated) + "," +
+             std::to_string(v->data.collected) + "]";
+    });
+    o += "],\"edges\":[";
+    first = true;
+    graph_.forEachVertex([&](MapGraph::Vertex* v) {
+        for (MapGraph::Edge* e = v->edges; e != nullptr; e = e->next) {
+            if (!first) o += ",";
+            first = false;
+            o += "[" + std::to_string(v->id) + "," + std::to_string(e->to->id) + "," + std::to_string(e->open ? 1 : 0) + "]";
+        }
+    });
+    o += "]}";
+    return o;
+}
+
+bool World::fromJson(const JsonValue* v) {
+    if (v == nullptr) return false;
+    if (const JsonValue* maps = v->get("maps")) {
+        for (const JsonValue* m = maps->first(); m != nullptr; m = m->next()) {
+            MapInfo* i = info(m->at(0) ? m->at(0)->asInt() : -1);
+            if (i == nullptr) continue;
+            i->visited = m->at(1) && m->at(1)->asInt() != 0;
+            i->tungkuLit = m->at(2) && m->at(2)->asInt() != 0;
+            i->defeated = m->at(3) ? static_cast<unsigned long long>(m->at(3)->asNumber()) : 0;
+            i->collected = m->at(4) ? static_cast<unsigned long long>(m->at(4)->asNumber()) : 0;
+        }
+    }
+    if (const JsonValue* edges = v->get("edges")) {
+        for (const JsonValue* e = edges->first(); e != nullptr; e = e->next()) {
+            int a = e->at(0) ? e->at(0)->asInt() : 0, b = e->at(1) ? e->at(1)->asInt() : 0;
+            bool open = e->at(2) && e->at(2)->asInt() != 0;
+            MapGraph::Vertex* va = graph_.findVertex(a);
+            if (va == nullptr) continue;
+            for (MapGraph::Edge* ed = va->edges; ed != nullptr; ed = ed->next)
+                if (ed->to->id == b) ed->open = open;
+        }
+    }
+    dsOp("World.fromJson() -> status vertex & edge Graph dipulihkan");
+    return true;
+}

@@ -11,6 +11,8 @@
 #include <string>
 #include "../battle/BattleSystem.hpp"
 
+class JsonValue;
+
 struct Bloodstain {
     bool active = false;
     int  map = 0, x = 0, y = 0;
@@ -27,6 +29,25 @@ public:
     const Battler& hero() const { return hero_; }
     int classId() const { return classId_; }
     int level() const { return level_; }
+
+    // ---- pendamping (Timun Mas): bergabung lewat cerita, dipanggil di Tungku
+    bool companionJoined() const { return companionJoined_; }
+    bool companionActive() const { return companionJoined_ && companionActive_; }
+    void joinCompanion();
+    void setCompanionActive(bool on) { companionActive_ = on; }
+    Battler& companion() { return companion_; }
+    const Battler& companion() const { return companion_; }
+    int  companionLevel() const { return companionLevel_; }
+    int  companionLevelUpCost() const;
+    bool companionLevelUp();
+    // Isi array party untuk battle (pemain + pendamping bila aktif). Mengembalikan jumlahnya.
+    int  party(Battler* out) const;
+    // Salin hasil battle kembali (HP/MP/status) dari array party.
+    void applyParty(const Battler* in, int n);
+
+    // ---- simpan / muat (teks JSON)
+    std::string toJson() const;
+    bool fromJson(const JsonValue* v);
 
     // ---- sukma
     int  sukma() const { return sukma_; }
@@ -83,4 +104,8 @@ private:
     int     tungkuMap_ = 0, tungkuX_ = 0, tungkuY_ = 0;
     Bloodstain blood_;
     int     deaths_ = 0;
+    Battler companion_;
+    bool    companionJoined_ = false;
+    bool    companionActive_ = false;
+    int     companionLevel_ = 1;
 };

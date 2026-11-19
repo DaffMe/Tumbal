@@ -1,6 +1,8 @@
 #include "Game.hpp"
 
+#include <cstdio>
 #include "../util/DsTrace.hpp"
+#include "../util/Json.hpp"
 
 Game::Game() : field_(world_), interp_(state_, events_, *this) {}
 
@@ -53,9 +55,11 @@ void Game::update(float dt, const GameInput& in) {
         case FieldEvent::Transfer:
             requestTransfer(ev.travel.toMap, ev.travel.x, ev.travel.y, ev.travel.dir, false);
             break;
-        case FieldEvent::LockedDoor:
-            notice("Terkunci dari sisi lain.");
+        case FieldEvent::LockedDoor: {
+            std::string msg = ev.object ? ev.object->props.getString("pesan", "") : "";
+            notice(msg.empty() ? "Terkunci dari sisi lain." : msg);
             break;
+        }
         case FieldEvent::Encounter:
             battlePending_ = true;
             battleTroop_ = ev.troop;
@@ -155,18 +159,19 @@ void Game::checkBloodstain() {
 // ------------------------------------------------------------------ battle
 
 void Game::setupBattle(BattleSystem& bs, std::uint32_t seed) {
-    bs.setup(&state_.hero(), 1, battleTroop_, static_cast<Initiative>(battleInit_), seed);
+    Battler party[BattleSystem::MAX_PARTY];
+    int n = state_.party(party);
+    bs.setup(party, n, battleTroop_, static_cast<Initiative>(battleInit_), seed);
     bs.setInventory(&state_);
     bs.setCanEscape(battleEnemyIndex_ >= 0);   // battle dari event (boss) tidak bisa dikabur
 }
 
 void Game::endBattle(const BattleSystem& bs) {
     battlePending_ = false;
-    const Battler& b = bs.battler(0);
-    Battler& h = state_.hero();
-    h.hp = b.hp;
-    h.mp = b.mp;
-    for (int s = 1; s < ST_COUNT; ++s) h.status[s] = statusDef(s).battleOnly ? 0 : b.status[s];
+    Battler party[BattleSystem::MAX_PARTY];
+    int n = bs.partyCount();
+    for (int i = 0; i < n; ++i) party[i] = bs.battler(i);
+    state_.applyParty(party, n);
 
     BattleSystem::Phase r = bs.phase();
     bool fromEvent = battleEnemyIndex_ < 0;
@@ -276,4 +281,75 @@ bool Game::warpTo(int mapId) {
     state_.setLastTungku(mapId, x, y);
     requestTransfer(mapId, x, y, FACE_DOWN, false);
     return true;
+}
+
+// ------------------------------------------------------------------ simpan / muat
+
+void Game::giveStartingGift(int gift) {
+    switch (gift) {
+        case 0: state_.addItem(IT_JAMU, 2); break;
+        case 1: state_.addItem(IT_SUKMA_SEDANG, 1); break;
+        case 2: state_.addItem(IT_BOM_MINYAK, 3); break;
+        default: state_.addItem(IT_ABU_PULANG, 3); break;
+    }
+}
+
+bool Game::saveTo(const std::string& path, std::string* error) const {
+    const Actor& p = field_.player();
+    std::string o = "{\"version\":1,\"map\":" + std::to_string(field_.mapId()) + ",\"x\":" + std::to_string(p.x) +
+                    ",\"y\":" + std::to_string(p.y) + ",\"dir\":" + std::to_string(p.facing) + ",\"state\":" +
+                    state_.toJson() + ",\"world\":" + world_.toJson() + "}";
+    std::FILE* f = std::fopen(path.c_str(), "wb");
+    if (f == nullptr) {
+        if (error) *error = "tidak bisa menulis " + path;
+        return false;
+    }
+    std::fwrite(o.data(), 1, o.size(), f);
+    std::fclose(f);
+    dsOp("simpan -> " + path);
+    return true;
+}
+
+bool Game::loadFrom(const std::string& path, std::string* error) {
+    JsonValue* root = JsonValue::parseFile(path, error);
+    if (root == nullptr) return false;
+    bool ok = state_.fromJson(root->get("state")) && world_.fromJson(root->get("world"));
+    int map = root->getInt("map"), x = root->getInt("x"), y = root->getInt("y"), dir = root->getInt("dir");
+    delete root;
+    if (!ok || world_.info(map) == nullptr) {
+        if (error) *error = "berkas simpan rusak";
+        return false;
+    }
+    interp_.abort();
+    battlePending_ = transferPending_ = tungkuMenu_ = false;
+    std::string n;
+    while (notices_.dequeue(n)) {}
+    field_.enter(map, x, y, dir);
+    field_.respawnEnemies();
+    enteredMap_ = true;
+    return true;
+}
+
+std::string Game::describeSave(const std::string& path) {
+    JsonValue* root = JsonValue::parseFile(path, nullptr);
+    if (root == nullptr) return "";
+    const JsonValue* st = root->get("state");
+    int level = st ? st->getInt("level", 1) : 1;
+    int sukma = st ? st->getInt("sukma") : 0;
+    int map = root->getInt("map");
+    delete root;
+    return "Level " + std::to_string(level) + "  -  Sukma " + std::to_string(sukma) + "  -  peta " + std::to_string(map);
+}
+
+std::string Game::companionLevelUp() {
+    if (!state_.companionJoined()) return "";
+    int cost = state_.companionLevelUpCost();
+    if (!state_.companionLevelUp()) return "Sukma tidak cukup (butuh " + std::to_string(cost) + ").";
+    return "Timun Mas naik ke level " + std::to_string(state_.companionLevel()) + ".";
+}
+
+std::string Game::toggleCompanion() {
+    if (!state_.companionJoined()) return "";
+    state_.setCompanionActive(!state_.companionActive());
+    return state_.companionActive() ? "Timun Mas berjalan bersamamu." : "Timun Mas menunggu di Tungku.";
 }

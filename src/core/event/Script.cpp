@@ -23,7 +23,7 @@ EventLibrary::~EventLibrary() {
 
 static int opFromName(const std::string& s) {
     static const char* names[CMD_COUNT] = {"text", "choice", "item", "sukma", "flag", "if_flag", "if_item",
-                                           "battle", "call", "heal", "unlock", "transfer", "notice", "end"};
+                                           "battle", "call", "heal", "unlock", "transfer", "notice", "end", "join"};
     for (int i = 0; i < CMD_COUNT; ++i)
         if (s == names[i]) return i;
     return -1;
