@@ -1,7 +1,7 @@
 # ============================================================================
-# Cinderwake — build dengan MSYS2 UCRT64 g++ + mingw32-make
+# TUMBAL — build dengan MSYS2 UCRT64 g++ + mingw32-make
 #
-#   mingw32-make            build game  → bin/cinderwake.exe
+#   mingw32-make            build game  → bin/tumbal.exe
 #   mingw32-make test       build + jalankan unit test
 #   mingw32-make run        build + jalankan game
 #   mingw32-make clean
@@ -37,8 +37,8 @@ GUI_SRC  := $(wildcard src/gui/*.cpp)
 CON_SRC  := $(wildcard src/console/*.cpp)
 TEST_SRC := $(wildcard tests/*.cpp)
 
-GAME := bin/cinderwake.exe
-TEST := bin/cinderwake_tests.exe
+GAME := bin/tumbal.exe
+TEST := bin/tumbal_tests.exe
 
 .PHONY: all test run clean
 

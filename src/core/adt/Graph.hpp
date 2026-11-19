@@ -1,24 +1,27 @@
 #pragma once
 // ============================================================================
-// Graph tak berarah berbobot — representasi adjacency MULTI LINKED LIST.
-// Struktur data utama Mekanik M2 (Dungeon Exploration).
+// Graph berarah berbobot — representasi adjacency MULTI LINKED LIST.
+// Struktur data utama Mekanik M2 (Dunia saling terhubung & Tungku).
 //
-//   Vertex list (linked):  [R0] → [R1] → [R2] → ...
-//                           |      |      |
-//   Edge list per vertex:  (→R1,w2) (→R0,w2) (→R0,w1)
-//                          (→R2,w1) (→R2,w3)  ...
+//   Vertex list (linked):  [P1] -> [P2] -> [P3] -> ...
+//                           |       |       |
+//   Edge list per vertex:  (->P2)  (->P1)  (->P2, terkunci)
+//                          (->P3)  ...
 //
-// - Vertex = ruangan dungeon (payload T = data ruangan).
-// - Edge   = koridor; weight = biaya cahaya lentera untuk melewatinya.
-// - Setiap edge menunjuk langsung ke Vertex tujuan (pointer), bukan indeks,
-//   sehingga relasi antar-node terlihat jelas (multi linked list).
-// - Graph tak berarah → setiap koridor disimpan sebagai DUA edge (a→b, b→a).
+// - Vertex = satu peta (payload T = info peta).
+// - Edge   = jalan antar-peta (pintu, tepi peta, tangga). Setiap edge
+//   menyimpan status `open`: jalan pintas mulai terkunci dan dibuka dari
+//   satu sisi (seperti Black Souls / Dark Souls).
+// - addEdge -> jalan dua arah (disimpan sebagai DUA edge a->b dan b->a).
+//   addArc  -> jalan satu arah (mis. lompat turun ke jurang).
+// - Edge menunjuk langsung ke Vertex tujuan (pointer), bukan indeks.
 //
-// Kenapa Graph (bukan Tree): ruangan bisa punya banyak tetangga dan ada
-// siklus (lebih dari satu jalan menuju ruangan yang sama).
+// Kenapa Graph (bukan Tree): peta punya banyak tetangga dan ada siklus
+// (jalan pintas membuat lebih dari satu rute ke peta yang sama).
 //
-// Algoritma memakai field "scratch" di Vertex (visited, dist, parent) —
-// pendekatan klasik buku teks — sehingga tidak butuh array/map tambahan.
+// Algoritma traversal hanya melewati edge yang `open`, dan memakai field
+// "scratch" di Vertex (visited, dist, parent) sehingga tidak butuh
+// array/map tambahan.
 // ============================================================================
 
 #include <cstddef>
@@ -33,6 +36,7 @@ public:
     struct Edge {
         Vertex* to;
         int     weight;
+        bool    open;     // false = terkunci (belum bisa dilewati)
         Edge*   next;     // edge berikutnya milik vertex yang sama
     };
 
@@ -108,27 +112,60 @@ public:
 
     // ------------------------------------------------------------------ edge
 
-    // Tambah koridor tak berarah a—b dengan bobot w.
-    bool addEdge(int a, int b, int weight) {
+    // Tambah jalan dua arah a-b dengan bobot w (dua edge berarah).
+    bool addEdge(int a, int b, int weight, bool open = true) {
         if (a == b) return false;
         Vertex* va = findVertex(a);
         Vertex* vb = findVertex(b);
         if (va == nullptr || vb == nullptr) return false;
-        if (findEdge(va, vb) != nullptr) return false;   // tanpa edge ganda
-        va->edges = new Edge{vb, weight, va->edges};
-        vb->edges = new Edge{va, weight, vb->edges};
+        if (findEdge(va, vb) != nullptr || findEdge(vb, va) != nullptr) return false;
+        va->edges = new Edge{vb, weight, open, va->edges};
+        vb->edges = new Edge{va, weight, open, vb->edges};
         edgeCount_ += 2;
         return true;
     }
 
-    // Hapus koridor a—b (mis. event "koridor runtuh").
+    // Tambah jalan SATU arah a->b.
+    bool addArc(int a, int b, int weight, bool open = true) {
+        if (a == b) return false;
+        Vertex* va = findVertex(a);
+        Vertex* vb = findVertex(b);
+        if (va == nullptr || vb == nullptr) return false;
+        if (findEdge(va, vb) != nullptr) return false;
+        va->edges = new Edge{vb, weight, open, va->edges};
+        edgeCount_ += 1;
+        return true;
+    }
+
+    // Ubah status buka/kunci edge a->b (dan b->a bila ada). Dipakai saat
+    // pemain membuka jalan pintas.
+    bool setOpen(int a, int b, bool open) {
+        Vertex* va = findVertex(a);
+        Vertex* vb = findVertex(b);
+        if (va == nullptr || vb == nullptr) return false;
+        bool any = false;
+        if (Edge* e = findEdge(va, vb)) { e->open = open; any = true; }
+        if (Edge* e = findEdge(vb, va)) { e->open = open; any = true; }
+        return any;
+    }
+
+    // true jika edge a->b ada DAN terbuka.
+    bool isOpen(int a, int b) const {
+        Vertex* va = findVertex(a);
+        Vertex* vb = findVertex(b);
+        if (va == nullptr || vb == nullptr) return false;
+        Edge* e = findEdge(va, vb);
+        return e != nullptr && e->open;
+    }
+
+    // Hapus jalan a—b (mis. jembatan runtuh).
     bool removeEdge(int a, int b) {
         Vertex* va = findVertex(a);
         Vertex* vb = findVertex(b);
         if (va == nullptr || vb == nullptr) return false;
         bool r1 = removeDirected(va, vb);
         bool r2 = removeDirected(vb, va);
-        return r1 && r2;
+        return r1 || r2;
     }
 
     bool hasEdge(int a, int b) const {
@@ -137,7 +174,7 @@ public:
         return va != nullptr && vb != nullptr && findEdge(va, vb) != nullptr;
     }
 
-    // Bobot koridor a—b, atau -1 jika tidak ada.
+    // Bobot jalan a—b, atau -1 jika tidak ada.
     int edgeWeight(int a, int b) const {
         Vertex* va = findVertex(a);
         Vertex* vb = findVertex(b);
@@ -156,13 +193,21 @@ public:
         for (Edge* e = v->edges; e != nullptr; e = e->next) fn(e->to, e->weight);
     }
 
+    // Kunjungi semua edge keluar dari vertex id. fn(Edge*)
+    template <typename Fn>
+    void forEachEdge(int id, Fn fn) const {
+        Vertex* v = findVertex(id);
+        if (v == nullptr) return;
+        for (Edge* e = v->edges; e != nullptr; e = e->next) fn(e);
+    }
+
     template <typename Fn>
     void forEachVertex(Fn fn) const {
         for (Vertex* v = vertices_; v != nullptr; v = v->next) fn(v);
     }
 
     // Breadth-First Search dari start sampai kedalaman maxDepth (jumlah
-    // koridor, bukan bobot). fn(Vertex*, int depth) dipanggil untuk setiap
+    // jalan, bukan bobot). fn(Vertex*, int depth) dipanggil untuk setiap
     // vertex yang terjangkau, termasuk start (depth 0).
     // maxDepth < 0 berarti tanpa batas. Mengembalikan jumlah vertex dikunjungi.
     template <typename Fn>
@@ -183,7 +228,7 @@ public:
             ++count;
             if (maxDepth >= 0 && v->dist >= maxDepth) continue;
             for (Edge* e = v->edges; e != nullptr; e = e->next) {
-                if (!e->to->visited) {
+                if (e->open && !e->to->visited) {
                     e->to->visited = true;
                     e->to->dist = v->dist + 1;
                     e->to->parent = v;
@@ -206,14 +251,14 @@ public:
     // rekonstruksi berjalan mundur via parent, di-push ke Stack, lalu
     // pemanggil cukup pop untuk mendapat urutan maju.
     // Mengembalikan total bobot, atau -1 jika tidak terjangkau.
-    // Kompleksitas O(V^2) — cukup untuk dungeon ±20 ruangan, tanpa
+    // Kompleksitas O(V^2) — cukup untuk dunia ±20 peta, tanpa
     // priority queue siap pakai.
     int dijkstra(int startId, int targetId, Stack<int>& pathOut) {
         return dijkstra(startId, targetId, pathOut, [](Vertex*) { return true; });
     }
 
     // Versi dengan filter: hanya vertex yang lolos `passable(Vertex*)` boleh
-    // dilalui (mis. hanya ruangan yang sudah terungkap). Start selalu boleh.
+    // dilalui (mis. hanya peta yang sudah dikunjungi). Start selalu boleh.
     template <typename Pass>
     int dijkstra(int startId, int targetId, Stack<int>& pathOut, Pass passable) {
         pathOut.clear();
@@ -234,7 +279,7 @@ public:
             // relaksasi edge
             for (Edge* e = u->edges; e != nullptr; e = e->next) {
                 Vertex* w = e->to;
-                if (!passable(w)) continue;
+                if (!e->open || !passable(w)) continue;
                 if (!w->visited && u->dist + e->weight < w->dist) {
                     w->dist = u->dist + e->weight;
                     w->parent = u;
@@ -250,7 +295,8 @@ public:
     // ------------------------------------------------------------------ info
 
     std::size_t vertexCount() const { return vertexCount_; }
-    std::size_t edgeCount()   const { return edgeCount_ / 2; }   // koridor
+    std::size_t edgeCount()   const { return edgeCount_ / 2; }   // jalan dua arah
+    std::size_t arcCount()    const { return edgeCount_; }       // edge berarah
     std::size_t degree(int id) const {
         std::size_t d = 0;
         forEachNeighbor(id, [&d](Vertex*, int) { ++d; });
@@ -276,7 +322,7 @@ public:
 private:
     Vertex*     vertices_;
     std::size_t vertexCount_;
-    std::size_t edgeCount_;   // jumlah edge berarah (2 × koridor)
+    std::size_t edgeCount_;   // jumlah edge berarah
 
     Edge* findEdge(Vertex* from, Vertex* to) const {
         for (Edge* e = from->edges; e != nullptr; e = e->next)

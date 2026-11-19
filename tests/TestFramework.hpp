@@ -15,5 +15,4 @@ inline int g_fail = 0;
 #define SECTION(name) std::printf("[%s]\n", name)
 
 void runAdtTests();
-void runBattleTests();
-void runDungeonTests();
+void runWorldTests();

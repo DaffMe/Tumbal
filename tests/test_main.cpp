@@ -3,8 +3,7 @@
 
 int main() {
     runAdtTests();
-    runBattleTests();
-    runDungeonTests();
+    runWorldTests();
     std::printf("\n%d lulus, %d gagal\n", g_pass, g_fail);
     return g_fail == 0 ? 0 : 1;
 }
