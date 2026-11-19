@@ -150,12 +150,70 @@ def build_tiles():
     shutil.copy(os.path.join(SEV, 'bamboo.png'), os.path.join(TILES, 'bamboo.png'))
     for out, (src, frames) in autos.items():
         autotile.bake(os.path.join(SEV, src), os.path.join(TILES, out), frames)
+    # varian warna per wilayah: rumput rawa keruh kecokelatan, sarang Buto pucat-sakit
+    tinted = {
+        'auto_rumput_rawa.png': ('dschungel-gras.png', (0.92, 0.82, 0.52), 0.45),
+        'auto_hutan_rawa.png': ('jungle-foliage-ground1.png', (0.85, 0.8, 0.55), 0.4),
+        'auto_rumput_sarang.png': ('dschungel-gras.png', (0.8, 0.78, 0.5), 0.6),
+        'auto_hutan_sarang.png': ('jungle-foliage-ground1.png', (0.7, 0.7, 0.48), 0.55),
+        'auto_tanah_rawa.png': ('dschungel-gras-b.png', (0.85, 0.78, 0.6), 0.4),
+    }
+    for out, (src, mul, desat) in tinted.items():
+        tmp = os.path.join(TILES, '_tint.png')
+        _tint_water(Image.open(os.path.join(SEV, src)).convert('RGBA'), mul, desat).save(tmp)
+        autotile.bake(tmp, os.path.join(TILES, out), 1)
+        os.remove(tmp)
+    texture_canopy()
+    build_decor_tiles()
 
 
-if __name__ == '__main__':
-    build_characters()
-    build_tiles()
-    print('aset selesai:', sorted(os.listdir(CHARS)), len(os.listdir(TILES)), 'tileset')
+def texture_canopy():
+    """Kanopi bambu aslinya hijau polos di bagian dalam: beri tekstur daun (dari autotile semak2)
+    agar massa hutan bambu tidak terlihat datar. Alpha kanopi asli dipertahankan."""
+    full = autotile.index_for(0xFF)
+    leaf = Image.open(os.path.join(TILES, 'auto_semak2.png')).convert('RGBA')
+    lt = leaf.crop(((full % 8) * 32, (full // 8) * 32, (full % 8 + 1) * 32, (full // 8 + 1) * 32))
+    path = os.path.join(TILES, 'auto_bambu_atas.png')
+    can = Image.open(path).convert('RGBA')
+    tex = Image.new('RGBA', can.size)
+    for y in range(0, can.height, 32):
+        for x in range(0, can.width, 32):
+            tex.paste(lt.transpose(Image.FLIP_LEFT_RIGHT) if (x // 32 + y // 32) % 2 else lt, (x, y))
+    tinted = ImageChops.multiply(tex.convert('RGB'), Image.new('RGB', can.size, (200, 255, 190)))
+    mixed = Image.blend(can.convert('RGB'), tinted, 0.6).convert('RGBA')
+    mixed.putalpha(can.split()[3])
+    mixed.save(path)
+
+
+def build_decor_tiles():
+    """Tileset hiasan kecil 32x32 (rumput semanggi, daun gugur, jamur, tulang) untuk layer `hiasan`.
+    Digambar di bawah karakter dan tidak menghalangi; dipakai generator peta agar tanah tidak datar."""
+    swamp = Image.open(os.path.join(SEV, 'dead-swamp-v4.png')).convert('RGBA')
+    trunk = Image.open(os.path.join(SEV, 'tree-trunk-32x32swamp.png')).convert('RGBA')
+    trunk2 = Image.open(os.path.join(SEV, 'tree-trunk-32x32.png')).convert('RGBA')
+    dung = Image.open(os.path.join(SEV, 'evildungeon_0.png')).convert('RGBA')
+    # urutan = indeks tile (dipakai tools/make_maps.py: DEKOR_*)
+    pieces = [
+        trunk.crop((32, 128, 56, 144)), trunk.crop((80, 128, 128, 152)), trunk.crop((168, 126, 224, 160)),  # 0-2 semanggi
+        swamp.crop((130, 1604, 162, 1632)), swamp.crop((192, 1598, 222, 1616)), swamp.crop((162, 1614, 192, 1632)),  # 3-5 daun
+        swamp.crop((228, 1157, 254, 1172)),            # 6 tengkorak
+        dung.crop((0, 256, 32, 288)),                  # 7 tulang (tile dungeon 64)
+        swamp.crop((172, 1536, 192, 1570)),            # 8 ranting kering
+        trunk.crop((222, 800, 256, 830)), trunk.crop((222, 835, 256, 860)),  # 9-10 batu kecil
+    ]
+    sheet = Image.new('RGBA', (8 * 32, 2 * 32), (0, 0, 0, 0))
+    for i, p in enumerate(pieces):
+        box = p.getbbox()
+        if box:
+            p = p.crop(box)
+        if p.width > 32 or p.height > 32:
+            k = 32 / max(p.width, p.height)
+            p = p.resize((max(1, int(p.width * k)), max(1, int(p.height * k))), Image.NEAREST)
+        cx, cy = (i % 8) * 32, (i // 8) * 32
+        sheet.alpha_composite(_night(p, 0.85, 0.8), (cx + (32 - p.width) // 2, cy + 32 - p.height - 2))
+    sheet.save(os.path.join(TILES, 'dekor.png'))
+
+
 
 
 # ------------------------------------------------------------------ battle
@@ -328,7 +386,37 @@ def build_props():
     save_prop(_crop(swamp, (192, 227, 256, 350)), 'rak_bambu.png')
     save_prop(_night(_crop('bamboo.png', (160, 128, 224, 320)), 0.8), 'bambu_tinggi_a.png')
     save_prop(_night(_crop('bamboo.png', (200, 128, 256, 320)), 0.8), 'bambu_tinggi_b.png')
-    save_prop(_night(_crop('tree-trunk-32x32swamp.png', (70, 164, 256, 494)), 0.7), 'tunggul_rawa.png')
+    # tunggul rawa: di lembar sumber tunggul terpotong di tepi kanan (x=256); sisa kanannya ada
+    # 300 px lebih bawah di tepi kiri lembar. Dua potongan dijahit lalu serpihan tetangga dihapus.
+    trunk = Image.open(os.path.join(SRC, 'sevarihk', 'tree-trunk-32x32swamp.png')).convert('RGBA')
+    st = Image.new('RGBA', (400, 350), (0, 0, 0, 0))
+    st.alpha_composite(trunk.crop((60, 160, 256, 500)), (0, 0))
+    st.alpha_composite(trunk.crop((0, 530, 180, 800)), (196, 70))
+    clear = Image.new('RGBA', (1, 1), (0, 0, 0, 0))
+    for box in [(300, 55, 400, 102), (262, 55, 300, 74), (352, 272, 400, 312), (196, 330, 400, 350)]:
+        st.paste(clear.resize((box[2] - box[0], box[3] - box[1])), box[:2])
+    save_prop(_night(_trim(st), 0.7), 'tunggul_rawa.png')
+    # hiasan rawa/sarang dari Dead Swamp: gelagah, tiang tengkorak, pagar tali, ranting mati
+    # dermaga busuk Laut Garam: papan jalan Fisher's Hut disambung memanjang, ujung bertiang di laut
+    hut = 'mini-fishers-hut.png'
+    planks = _crop(hut, (90, 282, 156, 425))
+    legs = _crop(hut, (90, 425, 156, 462)).transpose(Image.FLIP_TOP_BOTTOM)
+    pier = Image.new('RGBA', (66, 7 * 32), (0, 0, 0, 0))
+    y = legs.height - 6
+    while y < pier.height:
+        pier.alpha_composite(planks, (0, y))
+        y += planks.height - 4
+    pier.alpha_composite(legs, (0, 0))
+    save_prop(_night(_hue_shift(pier, (0.8, 0.76, 0.72)), 0.72, 0.55), 'dermaga.png')
+    save_prop(_night(_crop(hut, (326, 122, 364, 176)), 0.75, 0.6), 'tong.png')
+    jemur = _crop(hut, (12, 495, 156, 566))
+    save_prop(_night(_trim(jemur), 0.75, 0.6), 'jemuran_jala.png')
+    save_prop(_night(_crop(swamp, (222, 1534, 256, 1600)), 0.8), 'gelagah.png')
+    save_prop(_night(_crop(swamp, (192, 1534, 222, 1600)), 0.8), 'gelagah_b.png')
+    save_prop(_night(_trim(_crop(swamp, (192, 1120, 229, 1216))), 0.8), 'tiang_tengkorak.png')
+    save_prop(_night(_trim(_crop(swamp, (0, 1160, 92, 1214))), 0.8), 'pagar_tali.png')
+    save_prop(_night(_trim(_crop(swamp, (124, 1530, 160, 1600))), 0.8), 'ranting_mati.png')
+    save_prop(_night(_trim(_crop(swamp, (0, 1534, 64, 1616))), 0.75), 'pohon_akar.png')
 
 
 # ------------------------------------------------------------------ aset Codex
@@ -445,6 +533,9 @@ def build_codex():
 
 
 if __name__ == '__main__':
+    build_characters()
+    build_tiles()
+    print('aset selesai:', sorted(os.listdir(CHARS)), len(os.listdir(TILES)), 'tileset')
     build_battle()
     build_props()
     print('komponen props ladang:', build_codex())

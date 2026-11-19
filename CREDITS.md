@@ -41,6 +41,13 @@ diproses (latar dibuang, grid piksel dikembalikan, diskalakan) oleh `tools/build
 Perubahan: autotile RPG Maker XP dibakar ulang menjadi lembar 47 tile (`tools/autotile.py`); sprite karakter
 dirakit dari beberapa lapisan dan diwarnai ulang.
 
+Turunan tambahan dari paket Sevarihk di atas (CC-BY 4.0, dibuat `tools/build_assets.py`):
+varian warna rumput/hutan/tanah untuk Rawa Terasi & Sarang Buto (`auto_*_rawa.png`, `auto_*_sarang.png`);
+tekstur daun pada kanopi bambu (dari Ground and Foliage Autotiles); tileset hiasan kecil `dekor.png`
+(semanggi & batu dari Tree Trunk, daun gugur/tengkorak/ranting dari Dead Swamp, tulang dari Evil Dungeon);
+props `gelagah`, `tiang_tengkorak`, `pagar_tali`, `ranting_mati`, `pohon_akar` (Dead Swamp); `dermaga`, `tong`,
+`jemuran_jala` (Fisher's Hut); `tunggul_rawa` dijahit dari dua potongan lembar Tree Trunk (swamp).
+
 ## Audio
 
 Musik (semua CC0, lisensi dicek di halaman OpenGameArt masing-masing):
