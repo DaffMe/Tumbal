@@ -1,0 +1,18 @@
+{
+  "start": {
+    "map": 1,
+    "spawn": "awal"
+  },
+  "maps": [
+    {
+      "id": 1,
+      "name": "Sel Tumbal",
+      "file": "sel_tumbal.tmj"
+    },
+    {
+      "id": 2,
+      "name": "Lorong Lumbung",
+      "file": "lorong_lumbung.tmj"
+    }
+  ]
+}
