@@ -121,7 +121,7 @@ def process_hero(src, dst):
     img = Image.open(src).convert("RGBA")
     img = crop_aspect(img, 3 / 4, top_bias=0.15)
     img = img.resize((480, 640), Image.LANCZOS)
-    arr = grade(to_np(img), gain=0.94, gamma=1.06)
+    arr = grade(to_np(img), gain=1.08, gamma=0.96)
     arr[..., 3] = 255
     to_img(arr).save(dst, optimize=True)
 
