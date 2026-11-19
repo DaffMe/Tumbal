@@ -1,11 +1,11 @@
 #include "MapView.hpp"
 
 #include <cmath>
+#include <utility>
 #include "rlgl.h"
 #include "Assets.hpp"
 
 static constexpr int TS = 32;
-static constexpr int FRAME_W = 64, FRAME_H = 74;
 
 void MapView::init(int viewW, int viewH) {
     viewW_ = viewW;
@@ -62,6 +62,8 @@ void MapView::drawLayers(const TileMap& map, bool above, long long ms) {
 
 void MapView::drawActor(const Actor& a, const char* sheet, float alpha) {
     Texture2D tex = Assets::get().texture(sheet);
+    if (tex.id == 0) return;
+    const int FRAME_W = tex.width / 4, FRAME_H = tex.height / 4;   // 4 frame x 4 arah
     float px = std::floor(a.drawX() * TS - cam_.x);
     float py = std::floor(a.drawY() * TS - cam_.y);
     // bayangan elips di kaki
@@ -157,7 +159,31 @@ void MapView::draw(const Field& field, double time, bool showCollision) {
     long long ms = static_cast<long long>(time * 1000.0);
     drawLayers(*m, false, ms);
     drawObjects(*m, time);
-    drawActor(field.player(), "assets/chars/tumbal.png");
+    // karakter diurut berdasarkan y agar yang di depan menutupi yang di belakang
+    int order[Field::MAX_ENEMIES + 1];
+    int n = 0;
+    for (int i = 0; i < field.enemyCount(); ++i)
+        if (field.enemy(i).alive) order[n++] = i;
+    order[n++] = -1;   // pemain
+    auto yOf = [&](int k) { return k < 0 ? field.player().drawY() : field.enemy(k).actor.drawY(); };
+    for (int i = 1; i < n; ++i)
+        for (int j = i; j > 0 && yOf(order[j - 1]) > yOf(order[j]); --j) std::swap(order[j], order[j - 1]);
+    for (int i = 0; i < n; ++i) {
+        if (order[i] < 0) { drawActor(field.player(), "assets/chars/tumbal.png"); continue; }
+        const FieldEnemy& e = field.enemy(order[i]);
+        drawActor(e.actor, e.walker.c_str(), e.cooldown > 0 ? 0.55f : 1.0f);
+    }
+    // tanda "!" saat musuh menyadari pemain
+    for (int i = 0; i < field.enemyCount(); ++i) {
+        const FieldEnemy& e = field.enemy(i);
+        if (!e.alive || e.alertFlash <= 0) continue;
+        float x = e.actor.drawX() * TS + TS / 2.0f - cam_.x, y = e.actor.drawY() * TS - cam_.y - 46;
+        float pop = e.alertFlash > 0.6f ? (0.8f - e.alertFlash) / 0.2f : 1.0f;
+        DrawRectangle(static_cast<int>(x - 6), static_cast<int>(y - 8 * pop), 12, static_cast<int>(16 * pop), Color{240, 230, 210, 255});
+        DrawRectangleLines(static_cast<int>(x - 6), static_cast<int>(y - 8 * pop), 12, static_cast<int>(16 * pop), Color{60, 20, 20, 255});
+        DrawRectangle(static_cast<int>(x - 1), static_cast<int>(y - 5 * pop), 3, static_cast<int>(7 * pop), Color{170, 30, 30, 255});
+        DrawRectangle(static_cast<int>(x - 1), static_cast<int>(y + 4 * pop), 3, 2, Color{170, 30, 30, 255});
+    }
     drawLayers(*m, true, ms);
     drawLighting(field, time);
     if (showCollision) {

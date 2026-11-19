@@ -5,16 +5,17 @@ JRPG turn-based bernuansa **cerita rakyat Nusantara versi kelam**, dibuat untuk
 (RPG Maker VX Ace): battle front-view ATB, loop Tungku/Sukma ala Souls, dan dunia top-down yang saling terhubung.
 Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**; GUI memakai **raylib** sebagai antarmuka saja.
 
-> Status: **v2 hari 1 — kerangka eksplorasi.** Peta Tiled, jalan 8 arah, perpindahan peta lewat Graph dunia,
-> kegelapan & cahaya Tungku, Inspector struktur data (F1), mode console.
+> Status: **v2 hari 2 — eksplorasi + battle.** Peta Tiled, jalan 8 arah, perpindahan peta lewat Graph dunia,
+> musuh terlihat yang mengejar, battle front-view ATB dengan antrean giliran, istirahat di Tungku,
+> Inspector struktur data (F1), mode console.
 > Rencana lengkap: [docs/PLAN_V2.md](docs/PLAN_V2.md) · Bedah sistem acuan: [docs/research/black-souls-1-analysis.md](docs/research/black-souls-1-analysis.md)
 
 ## Mekanik yang direplikasi (rencana)
 
 | Mekanik | Dari Black Souls 1 | Struktur data | Status |
 |---|---|---|---|
-| M1 Battle ATB mode *wait* + antrean giliran | skrip ATB (gauge AP, rapal, stun) | Doubly Linked List terurut (`Timeline`) | ADT siap, mekanik menyusul |
-| M2 Dunia saling terhubung & Tungku | hub + rantai peta, bonfire, warp, jalan pintas | Graph berarah (adjacency multi linked list) | **berjalan** (pindah peta, kunci jalan pintas, BFS Tungku) |
+| M1 Battle ATB mode *wait* + antrean giliran | skrip ATB (gauge AP, rapal, stun) | Doubly Linked List terurut (`Timeline`) + Queue `BattleEvent` | **berjalan** (gauge AP dari AGI, rapal & buyar rapal, tunda giliran, Elak/Tangkis, AI musuh, prediksi antrean) |
+| M2 Dunia saling terhubung & Tungku | hub + rantai peta, bonfire, warp, jalan pintas, musuh terlihat | Graph berarah (adjacency multi linked list) | **berjalan** (pindah peta, kunci jalan pintas, BFS Tungku, respawn musuh lewat traversal) |
 | M3 Interpreter event & dialog | perintah event RPG Maker | Stack (frame) + Queue (pesan) | menyusul |
 
 ## Struktur data (semua manual, tanpa container STL di `src/core`)
@@ -43,7 +44,8 @@ mingw32-make run           # build + jalankan game (GUI)
 bin/tumbal.exe --console   # mode console (logika yang sama, tanpa GUI)
 ```
 
-Kontrol: panah/WASD jalan (8 arah), Shift lari, F1 Inspector struktur data, F3 tampilkan collision.
+Kontrol: panah/WASD jalan (8 arah), Shift lari, Z/Enter aksi & konfirmasi (istirahat di Tungku), X/Esc batal,
+tahan Z saat battle untuk mempercepat animasi, F1 Inspector struktur data, F3 tampilkan collision.
 
 Membangun ulang aset dan peta (butuh Python + Pillow dari MSYS2):
 

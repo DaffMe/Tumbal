@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include "core/battle/BattleSystem.hpp"
 #include "core/util/DsTrace.hpp"
 #include "core/world/Field.hpp"
 
@@ -41,11 +42,100 @@ void printView(const Field& f) {
                 else if (o->type == "loot") c = '*';
                 else if (o->type == "tungku") c = 'T';
             }
+            if (f.enemyAt(x, y) >= 0) c = 'M';
             if (x == p.x && y == p.y) c = '@';
             std::putchar(c);
         }
         std::putchar('\n');
     }
+}
+
+// ------------------------------------------------------------------ battle
+
+void printEvents(BattleSystem& bs) {
+    BattleEvent e;
+    while (bs.events().dequeue(e)) {
+        const char* dn = (e.dst >= 0) ? bs.battler(e.dst).name.c_str() : "";
+        if (e.kind == BattleEvent::TurnStart) continue;
+        if (e.kind == BattleEvent::Damage) {
+            if (!e.text.empty()) std::printf("  %s (-%d)\n", e.text.c_str(), e.value);
+            else std::printf("  %s menerima %d damage%s\n", dn, e.value, e.critical ? " (KRITIS!)" : "");
+        } else if (e.kind == BattleEvent::Heal) {
+            std::printf("  %s pulih %d HP\n", dn, e.value);
+        } else if (e.kind == BattleEvent::StatusRemove) {
+            std::printf("  %s: %s hilang\n", dn, statusDef(e.status).name);
+        } else if (!e.text.empty()) {
+            std::printf("  %s\n", e.text.c_str());
+        }
+    }
+}
+
+void printBattle(BattleSystem& bs) {
+    std::printf("\n");
+    for (int i = 0; i < bs.count(); ++i) {
+        const Battler& b = bs.battler(i);
+        if (!b.alive()) {
+            std::printf("  [%d] %-18s (tumbang)\n", i, b.name.c_str());
+            continue;
+        }
+        int bar = static_cast<int>(bs.gauge(i) * 10);
+        std::printf("  [%d] %-18s HP %4d/%-4d MP %3d  %s[%-10.*s]", i, b.name.c_str(), b.hp, b.stats.mhp, b.mp,
+                    b.chanting ? "RAPAL" : "AP   ", bar, "##########");
+        for (int s = 1; s < ST_COUNT; ++s)
+            if (b.status[s] > 0) std::printf(" %s", statusDef(s).shortName);
+        std::printf("\n");
+    }
+    int order[8];
+    int n = bs.predictTurns(order, 8);
+    std::printf("  Antrean giliran (Timeline DLL):");
+    for (int i = 0; i < n; ++i) std::printf(" %s%s", i ? "-> " : "", bs.battler(order[i]).name.c_str());
+    std::printf("\n");
+}
+
+// Battle teks. Mengembalikan fase akhir; HP/MP pemain disalin balik ke `hero`.
+BattleSystem::Phase consoleBattle(Battler& hero, int troopId, Initiative init, int* sukmaOut) {
+    BattleSystem bs;
+    bs.setup(&hero, 1, troopId, init, 12345u + static_cast<unsigned>(troopId) * 77u);
+    std::printf("\n=== BATTLE: %s ===\n", troopDef(troopId) ? troopDef(troopId)->name : "?");
+    printEvents(bs);
+    std::string line;
+    while (!bs.over()) {
+        int who = bs.advanceToNextActor();
+        printEvents(bs);
+        if (bs.over() || who < 0 || bs.phase() != BattleSystem::Input) continue;
+        Battler& me = bs.battler(who);
+        printBattle(bs);
+        std::printf("Giliran %s. Jurus:", me.name.c_str());
+        for (int i = 0; i < me.skillCount; ++i) {
+            const SkillDef* s = skillDef(me.skills[i]);
+            std::printf("  %d=%s(%dMP)%s", i + 1, s->name, s->mpCost, bs.canUse(who, s->id) ? "" : "x");
+        }
+        std::printf("  b=Bertahan k=Kabur\n  pilih [jurus target]: ");
+        if (!std::getline(std::cin, line)) return BattleSystem::Escaped;
+        if (line == "k") {
+            bs.tryEscape();
+            printEvents(bs);
+            continue;
+        }
+        BattleAction a;
+        if (line == "b") {
+            a.skill = SKL_BERTAHAN;
+        } else {
+            int k = 1, t = -1;
+            std::sscanf(line.c_str(), "%d %d", &k, &t);
+            if (k < 1 || k > me.skillCount) k = 1;
+            a.skill = me.skills[k - 1];
+            a.target = t;
+        }
+        if (!bs.validTarget(who, a.skill, a.target)) a.target = bs.firstTarget(who, a.skill);
+        if (!bs.submit(a)) std::printf("  (aksi tidak valid)\n");
+        printEvents(bs);
+    }
+    hero.hp = bs.battler(0).hp;
+    hero.mp = bs.battler(0).mp;
+    for (int s = 1; s < ST_COUNT; ++s) hero.status[s] = statusDef(s).battleOnly ? 0 : bs.battler(0).status[s];
+    if (sukmaOut) *sukmaOut = bs.sukmaReward();
+    return bs.phase();
 }
 
 }  // namespace
@@ -60,13 +150,16 @@ int runConsole() {
     }
     Field field(world);
     field.enterAtSpawn(world.startMap(), world.startSpawn());
-    std::printf("\nTUMBAL — mode console\n"
+    Battler hero = makeHeroBattler("Tumbal", KL_PENDEKAR, 1);
+    int sukma = 0;
+    std::printf("\nTUMBAL - mode console\n"
                 "Perintah: w/a/s/d (+angka langkah, mis. 'd 5'), q/e/z/c = diagonal,\n"
-                "          graph, tungku, buka <a> <b>, lihat, keluar\n");
+                "          graph, tungku, buka <a> <b>, lihat, battle <troop 1-5>, keluar\n"
+                "Peta: @ kamu, M musuh, * barang, T Tungku, D pintu\n");
     printView(field);
 
     std::string line;
-    while (std::printf("\n> "), std::getline(std::cin, line)) {
+    while (std::printf("\n[HP %d/%d  Sukma %d] > ", hero.hp, hero.stats.mhp, sukma), std::getline(std::cin, line)) {
         if (line.empty()) continue;
         std::string cmd = line.substr(0, line.find(' '));
         if (cmd == "keluar" || cmd == "x") break;
@@ -82,6 +175,15 @@ int runConsole() {
             if (std::sscanf(line.c_str(), "buka %d %d", &a, &b) == 2) world.unlockShortcut(a, b);
             continue;
         }
+        if (cmd == "battle") {
+            int t = 1;
+            std::sscanf(line.c_str(), "battle %d", &t);
+            int got = 0;
+            BattleSystem::Phase r = consoleBattle(hero, t, INIT_NORMAL, &got);
+            if (r == BattleSystem::Victory) sukma += got;
+            if (r == BattleSystem::Defeat) { hero.hp = hero.stats.mhp; std::printf("(kamu bangkit kembali)\n"); }
+            continue;
+        }
         int dx = 0, dy = 0;
         if (cmd == "w") dy = -1; else if (cmd == "s") dy = 1;
         else if (cmd == "a") dx = -1; else if (cmd == "d") dx = 1;
@@ -91,7 +193,7 @@ int runConsole() {
         int steps = 1;
         std::sscanf(line.c_str() + cmd.size(), "%d", &steps);
         for (int i = 0; i < steps; ++i) {
-            // simulasikan satu langkah penuh: tekan arah lalu jalankan waktu sampai tiba
+            // satu langkah penuh: tekan arah lalu jalankan waktu sampai tiba
             FieldEvent ev = field.update(0.0f, dx, dy, false);
             for (int k = 0; k < 60 && field.player().moving && ev.kind == FieldEvent::None; ++k)
                 ev = field.update(1.0f / 30.0f, 0, 0, false);
@@ -101,6 +203,16 @@ int runConsole() {
                 break;
             }
             if (ev.kind == FieldEvent::LockedDoor) { std::printf("Terkunci dari sisi lain.\n"); break; }
+            if (ev.kind == FieldEvent::Encounter) {
+                static const char* initName[] = {"", " (kamu menyerang dari belakang)", " (kamu disergap!)"};
+                std::printf("-- bertemu musuh%s --\n", initName[ev.initiative]);
+                int got = 0;
+                BattleSystem::Phase r = consoleBattle(hero, ev.troop, static_cast<Initiative>(ev.initiative), &got);
+                field.resolveEncounter(ev.enemyIndex, r == BattleSystem::Victory);
+                if (r == BattleSystem::Victory) sukma += got;
+                if (r == BattleSystem::Defeat) { hero.hp = hero.stats.mhp; std::printf("(kamu bangkit kembali)\n"); }
+                break;
+            }
         }
         printView(field);
     }

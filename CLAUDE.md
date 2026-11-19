@@ -36,7 +36,7 @@ bin/tumbal.exe --shots     # screenshot otomatis beberapa scene (shot_*.png)
 ```
 
 Toolchain: MSYS2 UCRT64 (g++, raylib 6 dari pacman, Python + Pillow). Makefile jalan dari bash maupun PowerShell.
-GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari.
+GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari, Z = aksi/konfirmasi, X = batal.
 
 ## Konvensi kode
 
@@ -48,7 +48,12 @@ GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari.
 - Kompilasi tanpa warning (`-Wall -Wextra -Wpedantic`).
 - raylib `DrawTriangle` butuh urutan counter-clockwise di layar (atas, kiri-bawah, kanan-bawah).
 - raylib tidak mendukung `BeginTextureMode` bersarang: siapkan render-texture lain (mis. lightmap) sebelum layar utama.
-- Resolusi logis 640x360, tile 32px, karakter Aurora 64x74 per frame (4 frame x 4 arah: bawah, kiri, kanan, atas).
+- Resolusi logis 640x360, tile 32px, sprite karakter = 4 frame x 4 arah (bawah, kiri, kanan, atas); ukuran frame
+  dihitung dari ukuran gambar / 4.
+- Font UI Jersey 10 (`src/gui/Ui.hpp`), selalu digambar di 10/20/30/40 px agar tajam. Jangan pakai nama warna yang
+  bentrok dengan makro raylib (GOLD, RED, ...); palet ada di namespace `ui`.
+- Data game (jurus, status, musuh, troop, kelas) ada di `src/core/data/GameData.cpp`; id troop juga dipakai
+  `tools/make_maps.py` (objek `enemy` dengan property `troop`, `walker`).
 
 ## Peta & aset
 
