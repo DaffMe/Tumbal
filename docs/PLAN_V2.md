@@ -1,6 +1,6 @@
 # Rencana v2 — TUMBAL
 
-> Status: **disetujui 2026-11-19; eksekusi berjalan** (hari 1 selesai). Disusun 2026-11-19 dari brainstorming dan
+> Status: **disetujui 2026-11-19; eksekusi berjalan** (demo lengkap 8 peta sampai tamat sudah dapat dimainkan; lihat docs/DEMO.md). Disusun 2026-11-19 dari brainstorming dan
 > [bedah sistem Black Souls 1](research/black-souls-1-analysis.md).
 > Judul game: **TUMBAL** (disepakati 2026-11-19).
 

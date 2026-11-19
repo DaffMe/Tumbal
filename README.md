@@ -5,14 +5,15 @@ JRPG turn-based bernuansa **cerita rakyat Nusantara versi kelam**, dibuat untuk
 (RPG Maker VX Ace): battle front-view ATB, loop Tungku/Sukma ala Souls, dan dunia top-down yang saling terhubung.
 Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**; GUI memakai **raylib** sebagai antarmuka saja.
 
-> Status: **v2 hari 5 — wilayah pertama tamat.** Ladang Timun Busuk dengan boss Memedi Sawah (rapal "Ritual Panen"
-> yang harus dibuyarkan), bekal pertama Biji Timun Mas. Sebelumnya hari 4: Menu Tungku (naik level dengan sukma, warp antar-Tungku lewat BFS),
-> peta Desa Karangtumbal sebagai hub dengan Mbok Srini. Sebelumnya: Peta Tiled, jalan 8 arah, perpindahan peta lewat Graph dunia,
-> musuh terlihat yang mengejar, battle front-view ATB dengan antrean giliran, dialog & pilihan lewat interpreter
-> event, barang (Ramuan Jamu dll.), istirahat di Tungku, sukma tercecer saat mati, Inspector (F1), mode console.
-> Rencana lengkap: [docs/PLAN_V2.md](docs/PLAN_V2.md) · Bedah sistem acuan: [docs/research/black-souls-1-analysis.md](docs/research/black-souls-1-analysis.md)
+> Status: **demo lengkap dapat dimainkan dari awal sampai tamat (±45–60 menit).** Delapan peta: Sel Tumbal →
+> Lorong Lumbung → Desa Karangtumbal (hub) → Ladang Timun Busuk (boss Memedi Sawah) → Hutan Bambu Jarum →
+> Laut Garam (Timun Mas bergabung) → Rawa Terasi → Sarang Buto (boss akhir Buto Ijo). Battle ATB dengan antrean
+> giliran, Tungku (naik level, warp BFS), sukma tercecer, pendamping, simpan/muat 3 slot, layar judul & tamat,
+> musik & efek suara, Inspector (F1), mode console.
+> Panduan uji & presentasi: [docs/DEMO.md](docs/DEMO.md) · Rencana: [docs/PLAN_V2.md](docs/PLAN_V2.md) ·
+> Bedah sistem acuan: [docs/research/black-souls-1-analysis.md](docs/research/black-souls-1-analysis.md)
 
-## Mekanik yang direplikasi (rencana)
+## Mekanik yang direplikasi
 
 | Mekanik | Dari Black Souls 1 | Struktur data | Status |
 |---|---|---|---|
@@ -48,6 +49,7 @@ bin/tumbal.exe --console   # mode console (logika yang sama, tanpa GUI)
 
 Kontrol: panah/WASD jalan (8 arah), Shift lari, Z/Enter aksi & konfirmasi (istirahat di Tungku), X/Esc batal,
 tahan Z saat battle untuk mempercepat animasi, F1 Inspector struktur data, F3 tampilkan collision.
+Simpan lewat menu (X → Simpan); kematian tidak menyimpan otomatis, jadi memuat ulang bisa membatalkannya (seperti BS1).
 
 Membangun ulang aset dan peta (butuh Python + Pillow dari MSYS2):
 
