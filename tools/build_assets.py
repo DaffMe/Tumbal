@@ -174,6 +174,11 @@ def build_battle():
     cut(os.path.join(RED, 'fossils3.PNG'), (171, 12, 219, 81), 2, 'tumbal_gagal.png')
     cut(os.path.join(RED, 'more_rpg_enemies.PNG'), (78, 19, 137, 110), 2, 'penjaga_lumbung.png')
     cut(os.path.join(RED, '9RPGenemies.PNG'), (108, 13, 157, 66), 2, 'belatung.png')
+    cut(os.path.join(RED, 'rpgcritters2.png'), (9, 52, 46, 86), 3, 'belalang_sangit.png')
+    # belalang: hijau terang -> hijau busuk kecokelatan agar sesuai palet ladang
+    bl = Image.open(os.path.join(BATTLERS, 'belalang_sangit.png')).convert('RGBA')
+    bl = _hue_shift(bl, (1.15, 0.78, 0.55))
+    bl.save(os.path.join(BATTLERS, 'belalang_sangit.png'))
     # tikus: frame samping charset Sevarihk, menghadap ke kiri (ke arah party)
     rat = Image.open(os.path.join(SEV, 'rat-charset-with-shadow.png')).convert('RGBA').crop((0, 58, 71, 116))
     rat.resize((142, 116), Image.NEAREST).save(os.path.join(BATTLERS, 'tikus_lumbung.png'))
@@ -277,8 +282,112 @@ def build_props():
     save_prop(_crop(swamp, (192, 227, 256, 350)), 'rak_bambu.png')
 
 
+# ------------------------------------------------------------------ aset Codex
+# Gambar dari Codex (assets/raw/codex) berlatar magenta #FF00FF dengan grid
+# piksel besar (mis. 8 px = 1 piksel seni). Diproses: latar -> transparan,
+# kembali ke grid asli (ambil tengah tiap sel), lalu diskalakan ke kepadatan
+# piksel yang sama dengan aset lain.
+CODEX = os.path.join(ROOT, 'assets', 'raw', 'codex')
+
+
+def _degrid(path, cell):
+    im = Image.open(path).convert('RGBA')
+    w, h = im.width // cell, im.height // cell
+    out = Image.new('RGBA', (w, h), (0, 0, 0, 0))
+    src = im.load()
+    dst = out.load()
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = src[x * cell + cell // 2, y * cell + cell // 2]
+            magenta = r > 180 and b > 180 and g < 110
+            dst[x, y] = (0, 0, 0, 0) if magenta or a < 20 else (r, g, b, 255)
+    return out
+
+
+def _trim(im):
+    box = im.getbbox()
+    return im.crop(box) if box else im
+
+
+def _components(im, gap=3):
+    """Kotak pembatas bagian-bagian yang terpisah (untuk lembar props)."""
+    w, h = im.size
+    a = im.split()[3].load()
+    seen = [[False] * h for _ in range(w)]
+    boxes = []
+    for sy in range(h):
+        for sx in range(w):
+            if seen[sx][sy] or a[sx, sy] == 0:
+                continue
+            stack = [(sx, sy)]
+            seen[sx][sy] = True
+            x0 = x1 = sx
+            y0 = y1 = sy
+            n = 0
+            while stack:
+                x, y = stack.pop()
+                n += 1
+                x0, x1, y0, y1 = min(x0, x), max(x1, x), min(y0, y), max(y1, y)
+                for dx in range(-gap, gap + 1):
+                    for dy in range(-gap, gap + 1):
+                        nx, ny = x + dx, y + dy
+                        if 0 <= nx < w and 0 <= ny < h and not seen[nx][ny] and a[nx, ny] > 0:
+                            seen[nx][ny] = True
+                            stack.append((nx, ny))
+            if n > 20:
+                boxes.append((x0, y0, x1 + 1, y1 + 1))
+    # dua baris (atas/bawah lembar), masing-masing urut kiri ke kanan
+    boxes.sort(key=lambda b: (0 if (b[1] + b[3]) / 2 < h / 2 else 1, b[0]))
+    return boxes
+
+
+def build_codex():
+    os.makedirs(BATTLERS, exist_ok=True)
+    os.makedirs(PROPS, exist_ok=True)
+    # battler: grid 8 -> 128 sel; diperkecil ke kepadatan battler Redshrike (1 sel = 2 px)
+    memedi = _trim(_degrid(os.path.join(CODEX, 'memedi_sawah.png'), 8))
+    m = memedi.resize((int(memedi.width * 0.75), int(memedi.height * 0.75)), Image.NEAREST)
+    m.resize((m.width * 2, m.height * 2), Image.NEAREST).save(os.path.join(BATTLERS, 'memedi_sawah.png'))
+    # Memedi berdiri diam di ladang (prop peta, kepadatan 1 sel = 1 px)
+    mp = memedi.resize((int(memedi.width * 0.62), int(memedi.height * 0.62)), Image.NEAREST)
+    save_prop(_night(mp, 0.85), 'memedi_peta.png')
+
+    timun = _trim(_degrid(os.path.join(CODEX, 'timun_busuk.png'), 8))
+    t = timun.resize((int(timun.width * 0.6), int(timun.height * 0.6)), Image.NEAREST)
+    t.resize((t.width * 2, t.height * 2), Image.NEAREST).save(os.path.join(BATTLERS, 'timun_busuk.png'))
+
+    # lembar props ladang: grid 4 -> 1 sel = 1 px, sudah seskala tile 32 px
+    sheet = _degrid(os.path.join(CODEX, 'ladang_props.png'), 4)
+    names = ['ajir.png', 'ajir_roboh.png', 'gubuk_sawah.png', 'timun_tumpuk.png', 'ember.png', 'cangkul.png',
+             'pagar_bambu.png']
+    boxes = _components(sheet)
+    for name, box in zip(names, boxes):
+        save_prop(_night(sheet.crop(box), 0.85), name)
+    # sprite peta musuh ladang: battler diperkecil, 4 frame x 4 arah (bergoyang tipis)
+    for src, out, size in [('belalang_sangit.png', 'belalang.png', 40), ('timun_busuk.png', 'timun_busuk.png', 44)]:
+        b = Image.open(os.path.join(BATTLERS, src)).convert('RGBA')
+        k = size / max(b.width, b.height)
+        small = b.resize((max(1, int(b.width * k)), max(1, int(b.height * k))), Image.NEAREST)
+        fw, fh = 64, 74
+        sheet = Image.new('RGBA', (fw * 4, fh * 4), (0, 0, 0, 0))
+        for row in range(4):
+            img = small.transpose(Image.FLIP_LEFT_RIGHT) if row == 2 else small
+            for col in range(4):
+                dy = 1 if col in (1, 3) else 0
+                sheet.alpha_composite(img, (fw // 2 - img.width // 2, fh - 6 - img.height + dy + (row * fh)), )
+                sheet.paste(sheet.crop((0, row * fh, fw, row * fh + fh)), (col * fw, row * fh)) if col else None
+        # isi kolom 1-3 dengan frame yang sama, kolom ganjil turun 1 px
+        base = sheet.crop((0, 0, fw, fh * 4))
+        final = Image.new('RGBA', sheet.size, (0, 0, 0, 0))
+        for col in range(4):
+            final.alpha_composite(base, (col * fw, 1 if col % 2 else 0))
+        final.save(os.path.join(CHARS, out))
+    return len(boxes)
+
+
 if __name__ == '__main__':
     build_battle()
     build_props()
+    print('komponen props ladang:', build_codex())
     print('battler:', sorted(os.listdir(BATTLERS)), 'battleback:', sorted(os.listdir(BACKS)))
     print('props:', sorted(os.listdir(PROPS)))

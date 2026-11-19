@@ -255,9 +255,10 @@ class MapBuilder:
 # ============================================================== PETA
 # id troop (sama dengan src/core/data/GameData.hpp)
 TR_TUMBAL_GAGAL, TR_TIKUS_2, TR_TUMBAL_TIKUS, TR_BELATUNG_3, TR_PENJAGA = 1, 2, 3, 4, 5
+TR_BELALANG_2, TR_TIMUN_BELALANG, TR_TIMUN_2, TR_MEMEDI = 6, 7, 8, 9
 
 # id peta (sama dengan world.json)
-SEL_TUMBAL, LORONG_LUMBUNG, DESA = 1, 2, 3
+SEL_TUMBAL, LORONG_LUMBUNG, DESA, LADANG = 1, 2, 3, 4
 
 
 def map_sel_tumbal():
@@ -383,7 +384,7 @@ def map_desa():
     g[16][23] = 'T'                           # Tungku alun-alun
     g[15][21] = 'B'                           # Mbok Srini
     g[17][32] = 'W'                           # warga di jalan timur
-    g[17][W - 4] = 'E'                        # ujung jalan ladang
+    g[17][W - 4] = 'E'                        # tiba dari ladang
     g[H - 4][22] = 'J'                        # ujung jalan selatan
     g[20][26] = 'L'; g[25][36] = 'L'; g[6][20] = 'L'
     g[24][28] = 'M'; g[9][35] = 'M'; g[27][10] = 'M'
@@ -399,7 +400,8 @@ def map_desa():
                                     walker='assets/chars/mbok_srini.png', dir=0), b.block(x, y)),
         'W': lambda b, x, y: (b.obj('npc', x, y, name='warga_lesung', event='warga_lesung',
                                     walker='assets/chars/warga_lelaki.png', dir=1), b.block(x, y)),
-        'E': lambda b, x, y: b.obj('event', x, y, name='jalan_ladang', event='jalan_ladang', trigger='touch', h=3),
+        'E': lambda b, x, y: (b.obj('spawn', x, y, name='dari_ladang', dir=1),
+                              [b.obj('door', W - 1, yy, to=LADANG, spawn='dari_desa') for yy in (16, 17, 18)]),
         'J': lambda b, x, y: b.obj('event', x, y, name='jalan_bambu', event='jalan_bambu', trigger='touch', w=3),
         'L': lambda b, x, y: b.obj('loot', x, y, item=loots.get((x, y), 'sukma_kecil')),
         'M': lambda b, x, y: b.obj('enemy', x, y, troop=TR_TUMBAL_TIKUS if x > 20 else TR_TUMBAL_GAGAL,
@@ -428,12 +430,93 @@ def map_desa():
     b.save('desa.tmj')
 
 
+def map_ladang():
+    W, H = 52, 36
+    g = [['"'] * W for _ in range(H)]
+
+    def fill(x0, y0, x1, y1, c):
+        for yy in range(y0, y1 + 1):
+            for xx in range(x0, x1 + 1):
+                if 0 <= xx < W and 0 <= yy < H:
+                    g[yy][xx] = c
+
+    fill(0, 0, W - 1, 2, '%'); fill(0, H - 3, W - 1, H - 1, '%')
+    fill(0, 0, 2, H - 1, '%'); fill(W - 3, 0, W - 1, H - 1, '%')
+    fill(0, 16, 2, 18, '"')                   # celah barat ke desa
+    fill(W - 3, 8, W - 1, 10, '"')            # celah timur (hutan bambu, belum dibuka)
+    # petak ladang (tanah digarap)
+    fill(6, 5, 18, 13, '.'); fill(22, 5, 30, 13, '.')
+    fill(6, 24, 18, 31, '.'); fill(22, 24, 34, 31, '.')
+    # parit lumpur memanjang dengan satu jembatan tanah
+    fill(5, 20, 44, 21, '~'); fill(24, 20, 26, 21, '"')
+    # lapangan Memedi
+    fill(34, 6, 46, 16, '.')
+    fill(46, 8, W - 1, 10, '.')
+    # semak liar
+    fill(40, 25, 45, 28, '&'); fill(19, 14, 21, 16, '&')
+
+    g[17][3] = 'S'                            # tiba dari desa
+    g[27][20] = 'T'                           # Tungku di gubuk sawah
+    g[9][W - 4] = 'E'                         # ujung timur
+    g[16][10] = 'M'; g[9][26] = 'M'; g[28][12] = 'M'; g[27][30] = 'M'; g[17][36] = 'M'
+    g[11][14] = 'K'                           # petani mati (loot + cerita)
+    g[30][28] = 'L'; g[7][8] = 'L'; g[25][44] = 'L'
+    rows = [''.join(r) for r in g]
+
+    b = MapBuilder('Ladang Timun Busuk', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'tabrak'])
+    b.props.update(nama='Ladang Timun Busuk', musik='ladang', gelap=0.58, battleback='assets/battlebacks/hutan.png')
+    troops = {(10, 16): TR_BELALANG_2, (26, 9): TR_TIMUN_BELALANG, (12, 28): TR_TIMUN_2,
+              (30, 27): TR_BELALANG_2, (36, 17): TR_TIMUN_BELALANG}
+    walkers = {TR_BELALANG_2: 'assets/chars/belalang.png', TR_TIMUN_2: 'assets/chars/timun_busuk.png',
+               TR_TIMUN_BELALANG: 'assets/chars/timun_busuk.png'}
+    loots = {(28, 30): 'jamu', (8, 7): 'sukma_kecil', (44, 25): 'bom_minyak'}
+    marks = {
+        'S': lambda b, x, y: (b.obj('spawn', x, y, name='dari_desa', dir=2),
+                              b.obj('event', 0, 0, name='ladang_masuk', event='ladang_masuk', trigger='auto',
+                                    once='ladang_masuk'),
+                              [b.obj('door', 0, yy, to=DESA, spawn='dari_ladang') for yy in (16, 17, 18)]),
+        'T': lambda b, x, y: (b.obj('tungku', x, y, name='tungku_ladang'), b.block(x, y)),
+        'E': lambda b, x, y: b.obj('event', x, y - 1, name='ujung_ladang', event='ujung_ladang', trigger='touch', h=3),
+        'M': lambda b, x, y: b.obj('enemy', x, y, troop=troops.get((x, y), TR_BELALANG_2),
+                                   walker=walkers.get(troops.get((x, y), TR_BELALANG_2)), dir=0),
+        'K': lambda b, x, y: b.obj('loot', x, y, event='orang_mati_ladang'),
+        'L': lambda b, x, y: b.obj('loot', x, y, item=loots.get((x, y), 'sukma_kecil')),
+    }
+    b.build_outdoor(marks)
+
+    # ajir timun berbaris di petak ladang (tapak 1 tile di kaki tiap ajir)
+    for (x0, y0, x1, y1) in [(6, 5, 18, 13), (22, 5, 30, 13), (6, 24, 18, 31), (22, 24, 34, 31)]:
+        for yy in range(y0 + 3, y1 + 1, 4):
+            for xx in range(x0, x1 - 1, 3):
+                if (xx, yy) in [(9, 8), (24, 12), (12, 31), (31, 27)]:
+                    b.prop('ajir_roboh.png', xx, yy, foot=(0, 3, 1))
+                else:
+                    b.prop('ajir.png', xx, yy, foot=(0, 2, 1))
+    b.prop('gubuk_sawah.png', 16, 27, foot=(0, 4, 2))
+    b.prop('memedi_peta.png', 39, 10, foot=(0, 0, 0), solid=False, name='memedi')
+    b.objects[-1]['props']['hideIf'] = 'memedi_mati'
+    b.objects[-1]['props']['glow'] = 70
+    # pemicu: mendekati Memedi
+    b.obj('event', 37, 12, name='memedi', event='memedi_bangun', trigger='touch', w=5, once='memedi_mati')
+    b.block(40, 10); b.block(41, 10)
+    for (tx, ty, img) in [(27, 33, 'timun_tumpuk.png'), (19, 12, 'timun_tumpuk.png'), (33, 9, 'timun_tumpuk.png'),
+                          (21, 27, 'ember.png'), (22, 28, 'cangkul.png')]:
+        b.prop(img, tx, ty, solid=False)
+    b.prop('pagar_bambu.png', 31, 14, foot=(0, 3, 1))
+    b.prop('pagar_bambu.png', 43, 17, foot=(0, 3, 1))
+    b.prop('orang_orangan.png', 4, 12, foot=(1, 2, 1))
+    b.prop('pohon_mati_c.png', 46, 30, foot=(1, 1, 1))
+    b.prop('pohon_mati_a.png', 3, 28, foot=(1, 1, 1))
+    b.save('ladang.tmj')
+
+
 WORLD = {
     'start': {'map': SEL_TUMBAL, 'spawn': 'awal'},
     'maps': [
         {'id': SEL_TUMBAL, 'name': 'Sel Tumbal', 'file': 'sel_tumbal.tmj'},
         {'id': LORONG_LUMBUNG, 'name': 'Lorong Lumbung', 'file': 'lorong_lumbung.tmj'},
         {'id': DESA, 'name': 'Desa Karangtumbal', 'file': 'desa.tmj'},
+        {'id': LADANG, 'name': 'Ladang Timun Busuk', 'file': 'ladang.tmj'},
     ],
 }
 
@@ -443,6 +526,7 @@ if __name__ == '__main__':
     map_sel_tumbal()
     map_lorong_lumbung()
     map_desa()
+    map_ladang()
     with open(os.path.join(MAPS_DIR, 'world.json'), 'w', encoding='utf-8') as f:
         json.dump(WORLD, f, indent=2, ensure_ascii=False)
     print('peta selesai:', sorted(os.listdir(MAPS_DIR)))

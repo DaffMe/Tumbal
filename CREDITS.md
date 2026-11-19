@@ -19,7 +19,18 @@ Lisensi diperiksa di halaman aslinya pada 2026-11-19.
 | Aurora Character Generator (potongan sprite) | Sevarihk; generator oleh RedoxGames | https://redoxgames.itch.io/aurora-character-generator | CC-BY 4.0 | sprite karakter (dirakit & diwarnai ulang oleh `tools/build_assets.py`) |
 | 10 Basic RPG Enemies, 6 More RPG Enemies, More RPG Enemies, Fossil Undead | Stephen "Redshrike" Challener (beberapa sprite hasil edit dari karya Blarumyrran & LordNeo) | https://opengameart.org/users/redshrike | CC-BY 3.0 | battler musuh (dipotong & diperbesar) |
 | Backgrounds (battleback) | Nidhoggn | https://opengameart.org/content/backgrounds-3 | CC0 | battleback (digelapkan & diberi vinyet) |
-| Plant & Mushroom Enemies | NettySvit | https://opengameart.org/content/plant-and-mushroom-enemies-charset-and-battlers | CC0 | calon musuh ladang |
+
+## Aset buatan AI untuk proyek ini
+
+Dibuat dengan Codex (model gpt-6.2-astra, alat pembuat gambar OpenAI) khusus untuk TUMBAL karena tidak ada
+padanan gratisnya; prompt tersimpan di `assets/raw/codex/PROMPT_*.md`. Gambar mentah di `assets/raw/codex/`,
+diproses (latar dibuang, grid piksel dikembalikan, diskalakan) oleh `tools/build_assets.py`.
+
+| Aset | Dipakai di |
+|---|---|
+| Memedi Sawah (battler + sprite peta) | boss Ladang Timun Busuk |
+| Timun Busuk (battler) | musuh ladang |
+| Props ladang: ajir timun, ajir roboh, gubuk sawah, tumpukan timun, ember, cangkul, pagar bambu | peta ladang |
 
 ## Font
 

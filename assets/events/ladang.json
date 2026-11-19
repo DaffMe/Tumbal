@@ -1,0 +1,37 @@
+{
+  "ladang_masuk": [
+    {"cmd": "text", "who": "", "text": "Ladang timun terbentang sampai ke kegelapan. Batang-batangnya merambat di ajir bambu seperti urat."},
+    {"cmd": "text", "who": "", "text": "Buahnya terlalu besar. Sebagian merekah, dan dari dalamnya terdengar sesuatu bernapas."},
+    {"cmd": "flag", "name": "ladang_masuk", "value": 1}
+  ],
+
+  "orang_mati_ladang": [
+    {"cmd": "text", "who": "", "text": "Seorang petani duduk bersandar di ajir, caping menutupi wajahnya. Ia sudah lama berhenti bernapas."},
+    {"cmd": "text", "who": "", "text": "Di pangkuannya ada sabit berkarat dan secarik kain bertuliskan: \"Jangan panen sebelum ia bernyanyi. Kalau ia bernyanyi, pukul kepalanya.\""},
+    {"cmd": "item", "item": "bom_minyak", "n": 2}
+  ],
+
+  "memedi_bangun": [
+    {"cmd": "text", "who": "", "text": "Orang-orangan sawah itu tidak bergerak. Lalu labu keringnya berputar menghadapmu."},
+    {"cmd": "text", "who": "Memedi Sawah", "text": "...Tumbal lepas... dari lumbung... Ladang lapar... ladang selalu lapar..."},
+    {"cmd": "text", "who": "Memedi Sawah", "text": "Biji yang dilempar si gadis emas... AKU yang menjaganya. Kembalikan dagingmu ke tanah."},
+    {"cmd": "battle", "troop": 9},
+    {"cmd": "text", "who": "", "text": "Jerami terbakar habis. Di antara abunya, sesuatu berkilau keemasan."},
+    {"cmd": "text", "who": "", "text": "Sebutir biji timun, hangat seperti baru dipetik. Ia berdenyut pelan di telapak tanganmu."},
+    {"cmd": "item", "item": "biji_timun", "n": 1},
+    {"cmd": "item", "item": "sukma_sedang", "n": 1},
+    {"cmd": "flag", "name": "memedi_mati", "value": 1},
+    {"cmd": "notice", "text": "Bekal pertama: Biji Timun Mas"}
+  ],
+
+  "ujung_ladang": [
+    {"cmd": "if_flag", "name": "memedi_mati", "value": 1,
+      "then": [
+        {"cmd": "text", "who": "", "text": "Di balik ladang, bambu-bambu tumbuh rapat dan tajam. Hutan Bambu Jarum menunggu."},
+        {"cmd": "text", "who": "", "text": "(Akhir versi demo ini. Terima kasih sudah bermain.)"}
+      ],
+      "else": [
+        {"cmd": "text", "who": "", "text": "Jalan setapak tertutup sulur timun yang menggeliat. Sesuatu di tengah ladang menahannya."}
+      ]}
+  ]
+}
