@@ -5,6 +5,7 @@
 // ============================================================================
 
 #include <string>
+#include <vector>
 #include "raylib.h"
 
 namespace ui {
@@ -18,6 +19,9 @@ void text(const std::string& s, float x, float y, Color c = RAYWHITE, float size
 void textCentered(const std::string& s, float cx, float y, Color c = RAYWHITE, float size = 16);
 void textRight(const std::string& s, float rx, float y, Color c = RAYWHITE, float size = 16);
 float measure(const std::string& s, float size = 16);
+
+// Pecah teks menjadi baris selebar maksimal `width` piksel.
+std::vector<std::string> wrap(const std::string& s, float width, float size = 16);
 
 void window(Rectangle r, float alpha = 0.88f);
 void bar(Rectangle r, float fill, Color a, Color b, Color back = Color{20, 16, 22, 255});

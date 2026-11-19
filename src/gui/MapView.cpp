@@ -74,10 +74,24 @@ void MapView::drawActor(const Actor& a, const char* sheet, float alpha) {
     DrawTextureRec(tex, src, pos, Fade(WHITE, alpha));
 }
 
-void MapView::drawObjects(const TileMap& map, double time) {
+void MapView::drawObjects(const Field& field, double time, const Bloodstain* blood) {
+    const TileMap& map = *field.map();
+    // ceceran sukma: nyala hijau pucat berdenyut di lokasi kematian
+    if (blood != nullptr && blood->active && blood->map == field.mapId()) {
+        float cx = blood->x * TS + TS / 2.0f - cam_.x, cy = blood->y * TS + TS / 2.0f - cam_.y + 6;
+        float p = 0.5f + 0.5f * static_cast<float>(std::sin(time * 3.0));
+        DrawEllipse(static_cast<int>(cx), static_cast<int>(cy + 4), 10, 4, Fade(Color{60, 200, 140, 255}, 0.35f));
+        DrawCircleV({cx, cy - 2}, 4 + p * 2, Fade(Color{120, 255, 190, 255}, 0.35f));
+        DrawCircleV({cx, cy - 2}, 2.5f, Color{220, 255, 235, 255});
+        for (int k = 0; k < 3; ++k) {
+            float t = static_cast<float>(std::fmod(time * 0.8 + k * 0.33, 1.0));
+            DrawCircleV({cx + std::sin(k * 2.1f + t * 6) * 4, cy - 2 - t * 18}, 1.2f, Fade(Color{160, 255, 210, 255}, 1 - t));
+        }
+    }
     for (const MapObject* o = map.objects(); o != nullptr; o = o->next) {
         float cx = o->x + TS / 2.0f - cam_.x;
         float cy = o->y + TS / 2.0f - cam_.y;
+        if (o->type == "loot" && field.world().isCollected(field.mapId(), map.typeIndex(o))) continue;
         if (o->type == "loot") {
             // kilau barang: titik cahaya berdenyut seperti BS1
             float t = static_cast<float>(time * 3.0 + o->id);
@@ -102,7 +116,7 @@ void MapView::drawObjects(const TileMap& map, double time) {
     }
 }
 
-void MapView::prepareLighting(const Field& field, double time) {
+void MapView::prepareLighting(const Field& field, double time, const Bloodstain* blood) {
     const TileMap* m = field.map();
     float dark = std::stof(m->props().getString("gelap", "0.0"));
     lightReady_ = dark > 0.01f;
@@ -122,12 +136,14 @@ void MapView::prepareLighting(const Field& field, double time) {
     const Actor& p = field.player();
     float px = p.drawX() * TS + TS / 2.0f - cam_.x, py = p.drawY() * TS + TS / 2.0f - cam_.y;
     punch(px, py - 8, 120, 0.95f);
+    if (blood != nullptr && blood->active && blood->map == field.mapId())
+        punch(blood->x * TS + TS / 2.0f - cam_.x, blood->y * TS + TS / 2.0f - cam_.y, 40, 0.8f);
     for (const MapObject* o = m->objects(); o != nullptr; o = o->next) {
         float cx = o->x + TS / 2.0f - cam_.x, cy = o->y + TS / 2.0f - cam_.y;
         if (o->type == "tungku") {
             float fl = 1.0f + 0.06f * std::sin(static_cast<float>(time * 9.0)) + 0.04f * std::sin(static_cast<float>(time * 23.0));
             punch(cx, cy, 190 * fl, 1.0f);
-        } else if (o->type == "loot") {
+        } else if (o->type == "loot" && !field.world().isCollected(field.mapId(), m->typeIndex(o))) {
             punch(cx, cy + 6, 26, 0.6f);
         }
     }
@@ -153,22 +169,43 @@ void MapView::drawLighting(const Field& field, double time) {
     DrawTextureRec(lightmap_.texture, {0, 0, static_cast<float>(viewW_), -static_cast<float>(viewH_)}, {0, 0}, WHITE);
 }
 
-void MapView::draw(const Field& field, double time, bool showCollision) {
+void MapView::draw(const Field& field, double time, bool showCollision, const Bloodstain* blood) {
     const TileMap* m = field.map();
     if (m == nullptr) return;
     long long ms = static_cast<long long>(time * 1000.0);
     drawLayers(*m, false, ms);
-    drawObjects(*m, time);
+    drawObjects(field, time, blood);
     // karakter diurut berdasarkan y agar yang di depan menutupi yang di belakang
-    int order[Field::MAX_ENEMIES + 1];
+    int order[Field::MAX_ENEMIES + 1 + 16];
     int n = 0;
     for (int i = 0; i < field.enemyCount(); ++i)
         if (field.enemy(i).alive) order[n++] = i;
     order[n++] = -1;   // pemain
-    auto yOf = [&](int k) { return k < 0 ? field.player().drawY() : field.enemy(k).actor.drawY(); };
+    // NPC (objek "npc" dengan sprite) ikut diurut; disimpan sebagai -100 - urutan
+    const MapObject* npcs[16];
+    int npcCount = 0;
+    for (const MapObject* o = m->objects(); o != nullptr && npcCount < 16; o = o->next)
+        if (o->type == "npc" && !o->props.getString("walker").empty()) {
+            npcs[npcCount] = o;
+            order[n++] = -100 - npcCount;
+            ++npcCount;
+        }
+    auto yOf = [&](int k) {
+        if (k <= -100) return npcs[-100 - k]->y / TS;
+        return k < 0 ? field.player().drawY() : field.enemy(k).actor.drawY();
+    };
     for (int i = 1; i < n; ++i)
         for (int j = i; j > 0 && yOf(order[j - 1]) > yOf(order[j]); --j) std::swap(order[j], order[j - 1]);
     for (int i = 0; i < n; ++i) {
+        if (order[i] <= -100) {
+            const MapObject* o = npcs[-100 - order[i]];
+            Actor a;
+            a.x = static_cast<int>(o->x) / TS;
+            a.y = static_cast<int>(o->y) / TS;
+            a.facing = o->props.getInt("dir", 0);
+            drawActor(a, o->props.getString("walker").c_str());
+            continue;
+        }
         if (order[i] < 0) { drawActor(field.player(), "assets/chars/tumbal.png"); continue; }
         const FieldEnemy& e = field.enemy(order[i]);
         drawActor(e.actor, e.walker.c_str(), e.cooldown > 0 ? 0.55f : 1.0f);

@@ -15,8 +15,8 @@ static bool keyDown() { return IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S); }
 static bool keyLeft() { return IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A); }
 static bool keyRight() { return IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D); }
 
-static const char* COMMANDS[] = {"Serang", "Jurus", "Bertahan", "Kabur"};
-static constexpr int COMMAND_COUNT = 4;
+static const char* COMMANDS[] = {"Serang", "Jurus", "Bertahan", "Barang", "Kabur"};
+static constexpr int COMMAND_COUNT = 5;
 
 // ------------------------------------------------------------------ setup
 
@@ -196,8 +196,24 @@ void BattleView::openCommand() {
 }
 
 void BattleView::submit(int skill, int target) {
-    BattleAction a{skill, target};
+    BattleAction a{skill, target, 0};
     if (bs_->submit(a)) menu_ = MenuNone;
+}
+
+void BattleView::submitItem(int item, int target) {
+    BattleAction a{SKL_SERANG, target, item};
+    if (bs_->submit(a)) menu_ = MenuNone;
+}
+
+void BattleView::refreshItems() {
+    itemCount_ = 0;
+    const ItemBag* bag = bs_->inventory();
+    if (bag == nullptr) return;
+    for (int id = 1; id < IT_COUNT; ++id) {
+        const ItemDef* d = itemDef(id);
+        if (d && d->inBattle && bag->count(id) > 0) itemList_[itemCount_++] = id;
+    }
+    if (itemIndex_ >= itemCount_) itemIndex_ = 0;
 }
 
 void BattleView::handleInput() {
@@ -217,6 +233,9 @@ void BattleView::handleInput() {
                 if (skillCount_ > 0) menu_ = MenuSkill;
             } else if (cmdIndex_ == 2) {
                 submit(SKL_BERTAHAN, -1);
+            } else if (cmdIndex_ == 3) {
+                refreshItems();
+                if (itemCount_ > 0) menu_ = MenuItem;
             } else {
                 menu_ = MenuNone;
                 bs_->tryEscape();
@@ -242,16 +261,41 @@ void BattleView::handleInput() {
         }
         return;
     }
+    if (menu_ == MenuItem) {
+        if (keyUp()) itemIndex_ = (itemIndex_ + itemCount_ - 1) % itemCount_;
+        if (keyDown()) itemIndex_ = (itemIndex_ + 1) % itemCount_;
+        if (keyCancel()) menu_ = MenuCommand;
+        if (keyConfirm()) {
+            int it = itemList_[itemIndex_];
+            if (itemDef(it)->kind == IK_SERANG) {
+                pendingItem_ = it;
+                pendingSkill_ = 0;
+                menu_ = MenuTarget;
+                targetIndex_ = bs_->firstItemTarget(actor, it);
+            } else {
+                submitItem(it, bs_->firstItemTarget(actor, it));
+            }
+        }
+        return;
+    }
     if (menu_ == MenuTarget) {
         int dir = (keyLeft() || keyUp()) ? -1 : ((keyRight() || keyDown()) ? 1 : 0);
         if (dir != 0) {
             for (int k = 1; k <= bs_->count(); ++k) {
                 int t = (targetIndex_ + dir * k + bs_->count() * 4) % bs_->count();
-                if (bs_->validTarget(actor, pendingSkill_, t)) { targetIndex_ = t; break; }
+                bool ok = pendingSkill_ == 0 ? bs_->validItemTarget(actor, pendingItem_, t)
+                                             : bs_->validTarget(actor, pendingSkill_, t);
+                if (ok) { targetIndex_ = t; break; }
             }
         }
-        if (keyCancel()) menu_ = (pendingSkill_ == SKL_SERANG) ? MenuCommand : MenuSkill;
-        if (keyConfirm() && bs_->validTarget(actor, pendingSkill_, targetIndex_)) submit(pendingSkill_, targetIndex_);
+        if (keyCancel()) menu_ = pendingSkill_ == 0 ? MenuItem : (pendingSkill_ == SKL_SERANG ? MenuCommand : MenuSkill);
+        if (keyConfirm()) {
+            if (pendingSkill_ == 0) {
+                if (bs_->validItemTarget(actor, pendingItem_, targetIndex_)) submitItem(pendingItem_, targetIndex_);
+            } else if (bs_->validTarget(actor, pendingSkill_, targetIndex_)) {
+                submit(pendingSkill_, targetIndex_);
+            }
+        }
     }
 }
 
@@ -423,7 +467,7 @@ void BattleView::drawMenus(double time) {
     ui::window(cw);
     bool input = bs_->phase() == BattleSystem::Input && !playing_;
     for (int i = 0; i < COMMAND_COUNT; ++i) {
-        float y = cw.y + 8 + i * 20;
+        float y = cw.y + 6 + i * 17;
         bool sel = input && menu_ != MenuNone && i == cmdIndex_;
         ui::text(COMMANDS[i], cw.x + 20, y, input ? (sel ? ui::AMBER : ui::BONE) : ui::DIM);
         if (sel && menu_ == MenuCommand) ui::cursor(cw.x + 8, y + 8, time);
@@ -451,6 +495,21 @@ void BattleView::drawMenus(double time) {
         Rectangle hw{8, 6, 624, 22};
         ui::window(hw, 0.95f);
         ui::text(cur->desc, hw.x + 8, hw.y + 3, ui::BONE);
+    }
+    if (menu_ == MenuItem) {
+        Rectangle iw{132, 100, 376, static_cast<float>(26 + itemCount_ * 20)};
+        iw.y = BOTTOM_Y - iw.height - 4;
+        ui::window(iw, 0.94f);
+        for (int i = 0; i < itemCount_; ++i) {
+            const ItemDef* d = itemDef(itemList_[i]);
+            float y = iw.y + 10 + i * 20;
+            ui::text(d->name, iw.x + 22, y, i == itemIndex_ ? ui::AMBER : ui::BONE);
+            ui::textRight("x" + std::to_string(bs_->inventory()->count(itemList_[i])), iw.x + iw.width - 12, y, ui::BONE);
+            if (i == itemIndex_) ui::cursor(iw.x + 10, y + 8, time);
+        }
+        Rectangle hw{8, 6, 624, 22};
+        ui::window(hw, 0.95f);
+        ui::text(itemDef(itemList_[itemIndex_])->desc, hw.x + 8, hw.y + 3, ui::BONE);
     }
     if (menu_ == MenuTarget && targetIndex_ >= 0) {
         Vector2 a = popupAnchor(targetIndex_);
@@ -506,13 +565,13 @@ void BattleView::draw(double time) {
     else ClearBackground(Color{12, 10, 14, 255});
     drawEnemies(time);
     // log satu baris di atas (seperti BS1)
-    if (logTime_ > 0 && menu_ != MenuSkill) {
+    if (logTime_ > 0 && menu_ != MenuSkill && menu_ != MenuItem) {
         float a = std::fmin(1.0f, logTime_ / 0.3f);
         DrawRectangleGradientH(0, 6, 320, 22, Fade(BLACK, 0.0f), Fade(BLACK, 0.65f * a));
         DrawRectangleGradientH(320, 6, 320, 22, Fade(BLACK, 0.65f * a), Fade(BLACK, 0.0f));
         ui::textCentered(log_, 320, 9, Fade(ui::BONE, a));
     }
-    if (menu_ != MenuSkill) drawQueue();
+    if (menu_ != MenuSkill && menu_ != MenuItem) drawQueue();
     drawMenus(time);
     drawStatus(time);
     drawPopups();

@@ -60,6 +60,11 @@ GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari, Z = a
 - Peta = berkas Tiled JSON (`assets/maps/*.tmj`, tileset embedded) + `assets/maps/world.json` (daftar peta).
   Konvensi: layer `collision` (≠0 = terhalang), property layer `above` = digambar di atas karakter, objek bertipe
   `spawn`, `door` (`to`, `spawn`, `locked`, `oneway`), `tungku`, `loot`. Property peta `nama`, `gelap` (0..1).
+- Objek peta lain: `npc` (`event`, `walker`, `dir`, `once`, `after`), `event` (`event`, `trigger` = action/touch/auto,
+  `once` = flag yang menandai sudah terjadi), `loot` (`item` + `n`, atau `event`), `enemy` (`troop`, `walker`, `dir`).
+- Skrip event = JSON di `assets/events/*.json` (perintah: text, choice, item, sukma, flag, if_flag, if_item, battle,
+  call, heal, unlock, transfer, notice, end). Teks cerita ditulis orisinal; jangan menyalin teks Black Souls.
+- Logika permainan dirangkai di `src/core/game/Game` (dipakai GUI dan console). App/console hanya meneruskan input.
 - Peta saat ini dibuat oleh `tools/make_maps.py`. Peta yang disunting manual di Tiled harus dikeluarkan dari generator.
 - Aset utama: CC-BY 4.0 (Sevarihk/Aurora) & CC0 dari internet. **Setiap aset baru wajib dicatat di `CREDITS.md`**
   (pembuat, URL, lisensi). Hindari lisensi share-alike dan "no redistribution".

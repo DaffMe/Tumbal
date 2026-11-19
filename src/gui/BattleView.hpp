@@ -29,7 +29,7 @@ public:
     void debugOpenSkills();
 
 private:
-    enum Menu { MenuNone, MenuCommand, MenuSkill, MenuTarget };
+    enum Menu { MenuNone, MenuCommand, MenuSkill, MenuItem, MenuTarget };
     struct Popup {
         int    target = -1;
         std::string text;
@@ -46,6 +46,10 @@ private:
     int   pendingSkill_ = SKL_SERANG;
     int   skillList_[8] = {};
     int   skillCount_ = 0;
+    int   itemList_[IT_COUNT] = {};
+    int   itemCount_ = 0;
+    int   itemIndex_ = 0;
+    int   pendingItem_ = 0;
 
     bool        playing_ = false;
     BattleEvent cur_;
@@ -72,6 +76,8 @@ private:
     void openCommand();
     void handleInput();
     void submit(int skill, int target);
+    void submitItem(int item, int target);
+    void refreshItems();
     Vector2 popupAnchor(int i) const;
 
     void drawEnemies(double time);

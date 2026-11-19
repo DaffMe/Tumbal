@@ -4,20 +4,21 @@
 #include <iostream>
 #include <string>
 #include "core/battle/BattleSystem.hpp"
+#include "core/game/Game.hpp"
 #include "core/util/DsTrace.hpp"
-#include "core/world/Field.hpp"
 
 namespace {
 
-std::string findWorld() {
-    const char* candidates[] = {"assets/maps/world.json", "../assets/maps/world.json"};
+std::string findAssets() {
+    const char* candidates[] = {"assets/", "../assets/"};
     for (const char* c : candidates) {
-        if (std::FILE* f = std::fopen(c, "rb")) {
+        std::string p = std::string(c) + "maps/world.json";
+        if (std::FILE* f = std::fopen(p.c_str(), "rb")) {
             std::fclose(f);
             return c;
         }
     }
-    return "assets/maps/world.json";
+    return "assets/";
 }
 
 void printGraph(World& world, int current) {
@@ -30,7 +31,7 @@ void printGraph(World& world, int current) {
     });
 }
 
-void printView(const Field& f) {
+void printView(const Field& f, const Bloodstain* blood) {
     const TileMap* m = f.map();
     const Actor& p = f.player();
     std::printf("\n%s  (posisi %d,%d)\n", f.world().info(f.mapId())->name.c_str(), p.x, p.y);
@@ -39,10 +40,13 @@ void printView(const Field& f) {
             char c = m->blocked(x, y) ? '#' : '.';
             if (const MapObject* o = m->objectAt(x, y)) {
                 if (o->type == "door") c = 'D';
-                else if (o->type == "loot") c = '*';
+                else if (o->type == "loot" && !f.world().isCollected(f.mapId(), m->typeIndex(o))) c = '*';
                 else if (o->type == "tungku") c = 'T';
+                else if (o->type == "npc") c = 'N';
+                else if (o->type == "event" && o->props.getString("trigger", "action") == "action") c = '?';
             }
             if (f.enemyAt(x, y) >= 0) c = 'M';
+            if (blood && blood->active && blood->map == f.mapId() && blood->x == x && blood->y == y) c = '~';
             if (x == p.x && y == p.y) c = '@';
             std::putchar(c);
         }
@@ -92,11 +96,11 @@ void printBattle(BattleSystem& bs) {
     std::printf("\n");
 }
 
-// Battle teks. Mengembalikan fase akhir; HP/MP pemain disalin balik ke `hero`.
-BattleSystem::Phase consoleBattle(Battler& hero, int troopId, Initiative init, int* sukmaOut) {
+// Battle teks memakai BattleSystem yang disiapkan Game. Mengembalikan fase akhir.
+BattleSystem::Phase consoleBattle(Game& game) {
     BattleSystem bs;
-    bs.setup(&hero, 1, troopId, init, 12345u + static_cast<unsigned>(troopId) * 77u);
-    std::printf("\n=== BATTLE: %s ===\n", troopDef(troopId) ? troopDef(troopId)->name : "?");
+    game.setupBattle(bs, 12345u + static_cast<unsigned>(game.battleTroop()) * 77u);
+    std::printf("\n=== BATTLE: %s ===\n", troopDef(game.battleTroop()) ? troopDef(game.battleTroop())->name : "?");
     printEvents(bs);
     std::string line;
     while (!bs.over()) {
@@ -110,8 +114,8 @@ BattleSystem::Phase consoleBattle(Battler& hero, int troopId, Initiative init, i
             const SkillDef* s = skillDef(me.skills[i]);
             std::printf("  %d=%s(%dMP)%s", i + 1, s->name, s->mpCost, bs.canUse(who, s->id) ? "" : "x");
         }
-        std::printf("  b=Bertahan k=Kabur\n  pilih [jurus target]: ");
-        if (!std::getline(std::cin, line)) return BattleSystem::Escaped;
+        std::printf("\n  b=Bertahan  j=Ramuan Jamu(%d)  k=Kabur   pilih [jurus target]: ", game.state().count(IT_JAMU));
+        if (!std::getline(std::cin, line)) break;
         if (line == "k") {
             bs.tryEscape();
             printEvents(bs);
@@ -120,6 +124,9 @@ BattleSystem::Phase consoleBattle(Battler& hero, int troopId, Initiative init, i
         BattleAction a;
         if (line == "b") {
             a.skill = SKL_BERTAHAN;
+        } else if (line == "j") {
+            a.item = IT_JAMU;
+            a.target = who;
         } else {
             int k = 1, t = -1;
             std::sscanf(line.c_str(), "%d %d", &k, &t);
@@ -127,61 +134,113 @@ BattleSystem::Phase consoleBattle(Battler& hero, int troopId, Initiative init, i
             a.skill = me.skills[k - 1];
             a.target = t;
         }
-        if (!bs.validTarget(who, a.skill, a.target)) a.target = bs.firstTarget(who, a.skill);
+        if (a.item == 0 && !bs.validTarget(who, a.skill, a.target)) a.target = bs.firstTarget(who, a.skill);
         if (!bs.submit(a)) std::printf("  (aksi tidak valid)\n");
         printEvents(bs);
     }
-    hero.hp = bs.battler(0).hp;
-    hero.mp = bs.battler(0).mp;
-    for (int s = 1; s < ST_COUNT; ++s) hero.status[s] = statusDef(s).battleOnly ? 0 : bs.battler(0).status[s];
-    if (sukmaOut) *sukmaOut = bs.sukmaReward();
+    if (!bs.over()) bs.tryEscape();
+    game.endBattle(bs);
     return bs.phase();
+}
+
+// ------------------------------------------------------------------ dialog
+
+void consoleDialog(Game& game) {
+    Interpreter& it = game.interpreter();
+    std::string line;
+    while (game.inDialog()) {
+        if (it.state() == Interpreter::WaitMessage) {
+            if (!it.speaker().empty()) std::printf("\n  [%s]", it.speaker().c_str());
+            std::printf("\n  %s  (Enter)", it.message().c_str());
+            if (!std::getline(std::cin, line)) { it.abort(); return; }
+            it.resume();
+        } else {
+            for (int i = 0; i < it.optionCount(); ++i) std::printf("\n   %d) %s", i + 1, it.option(i).c_str());
+            std::printf("\n  pilih: ");
+            int k = 0;
+            if (!std::getline(std::cin, line)) { it.abort(); return; }
+            std::sscanf(line.c_str(), "%d", &k);
+            it.choose(k - 1);
+        }
+    }
+}
+
+void flushNotices(Game& game) {
+    std::string n;
+    while (game.popNotice(n)) std::printf("  >> %s\n", n.c_str());
+}
+
+// Tuntaskan permintaan Game setelah setiap langkah (dialog, battle, pindah peta).
+void settle(Game& game) {
+    for (int guard = 0; guard < 50; ++guard) {
+        flushNotices(game);
+        if (game.inDialog()) {
+            consoleDialog(game);
+            continue;
+        }
+        if (game.battlePending()) {
+            if (consoleBattle(game) == BattleSystem::Defeat) std::printf("\n  KAMU MATI. Sukmamu tercecer di tempat itu.\n");
+            continue;
+        }
+        if (game.transferPending()) {
+            game.finishTransfer();
+            std::printf("-- %s --\n", game.world().info(game.field().mapId())->name.c_str());
+            continue;
+        }
+        break;
+    }
+    flushNotices(game);
 }
 
 }  // namespace
 
 int runConsole() {
     DsTrace::instance().setEcho(true);
-    World world;
+    Game game;
     std::string err;
-    if (!world.load(findWorld(), &err)) {
+    std::string root = findAssets();
+    std::string events[] = {root + "events/lumbung.json"};
+    if (!game.load(root + "maps/world.json", events, 1, &err)) {
         std::printf("Gagal memuat dunia: %s\n", err.c_str());
         return 1;
     }
-    Field field(world);
-    field.enterAtSpawn(world.startMap(), world.startSpawn());
-    Battler hero = makeHeroBattler("Tumbal", KL_PENDEKAR, 1);
-    int sukma = 0;
+    game.newGame("Tumbal", KL_PENDEKAR);
     std::printf("\nTUMBAL - mode console\n"
-                "Perintah: w/a/s/d (+angka langkah, mis. 'd 5'), q/e/z/c = diagonal,\n"
-                "          graph, tungku, buka <a> <b>, lihat, battle <troop 1-5>, keluar\n"
-                "Peta: @ kamu, M musuh, * barang, T Tungku, D pintu\n");
-    printView(field);
+                "Perintah: w/a/s/d (+angka langkah, mis. 'd 5'), q/e/z/c = diagonal, x = periksa/bicara,\n"
+                "          jamu, graph, tungku, buka <a> <b>, lihat, keluar\n"
+                "Peta: @ kamu, M musuh, N orang, ? periksa, * barang, T Tungku, D pintu, ~ sukma tercecer\n");
+    settle(game);
+    printView(game.field(), &game.state().bloodstain());
 
     std::string line;
-    while (std::printf("\n[HP %d/%d  Sukma %d] > ", hero.hp, hero.stats.mhp, sukma), std::getline(std::cin, line)) {
+    while (std::printf("\n[HP %d/%d  Jamu %d  Sukma %d] > ", game.state().hero().hp, game.state().hero().stats.mhp,
+                       game.state().count(IT_JAMU), game.state().sukma()),
+           std::getline(std::cin, line)) {
         if (line.empty()) continue;
         std::string cmd = line.substr(0, line.find(' '));
-        if (cmd == "keluar" || cmd == "x") break;
-        if (cmd == "graph") { printGraph(world, field.mapId()); continue; }
-        if (cmd == "lihat") { printView(field); continue; }
+        if (cmd == "keluar") break;
+        if (cmd == "graph") { printGraph(game.world(), game.field().mapId()); continue; }
+        if (cmd == "lihat") { printView(game.field(), &game.state().bloodstain()); continue; }
         if (cmd == "tungku") {
-            int t = world.nearestTungku(field.mapId());
-            std::printf("Tungku terdekat yang sudah dikunjungi: %s\n", t ? world.info(t)->name.c_str() : "(belum ada)");
+            int t = game.world().nearestTungku(game.field().mapId());
+            std::printf("Tungku terdekat yang sudah dikunjungi: %s\n", t ? game.world().info(t)->name.c_str() : "(belum ada)");
             continue;
         }
         if (cmd == "buka") {
             int a = 0, b = 0;
-            if (std::sscanf(line.c_str(), "buka %d %d", &a, &b) == 2) world.unlockShortcut(a, b);
+            if (std::sscanf(line.c_str(), "buka %d %d", &a, &b) == 2) game.world().unlockShortcut(a, b);
             continue;
         }
-        if (cmd == "battle") {
-            int t = 1;
-            std::sscanf(line.c_str(), "battle %d", &t);
-            int got = 0;
-            BattleSystem::Phase r = consoleBattle(hero, t, INIT_NORMAL, &got);
-            if (r == BattleSystem::Victory) sukma += got;
-            if (r == BattleSystem::Defeat) { hero.hp = hero.stats.mhp; std::printf("(kamu bangkit kembali)\n"); }
+        if (cmd == "jamu") {
+            std::string r = game.useItem(IT_JAMU);
+            std::printf("  %s\n", r.empty() ? "Tidak ada gunanya sekarang." : r.c_str());
+            continue;
+        }
+        if (cmd == "x") {
+            GameInput in;
+            in.action = true;
+            game.update(0.0f, in);
+            settle(game);
             continue;
         }
         int dx = 0, dy = 0;
@@ -193,28 +252,19 @@ int runConsole() {
         int steps = 1;
         std::sscanf(line.c_str() + cmd.size(), "%d", &steps);
         for (int i = 0; i < steps; ++i) {
-            // satu langkah penuh: tekan arah lalu jalankan waktu sampai tiba
-            FieldEvent ev = field.update(0.0f, dx, dy, false);
-            for (int k = 0; k < 60 && field.player().moving && ev.kind == FieldEvent::None; ++k)
-                ev = field.update(1.0f / 30.0f, 0, 0, false);
-            if (ev.kind == FieldEvent::Transfer) {
-                field.enter(ev.travel.toMap, ev.travel.x, ev.travel.y, ev.travel.dir);
-                std::printf("-- pindah ke %s --\n", world.info(field.mapId())->name.c_str());
+            // satu langkah penuh: tekan arah, lalu jalankan waktu sampai tiba
+            GameInput in;
+            in.dx = dx;
+            in.dy = dy;
+            game.update(0.0f, in);
+            for (int k = 0; k < 60 && game.field().player().moving; ++k) game.update(1.0f / 30.0f, GameInput{});
+            if (game.battlePending() || game.transferPending() || game.inDialog()) {
+                settle(game);
                 break;
             }
-            if (ev.kind == FieldEvent::LockedDoor) { std::printf("Terkunci dari sisi lain.\n"); break; }
-            if (ev.kind == FieldEvent::Encounter) {
-                static const char* initName[] = {"", " (kamu menyerang dari belakang)", " (kamu disergap!)"};
-                std::printf("-- bertemu musuh%s --\n", initName[ev.initiative]);
-                int got = 0;
-                BattleSystem::Phase r = consoleBattle(hero, ev.troop, static_cast<Initiative>(ev.initiative), &got);
-                field.resolveEncounter(ev.enemyIndex, r == BattleSystem::Victory);
-                if (r == BattleSystem::Victory) sukma += got;
-                if (r == BattleSystem::Defeat) { hero.hp = hero.stats.mhp; std::printf("(kamu bangkit kembali)\n"); }
-                break;
-            }
+            flushNotices(game);
         }
-        printView(field);
+        printView(game.field(), &game.state().bloodstain());
     }
     return 0;
 }

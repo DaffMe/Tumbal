@@ -63,6 +63,30 @@ void textRight(const std::string& s, float rx, float y, Color c, float size) {
     text(s, rx - measure(s, size), y, c, size);
 }
 
+std::vector<std::string> wrap(const std::string& s, float width, float size) {
+    std::vector<std::string> lines;
+    std::string line, word;
+    auto flushWord = [&]() {
+        if (word.empty()) return;
+        std::string trial = line.empty() ? word : line + " " + word;
+        if (!line.empty() && measure(trial, size) > width) {
+            lines.push_back(line);
+            line = word;
+        } else {
+            line = trial;
+        }
+        word.clear();
+    };
+    for (char c : s) {
+        if (c == ' ') flushWord();
+        else if (c == '\n') { flushWord(); lines.push_back(line); line.clear(); }
+        else word += c;
+    }
+    flushWord();
+    if (!line.empty()) lines.push_back(line);
+    return lines;
+}
+
 void window(Rectangle r, float alpha) {
     DrawRectangleRec(r, Fade(Color{14, 10, 16, 255}, alpha));
     DrawRectangleGradientV(static_cast<int>(r.x), static_cast<int>(r.y), static_cast<int>(r.width), 10,
