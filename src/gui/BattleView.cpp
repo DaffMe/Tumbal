@@ -244,6 +244,7 @@ void BattleView::handleInput() {
         if (s && !needsTarget(s->target)) { tryUse(ULT_SLOT, -1); return; }
     }
     if (IsKeyPressed(KEY_R) && battle_->rewindTurn()) { pullEvents(); return; }
+    if (IsKeyPressed(KEY_F2)) { battle_->debugFillResolve(); pullEvents(); return; }   // bantuan demo
 
     const Skill* sel = battle_->skillAt(selectedSlot_);
     hoverTarget_ = -1;

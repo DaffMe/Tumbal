@@ -108,6 +108,7 @@ void MapView::update(Run& run, float dt, DsLog& dsLog) {
         else if (f.room(hovered_)->revealed) run.autoTravel(hovered_);
         pathFor_ = -1;
     }
+    if (IsKeyPressed(KEY_F3)) run.floor().revealAll();   // bantuan demo: ungkap seluruh peta
     if (IsKeyPressed(KEY_S)) {
         run.travelToNearestShrine();
         pathFor_ = -1;

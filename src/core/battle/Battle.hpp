@@ -47,6 +47,13 @@ public:
         if (state_ == BattleState::Idle) ember_ = e < 0 ? 0 : (e > MAX_EMBER ? MAX_EMBER : e);
     }
 
+    // Bantuan demo: isi penuh Resolve semua hero agar Interject bisa langsung diperagakan.
+    void debugFillResolve() {
+        for (int i = 0; i < unitCount_; ++i)
+            if (units_[i].side == Side::Hero && units_[i].alive) units_[i].resolve = MAX_RESOLVE;
+        emit(EventType::Info, -1, -1, 0, "[Demo] Resolve semua hero penuh.");
+    }
+
     // ---------------------------------------------------------- aksi pemain
     void start();
     bool playerUseSkill(int slot, int targetIdx);   // slot 0..n-1 atau ULT_SLOT
