@@ -25,6 +25,8 @@ public:
     void draw(const Field& field, double time, bool showCollision, const Bloodstain* blood = nullptr);
 
     Vector2 camera() const { return cam_; }
+    // State pemain untuk flag hideIf/showIf objek peta.
+    void setState(const GameState* gs) { gs_ = gs; }
 
 private:
     int viewW_ = 640, viewH_ = 360;
@@ -37,4 +39,8 @@ private:
     void drawObjects(const Field& field, double time, const Bloodstain* blood);
     void drawLighting(const Field& field, double time);
     bool lightReady_ = false;
+    const GameState* gs_ = nullptr;
+    bool hidden(const MapObject* o) const {
+        return gs_ != nullptr && gs_->hidden(o->props.getString("hideIf"), o->props.getString("showIf"));
+    }
 };

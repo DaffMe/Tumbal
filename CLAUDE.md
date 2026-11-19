@@ -70,7 +70,12 @@ GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari, Z = a
 - Peta saat ini dibuat oleh `tools/make_maps.py`. Peta yang disunting manual di Tiled harus dikeluarkan dari generator.
 - Aset utama: CC-BY 4.0 (Sevarihk/Aurora) & CC0 dari internet. **Setiap aset baru wajib dicatat di `CREDITS.md`**
   (pembuat, URL, lisensi). Hindari lisensi share-alike dan "no redistribution".
-- Codex hanya untuk celah yang tidak ada aset gratisnya (`codex exec ... "<prompt>" -i <ref.png>`; prompt sebelum `-i`).
+- Codex hanya untuk celah yang tidak ada aset gratisnya. Pakai model terbaru yang tersedia (cek
+  `~/.codex/models_cache.json`; saat ini `gpt-6.2-astra`, reasoning medium):
+  `codex exec -m gpt-6.2-astra -c model_reasoning_effort="medium" -s workspace-write -C <repo> "<prompt>" -i <ref.png>`
+  (prompt SEBELUM `-i`). Prompt disimpan di `assets/raw/codex/PROMPT_*.md`; minta latar magenta polos #FF00FF dan
+  gaya sesuai gambar referensi. Hasil diproses `build_codex()` (deteksi grid piksel, buang magenta, skala) dan
+  dicatat di bagian "Aset buatan AI" di `CREDITS.md`.
 - Unduhan mentah disimpan di luar repo; yang dipakai disalin ke `assets/src/` lalu diproses `tools/build_assets.py`.
 
 ## Git

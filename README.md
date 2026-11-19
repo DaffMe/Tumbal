@@ -5,7 +5,8 @@ JRPG turn-based bernuansa **cerita rakyat Nusantara versi kelam**, dibuat untuk
 (RPG Maker VX Ace): battle front-view ATB, loop Tungku/Sukma ala Souls, dan dunia top-down yang saling terhubung.
 Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**; GUI memakai **raylib** sebagai antarmuka saja.
 
-> Status: **v2 hari 4 — lumbung + desa.** Menu Tungku (naik level dengan sukma, warp antar-Tungku lewat BFS),
+> Status: **v2 hari 5 — wilayah pertama tamat.** Ladang Timun Busuk dengan boss Memedi Sawah (rapal "Ritual Panen"
+> yang harus dibuyarkan), bekal pertama Biji Timun Mas. Sebelumnya hari 4: Menu Tungku (naik level dengan sukma, warp antar-Tungku lewat BFS),
 > peta Desa Karangtumbal sebagai hub dengan Mbok Srini. Sebelumnya: Peta Tiled, jalan 8 arah, perpindahan peta lewat Graph dunia,
 > musuh terlihat yang mengejar, battle front-view ATB dengan antrean giliran, dialog & pilihan lewat interpreter
 > event, barang (Ramuan Jamu dll.), istirahat di Tungku, sukma tercecer saat mati, Inspector (F1), mode console.

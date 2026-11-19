@@ -145,6 +145,11 @@ void MapView::prepareLighting(const Field& field, double time, const Bloodstain*
         if (o->type == "tungku") {
             float fl = 1.0f + 0.06f * std::sin(static_cast<float>(time * 9.0)) + 0.04f * std::sin(static_cast<float>(time * 23.0));
             punch(cx, cy, 190 * fl, 1.0f);
+        } else if (o->type == "prop" && o->props.getInt("glow") > 0 && !hidden(o)) {
+            // nyala samar (mis. mata Memedi) agar siluet terlihat di gelap
+            float r = static_cast<float>(o->props.getInt("glow"));
+            float fl = 1.0f + 0.08f * std::sin(static_cast<float>(time * 2.3));
+            punch(o->x + o->w / 2.0f - cam_.x, o->y + o->h * 0.35f - cam_.y, r * fl, 0.75f);
         } else if (o->type == "loot" && !field.world().isCollected(field.mapId(), m->typeIndex(o))) {
             punch(cx, cy + 6, 26, 0.6f);
         }
@@ -190,6 +195,7 @@ void MapView::draw(const Field& field, double time, bool showCollision, const Bl
     for (int i = 0; i < field.enemyCount(); ++i)
         if (field.enemy(i).alive) list.push_back({field.enemy(i).actor.drawY() + 1.0f, 1, i, nullptr});
     for (const MapObject* o = m->objects(); o != nullptr; o = o->next) {
+        if (hidden(o)) continue;
         if (o->type == "npc" && !o->props.getString("walker").empty())
             list.push_back({o->y / TS + 1.0f, 2, 0, o});
         else if (o->type == "prop")

@@ -229,8 +229,8 @@ int runConsole() {
     Game game;
     std::string err;
     std::string root = findAssets();
-    std::string events[] = {root + "events/lumbung.json", root + "events/desa.json"};
-    if (!game.load(root + "maps/world.json", events, 2, &err)) {
+    std::string events[] = {root + "events/lumbung.json", root + "events/desa.json", root + "events/ladang.json"};
+    if (!game.load(root + "maps/world.json", events, 3, &err)) {
         std::printf("Gagal memuat dunia: %s\n", err.c_str());
         return 1;
     }
