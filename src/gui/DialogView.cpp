@@ -1,6 +1,7 @@
 #include "DialogView.hpp"
 
 #include <cmath>
+#include "Assets.hpp"
 #include "Ui.hpp"
 #include "raylib.h"
 
@@ -32,6 +33,20 @@ void DialogView::update(Interpreter& it, float dt) {
     }
 }
 
+// Potret pembicara (assets/faces, dibuat tools/build_assets.py build_faces). Pemetaan nama -> gambar
+// hanya urusan tampilan, jadi tinggal di GUI; nama yang tidak ada di daftar tampil tanpa potret.
+static const char* portraitFor(const std::string& who) {
+    static const char* table[][2] = {
+        {"Timun Mas", "timun_mas"},       {"Gadis di Dermaga", "timun_mas"}, {"Mbok Srini", "mbok_srini"},
+        {"Perempuan Tua", "mbok_srini"},  {"Lelaki Tua", "lelaki_tua"},      {"Empu Karta", "empu_karta"},
+        {"Pandai Besi", "empu_karta"},    {"Pedagang Keliling", "pedagang"}, {"Pemuda Desa", "pemuda_desa"},
+        {"Penumbuk Lesung", "penumbuk_lesung"}, {"Buto Ijo", "buto_ijo"},   {"Memedi Sawah", "memedi_sawah"},
+    };
+    for (auto& row : table)
+        if (who == row[0]) return row[1];
+    return nullptr;
+}
+
 void DialogView::draw(const Interpreter& it, double time) {
     if (it.state() != Interpreter::WaitMessage && it.state() != Interpreter::WaitChoice) return;
     Rectangle box{20, 258, 600, 92};
@@ -46,9 +61,18 @@ void DialogView::draw(const Interpreter& it, double time) {
         ui::window(nb, 0.95f);
         ui::text(it.speaker(), nb.x + 12, nb.y + 4, ui::AMBER);
     }
-    std::vector<std::string> lines = ui::wrap(text, box.width - 36);
+    // potret di kiri kotak (seperti faceset RPG Maker); teks bergeser ke kanan
+    float textX = box.x + 18;
+    if (const char* face = portraitFor(it.speaker())) {
+        Texture2D t = Assets::get().texture(std::string("assets/faces/") + face + ".png");
+        if (t.id != 0) {
+            DrawTexture(t, static_cast<int>(box.x + 4), static_cast<int>(box.y + 4), WHITE);
+            textX = box.x + 4 + t.width + 12;
+        }
+    }
+    std::vector<std::string> lines = ui::wrap(text, box.x + box.width - textX - 18);
     float y = box.y + 14;
-    for (size_t i = 0; i < lines.size() && i < 4; ++i, y += 20) ui::text(lines[i], box.x + 18, y, ui::BONE);
+    for (size_t i = 0; i < lines.size() && i < 4; ++i, y += 20) ui::text(lines[i], textX, y, ui::BONE);
     if (it.state() == Interpreter::WaitMessage && visible >= static_cast<int>(shownText_.size())) {
         float bob = static_cast<float>(std::sin(time * 6) * 2);
         float cx = box.x + box.width - 20, cy = box.y + box.height - 12 + bob;

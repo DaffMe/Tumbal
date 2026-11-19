@@ -47,6 +47,8 @@ tekstur daun pada kanopi bambu (dari Ground and Foliage Autotiles); tileset hias
 (semanggi & batu dari Tree Trunk, daun gugur/tengkorak/ranting dari Dead Swamp, tulang dari Evil Dungeon);
 props `gelagah`, `tiang_tengkorak`, `pagar_tali`, `ranting_mati`, `pohon_akar` (Dead Swamp); `dermaga`, `tong`,
 `jemuran_jala` (Fisher's Hut); `tunggul_rawa` dijahit dari dua potongan lembar Tree Trunk (swamp).
+Potret dialog `assets/faces/` dipotong dari NPC Faceset Sevarihk (diperkecil, diwarnai gelap-sepia, diberi vinyet;
+hiasan bulan sabit pada potret Lelaki Tua ditutup); potret Buto Ijo & Memedi dipotong dari battler buatan Codex.
 
 ## Audio
 

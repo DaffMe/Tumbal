@@ -546,6 +546,63 @@ def build_codex():
     return len(boxes)
 
 
+# ------------------------------------------------------------------ potret dialog
+FACES = os.path.join(ROOT, 'assets', 'faces')
+FACE = 84
+
+
+def _face_frame(im):
+    """Potret 84x84: warna digradasi gelap-sepia, vinyet, bingkai tipis."""
+    from PIL import ImageDraw, ImageEnhance
+    base = Image.new('RGBA', im.size, (14, 10, 12, 255))   # latar gelap dulu agar tepi transparan tidak berpinggir warna
+    base.alpha_composite(im.convert('RGBA'))
+    im = base.resize((FACE, FACE), Image.LANCZOS)
+    rgb = ImageEnhance.Contrast(im.convert('RGB')).enhance(1.15)
+    rgb = _tint_water(rgb.convert('RGBA'), (0.86, 0.74, 0.62), 0.55).convert('RGB')
+    rgb = ImageEnhance.Brightness(rgb).enhance(0.82)
+    vig = Image.new('L', (FACE, FACE), 0)
+    d = ImageDraw.Draw(vig)
+    for i in range(18):
+        d.rectangle([i, i, FACE - 1 - i, FACE - 1 - i], outline=int(150 * (1 - i / 18)))
+    dark = Image.new('RGB', (FACE, FACE), (14, 10, 12))
+    rgb = Image.composite(dark, rgb, vig)
+    out = rgb.convert('RGBA')
+    d = ImageDraw.Draw(out)
+    d.rectangle([0, 0, FACE - 1, FACE - 1], outline=(120, 98, 76, 255))
+    return out
+
+
+def build_faces():
+    """Potret pembicara untuk kotak dialog. Faceset Sevarihk (5x3, 150 px) untuk manusia;
+    kepala Buto & Memedi dipotong dari battler (Codex)."""
+    os.makedirs(FACES, exist_ok=True)
+    sheet = Image.open(os.path.join(SEV, 'npcs_faceset.png')).convert('RGBA')
+
+    def cell(c, r):
+        return sheet.crop((c * 150, r * 150, c * 150 + 150, r * 150 + 150))
+    faces = {
+        'timun_mas': cell(2, 0), 'mbok_srini': cell(4, 0), 'pemuda_desa': cell(1, 0),
+        'lelaki_tua': cell(0, 1), 'pedagang': cell(1, 1), 'empu_karta': cell(2, 1),
+        'penumbuk_lesung': cell(1, 2),
+    }
+    # Lelaki Tua: hiasan bulan sabit di ikat kepala ditutup potongan ikat kepala polos di sebelahnya
+    tua = faces['lelaki_tua']
+    tua.paste(tua.crop((44, 26, 62, 39)), (60, 26))
+    tua.paste(tua.crop((44, 26, 62, 39)).transpose(Image.FLIP_LEFT_RIGHT), (68, 26))
+    for name, im in faces.items():
+        _face_frame(im).save(os.path.join(FACES, name + '.png'))
+    # monster: kepala dari battler, latar gelap
+    for name, src, box in [('buto_ijo', 'buto_kepala.png', (30, 10, 174, 154)),
+                           ('memedi_sawah', 'memedi_sawah.png', (48, 8, 136, 96))]:
+        b = Image.open(os.path.join(BATTLERS, src)).convert('RGBA').crop(box)
+        bg = Image.new('RGBA', b.size, (20, 16, 18, 255))
+        bg.alpha_composite(b)
+        f = bg.resize((FACE, FACE), Image.NEAREST)
+        from PIL import ImageDraw
+        ImageDraw.Draw(f).rectangle([0, 0, FACE - 1, FACE - 1], outline=(120, 98, 76, 255))
+        f.save(os.path.join(FACES, name + '.png'))
+
+
 if __name__ == '__main__':
     build_characters()
     build_tiles()
@@ -553,5 +610,6 @@ if __name__ == '__main__':
     build_battle()
     build_props()
     print('komponen props ladang:', build_codex())
+    build_faces()
     print('battler:', sorted(os.listdir(BATTLERS)), 'battleback:', sorted(os.listdir(BACKS)))
     print('props:', sorted(os.listdir(PROPS)))

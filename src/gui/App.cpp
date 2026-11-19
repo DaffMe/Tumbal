@@ -433,7 +433,8 @@ int App::run(bool smoke, bool shots) {
             if (frame == 300) go(6, 18, 5, FACE_UP);
             if (frame == 340) TakeScreenshot("shot_laut.png");
             if (frame == 345) it.runEvent("timun_mas");
-            skipDialog(345, 420);
+            if (frame == 362) TakeScreenshot("shot_dialog.png");   // potret pembicara
+            skipDialog(365, 420);
             if (frame == 425) go(7, 22, 16, FACE_DOWN);
             if (frame == 465) TakeScreenshot("shot_rawa.png");
             if (frame == 470) go(8, 16, 12, FACE_DOWN);
