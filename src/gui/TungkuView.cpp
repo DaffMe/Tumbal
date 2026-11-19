@@ -1,5 +1,7 @@
 #include "TungkuView.hpp"
 
+#include "core/data/GameData.hpp"
+
 #include <cmath>
 #include <cstdio>
 #include "Ui.hpp"
@@ -7,19 +9,22 @@
 
 static bool confirm() { return IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE); }
 static bool cancel() { return IsKeyPressed(KEY_X) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE); }
-static const char* ROOT[] = {"Naik Level", "Warp", "Pergi"};
+static const char* ROOT[] = {"Naik Level", "Timun Mas", "Warp", "Pergi"};
+static constexpr int ROOT_N = 4;
 
 std::string TungkuView::update(Game& game) {
     if (!game.tungkuMenuOpen()) { page_ = Root; return ""; }
     bool up = IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W);
     bool down = IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S);
     if (page_ == Root) {
-        if (up) index_ = (index_ + 2) % 3;
-        if (down) index_ = (index_ + 1) % 3;
+        bool hasCompanion = game.state().companionJoined();
+        if (up) { index_ = (index_ + ROOT_N - 1) % ROOT_N; if (index_ == 1 && !hasCompanion) index_ = 0; }
+        if (down) { index_ = (index_ + 1) % ROOT_N; if (index_ == 1 && !hasCompanion) index_ = 2; }
         if (cancel()) { game.closeTungkuMenu(); index_ = 0; }
         if (confirm()) {
             if (index_ == 0) page_ = Level;
-            else if (index_ == 1) {
+            else if (index_ == 1) page_ = Companion;
+            else if (index_ == 2) {
                 warpCount_ = game.warpTargets(warpMap_, warpDepth_, 16);
                 warpIndex_ = 0;
                 page_ = Warp;
@@ -30,6 +35,12 @@ std::string TungkuView::update(Game& game) {
     if (page_ == Level) {
         if (cancel()) page_ = Root;
         if (confirm()) return game.levelUp();
+        return "";
+    }
+    if (page_ == Companion) {
+        if (cancel()) page_ = Root;
+        if (confirm()) return game.companionLevelUp();
+        if (IsKeyPressed(KEY_C)) return game.toggleCompanion();
         return "";
     }
     // Warp
@@ -55,16 +66,17 @@ void TungkuView::draw(Game& game, double time) {
     DrawRectangle(0, 0, 640, 360, Fade(BLACK, 0.35f));
     // judul
     ui::textCentered("TUNGKU", 320, 22, ui::AMBER, 30);
-    Rectangle rw{24, 70, 150, 82};
+    Rectangle rw{24, 70, 150, 104};
     ui::window(rw, 0.95f);
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < ROOT_N; ++i) {
         float y = rw.y + 8 + i * 22;
         bool sel = i == index_;
-        ui::text(ROOT[i], rw.x + 26, y, sel && page_ == Root ? ui::AMBER : (sel ? ui::BONE : ui::DIM));
+        bool enabled = i != 1 || game.state().companionJoined();
+        ui::text(ROOT[i], rw.x + 26, y, !enabled ? Fade(ui::DIM, 0.4f) : (sel && page_ == Root ? ui::AMBER : (sel ? ui::BONE : ui::DIM)));
         if (sel && page_ == Root) ui::cursor(rw.x + 12, y + 8, time);
     }
     const GameState& gs = game.state();
-    Rectangle sw{24, 158, 150, 52};
+    Rectangle sw{24, 180, 150, 52};
     ui::window(sw, 0.95f);
     ui::text("Sukma", sw.x + 10, sw.y + 6, ui::DIM);
     ui::textRight(std::to_string(gs.sukma()), sw.x + sw.width - 10, sw.y + 6, ui::AMBER);
@@ -97,6 +109,31 @@ void TungkuView::draw(Game& game, double time) {
             ui::textCentered(gs.canLevelUp() ? "[Z] tukar sukma    [X] kembali" : "Sukma tidak cukup.    [X] kembali",
                              lw.x + lw.width / 2, lw.y + lw.height - 28, Fade(ui::BONE, 0.6f + 0.4f * blink));
         }
+    }
+    if (page_ == Companion || (page_ == Root && index_ == 1 && gs.companionJoined())) {
+        Rectangle cw{184, 70, 432, 196};
+        ui::window(cw, 0.95f);
+        const Battler& c = gs.companion();
+        char buf[96];
+        std::snprintf(buf, sizeof buf, "Timun Mas  -  Level %d  ->  %d", gs.companionLevel(), gs.companionLevel() + 1);
+        ui::text(buf, cw.x + 16, cw.y + 10, ui::BONE);
+        std::snprintf(buf, sizeof buf, "Butuh %d sukma", gs.companionLevelUpCost());
+        ui::textRight(buf, cw.x + cw.width - 16, cw.y + 10, gs.sukma() >= gs.companionLevelUpCost() ? ui::AMBER : ui::BLOOD);
+        Stats next = statsAtLevel(KL_TIMUN_MAS, gs.companionLevel() + 1);
+        const char* names[] = {"HP", "MP", "Serang", "Ilmu"};
+        int a[] = {c.stats.mhp, c.stats.mmp, c.stats.atk, c.stats.mag};
+        int b[] = {next.mhp, next.mmp, next.atk, next.mag};
+        for (int i = 0; i < 4; ++i) {
+            float x = cw.x + 16 + (i % 2) * 210, y = cw.y + 44 + (i / 2) * 24;
+            ui::text(names[i], x, y, ui::DIM);
+            ui::textRight(std::to_string(a[i]), x + 120, y, ui::BONE);
+            std::snprintf(buf, sizeof buf, "-> %d", b[i]);
+            ui::text(buf, x + 130, y, Color{150, 220, 150, 255});
+        }
+        ui::text(gs.companionActive() ? "Status: berjalan bersamamu" : "Status: menunggu di Tungku", cw.x + 16, cw.y + 106,
+                 gs.companionActive() ? Color{150, 220, 150, 255} : ui::DIM);
+        if (page_ == Companion)
+            ui::textCentered("[Z] tukar sukma   [C] panggil / lepas   [X] kembali", cw.x + cw.width / 2, cw.y + cw.height - 28, ui::BONE);
     }
     if (page_ == Warp) {
         Rectangle ww{184, 70, 432, 196};

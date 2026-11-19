@@ -4,17 +4,17 @@
 #include <cmath>
 #include <cstdio>
 #include "Assets.hpp"
+#include "Audio.hpp"
 #include "Ui.hpp"
 #include "core/util/DsTrace.hpp"
 
 bool App::boot(std::string& error) {
     std::string worldPath = Assets::get().path("assets/maps/world.json");
     std::string events[] = {Assets::get().path("assets/events/lumbung.json"), Assets::get().path("assets/events/desa.json"),
-                            Assets::get().path("assets/events/ladang.json")};
-    if (!game_.load(worldPath, events, 3, &error)) return false;
-    game_.newGame("Tumbal", KL_PENDEKAR);
+                            Assets::get().path("assets/events/ladang.json"), Assets::get().path("assets/events/akhir.json")};
+    if (!game_.load(worldPath, events, 4, &error)) return false;
     mapView_.setState(&game_.state());
-    mapView_.snapCamera(game_.field());
+    title_.open();
     return true;
 }
 
@@ -30,9 +30,44 @@ void App::update(float dt) {
     // notifikasi dari core (Queue): tampil satu per satu
     if (toastTime_ <= 0.3f) {
         std::string n;
-        if (game_.popNotice(n)) { toast_ = n; toastTime_ = 2.6f; }
+        if (game_.popNotice(n)) { toast_ = n; toastTime_ = 2.6f; audio::play(audio::DAPAT, 0.7f); }
     }
 
+    updateAudio();
+
+    if (mode_ == ModeTitle) {
+        TitleView::Result r = title_.update(dt);
+        if (r == TitleView::Quit) quit_ = true;
+        if (r == TitleView::NewGame) {
+            game_.newGame(title_.heroName(), title_.classId());
+            game_.giveStartingGift(title_.gift());
+            mapView_.snapCamera(game_.field());
+            lastMap_ = -1;
+            fade_ = 1.0f;
+            fadeDir_ = -1;
+            mode_ = ModeField;
+        } else if (r == TitleView::LoadSlot) {
+            std::string err;
+            if (game_.loadFrom(TitleView::slotPath(title_.slot()), &err)) {
+                mapView_.snapCamera(game_.field());
+                lastMap_ = -1;
+                fade_ = 1.0f;
+                fadeDir_ = -1;
+                mode_ = ModeField;
+                toast_ = "Dimuat dari slot " + std::to_string(title_.slot()) + ".";
+                toastTime_ = 2.0f;
+            }
+        }
+        return;
+    }
+    if (mode_ == ModeEnding) {
+        endingTime_ += dt;
+        if (endingTime_ > 4.0f && (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER))) {
+            title_.open();
+            mode_ = ModeTitle;
+        }
+        return;
+    }
     if (mode_ == ModeBattleIntro) {
         introTime_ += dt;
         if (introTime_ >= 0.55f) {
@@ -106,13 +141,70 @@ void App::updateField(float dt) {
         if (openMenu) { menu_.show(); return; }
         game_.update(dt, in);
     }
+    if (game_.state().flag("tamat") != 0 && !game_.interpreter().busy() && mode_ == ModeField) {
+        game_.state().setFlag("tamat", 0);
+        endingTime_ = 0.0f;
+        mode_ = ModeEnding;
+        return;
+    }
     if (game_.battlePending() && mode_ == ModeField) {
+        audio::play(audio::ENCOUNTER);
         mode_ = ModeBattleIntro;
         introTime_ = 0.0f;
     } else if (game_.transferPending() && fadeDir_ == 0) {
+        audio::play(audio::PINTU, 0.7f);
         fadeDir_ = 1;
     }
     mapView_.updateCamera(game_.field(), dt);
+}
+
+// ------------------------------------------------------------------ audio
+
+// Memilih musik sesuai mode/peta dan membunyikan efek suara antarmuka.
+// Hanya membaca state core; tidak ada aturan permainan di sini.
+void App::updateAudio() {
+    audio::update(GetFrameTime());
+    // musik
+    std::string music;
+    if (mode_ == ModeTitle || mode_ == ModeEnding) {
+        music = "judul";
+    } else if (mode_ == ModeBattle || mode_ == ModeBattleIntro) {
+        int t = game_.battleTroop();
+        music = (t == TR_PENJAGA || t == TR_MEMEDI || t == TR_BUTO) ? "boss" : "battle";
+    } else if (game_.field().map() != nullptr) {
+        music = game_.field().map()->props().getString("musik", "");
+    }
+    audio::playMusic(music);
+
+    // efek suara menu (judul, Tungku, menu, pilihan dialog)
+    bool inMenu = mode_ == ModeTitle ||
+                  (mode_ == ModeField && (game_.tungkuMenuOpen() || menu_.open() ||
+                                          game_.interpreter().state() == Interpreter::WaitChoice));
+    if (inMenu) {
+        if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_W) || IsKeyPressed(KEY_S))
+            audio::play(audio::KURSOR, 0.5f);
+        if (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER)) audio::play(audio::PILIH, 0.6f);
+        if (IsKeyPressed(KEY_X) || IsKeyPressed(KEY_ESCAPE)) audio::play(audio::BATAL, 0.6f);
+    } else if (mode_ == ModeField && game_.interpreter().state() == Interpreter::WaitMessage &&
+               (IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER))) {
+        audio::play(audio::KURSOR, 0.35f);
+    }
+    if (mode_ != ModeField) return;
+
+    // Tungku dinyalakan / dibuka
+    bool tungku = game_.tungkuMenuOpen();
+    if (tungku && !wasTungku_) audio::play(audio::TUNGKU);
+    wasTungku_ = tungku;
+
+    // langkah kaki: setiap kali pemain tiba di petak baru
+    const Actor& p = game_.field().player();
+    if ((p.x != lastX_ || p.y != lastY_) && game_.field().mapId() == lastStepMap_) {
+        stepAlt_ = !stepAlt_;
+        audio::play(stepAlt_ ? audio::LANGKAH1 : audio::LANGKAH2, 0.18f);
+    }
+    lastX_ = p.x;
+    lastY_ = p.y;
+    lastStepMap_ = game_.field().mapId();
 }
 
 // ------------------------------------------------------------------ draw
@@ -190,7 +282,39 @@ void App::drawInspector() {
     }
 }
 
+void App::drawEnding() {
+    ClearBackground(BLACK);
+    float t = endingTime_;
+    auto line = [&](const std::string& s, float y, float at, Color c, float size = 16) {
+        float a = std::fmin(1.0f, std::fmax(0.0f, (t - at) / 1.2f));
+        if (a > 0) ui::textCentered(s, VIEW_W / 2.0f, y, Fade(c, a), size);
+    };
+    line("Buto Ijo tenggelam untuk terakhir kalinya.", 70, 0.5f, ui::BONE);
+    line("Tapi lesung di Karangtumbal masih berbunyi.", 96, 2.0f, ui::DIM);
+    line("TUMBAL", 140, 3.5f, Color{196, 52, 44, 255}, 40);
+    line("akhir dari versi demo", 186, 4.0f, ui::DIM);
+    const GameState& gs = game_.state();
+    line("Level " + std::to_string(gs.level()) + "   -   Mati " + std::to_string(gs.deaths()) + " kali   -   Bekal " +
+             std::to_string(gs.count(IT_BIJI_TIMUN) + gs.count(IT_JARUM) + gs.count(IT_GARAM) + gs.count(IT_TERASI)) + "/4",
+         222, 5.0f, ui::AMBER);
+    line("Aset: Sevarihk, Redshrike, Nidhoggn, Kenney & lainnya (lihat CREDITS.md)", 280, 6.0f, ui::DIM, 10);
+    line("Terima kasih sudah bermain.   [Z] kembali ke judul", 320, 6.5f, ui::BONE);
+}
+
 void App::drawFrame() {
+    if (mode_ == ModeEnding) {
+        BeginTextureMode(screen_);
+        drawEnding();
+        EndTextureMode();
+        return;
+    }
+    if (mode_ == ModeTitle) {
+        BeginTextureMode(screen_);
+        ClearBackground(BLACK);
+        title_.draw(time_);
+        EndTextureMode();
+        return;
+    }
     if (mode_ != ModeBattle) mapView_.prepareLighting(game_.field(), time_, &game_.state().bloodstain());
     BeginTextureMode(screen_);
     ClearBackground(BLACK);
@@ -236,6 +360,7 @@ int App::run(bool smoke, bool shots) {
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
     ui::init();
+    audio::init();
     screen_ = LoadRenderTexture(VIEW_W, VIEW_H);
     mapView_.init(VIEW_W, VIEW_H);
 
@@ -253,7 +378,20 @@ int App::run(bool smoke, bool shots) {
     }
 
     int frame = 0;
-    while (!WindowShouldClose()) {
+    if (shots) {
+        // --shots: tampilkan judul sebentar, lalu langsung permainan baru
+        for (int i = 0; i < 90 && !WindowShouldClose(); ++i) {
+            time_ += 1.0 / 60.0;
+            title_.update(1.0f / 60.0f);
+            drawFrame();
+            present();
+        }
+        TakeScreenshot("shot_title.png");
+        game_.newGame("Tumbal", KL_PENDEKAR);
+        mapView_.snapCamera(game_.field());
+        mode_ = ModeField;
+    }
+    while (!WindowShouldClose() && !quit_) {
         float dt = std::fmin(GetFrameTime(), 1.0f / 20.0f);
         if (shots) dt = 1.0f / 60.0f;
         update(dt);
@@ -261,25 +399,31 @@ int App::run(bool smoke, bool shots) {
         present();
         ++frame;
         if (shots) {
-            // skenario screenshot otomatis: ladang & Memedi Sawah
+            // skenario screenshot otomatis: wilayah 2-4 & Buto Ijo
             Interpreter& it = game_.interpreter();
-            if (frame > 10 && frame < 60 && it.state() == Interpreter::WaitMessage && frame % 4 == 0) it.resume();
-            if (frame == 70) {
-                game_.state().setFlag("ladang_masuk", 1);
-                game_.field().enter(4, 12, 18, FACE_RIGHT);
+            auto go = [&](int map, int x, int y, int dir) {
+                game_.field().enter(map, x, y, dir);
                 mapView_.snapCamera(game_.field());
+            };
+            for (const char* f : {"bambu_masuk", "laut_masuk", "rawa_masuk", "sarang_masuk", "ladang_masuk"})
+                game_.state().setFlag(f, 1);
+            if (frame > 5 && frame < 60 && it.state() == Interpreter::WaitMessage && frame % 4 == 0) it.resume();
+            if (frame == 60) go(5, 27, 14, FACE_UP);
+            if (frame == 100) TakeScreenshot("shot_bambu.png");
+            if (frame == 110) go(6, 16, 9, FACE_RIGHT);
+            if (frame == 150) TakeScreenshot("shot_laut.png");
+            if (frame == 155) { it.runEvent("timun_mas"); }
+            if (frame > 155 && frame < 230 && game_.inDialog() && frame % 5 == 0) {
+                if (it.state() == Interpreter::WaitChoice) it.choose(0); else it.resume();
             }
-            if (frame == 130) TakeScreenshot("shot_ladang.png");
-            if (frame == 140) {
-                game_.field().enter(4, 38, 14, FACE_UP);
-                mapView_.snapCamera(game_.field());
-            }
-            if (frame == 190) TakeScreenshot("shot_ladang_memedi.png");
-            if (frame == 200) it.runEvent("memedi_bangun");
-            if (frame > 200 && frame < 260 && it.state() == Interpreter::WaitMessage && frame % 8 == 0) it.resume();
-            if (frame == 250) TakeScreenshot("shot_memedi_dialog.png");
-            if (frame == 380) TakeScreenshot("shot_memedi_battle.png");
-            if (frame >= 382) break;
+            if (frame == 235) go(7, 22, 16, FACE_DOWN);
+            if (frame == 275) TakeScreenshot("shot_rawa.png");
+            if (frame == 280) go(8, 15, 16, FACE_UP);
+            if (frame == 320) TakeScreenshot("shot_sarang.png");
+            if (frame == 325) it.runEvent("buto_bangun");
+            if (frame > 325 && frame < 360 && it.state() == Interpreter::WaitMessage && frame % 4 == 0) it.resume();
+            if (frame == 470) TakeScreenshot("shot_buto_battle.png");
+            if (frame >= 472) break;
         }
         if (smoke && frame > 30) break;
     }
@@ -287,6 +431,7 @@ int App::run(bool smoke, bool shots) {
     UnloadRenderTexture(screen_);
     ui::shutdown();
     Assets::get().unloadAll();
+    audio::shutdown();
     CloseWindow();
     return 0;
 }

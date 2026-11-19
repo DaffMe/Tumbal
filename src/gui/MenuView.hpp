@@ -16,13 +16,15 @@ public:
     void draw(const Game& game, double time);
 
 private:
-    enum Page { Root, Items, Status };
+    enum Page { Root, Items, Status, Save };
     bool open_ = false;
     Page page_ = Root;
     int  index_ = 0;
     int  itemIndex_ = 0;
     int  items_[IT_COUNT] = {};
     int  itemCount_ = 0;
+    int  slotIndex_ = 0;
+    std::string slotInfo_[3];
 
     void refreshItems(const Game& game);
 };

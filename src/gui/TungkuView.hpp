@@ -14,7 +14,7 @@ public:
     void draw(Game& game, double time);
 
 private:
-    enum Page { Root, Level, Warp };
+    enum Page { Root, Level, Warp, Companion };
     Page page_ = Root;
     int  index_ = 0;
     int  warpIndex_ = 0;

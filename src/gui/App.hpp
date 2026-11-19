@@ -12,6 +12,7 @@
 #include "DialogView.hpp"
 #include "MapView.hpp"
 #include "MenuView.hpp"
+#include "TitleView.hpp"
 #include "TungkuView.hpp"
 #include "core/game/Game.hpp"
 
@@ -23,18 +24,22 @@ public:
     static constexpr int VIEW_H = 360;
 
 private:
-    enum Mode { ModeField, ModeBattleIntro, ModeBattle };
+    enum Mode { ModeTitle, ModeField, ModeBattleIntro, ModeBattle, ModeEnding };
 
     Game       game_;
     MapView    mapView_;
     DialogView dialog_;
     MenuView   menu_;
     TungkuView tungku_;
+    TitleView  title_;
+    bool       quit_ = false;
+    float      endingTime_ = 0.0f;
+    void drawEnding();
     BattleSystem battle_;
     BattleView battleView_;
     RenderTexture2D screen_{};
     double     time_ = 0.0;
-    Mode       mode_ = ModeField;
+    Mode       mode_ = ModeTitle;
     float      introTime_ = 0.0f;
     unsigned   battleSeed_ = 1;
 
@@ -48,6 +53,8 @@ private:
     std::string toast_;
     float       toastTime_ = 0.0f;
     int         lastMap_ = -1;
+    int         lastX_ = -1, lastY_ = -1, lastStepMap_ = -1;
+    bool        stepAlt_ = false, wasTungku_ = false;
 
     bool showInspector_ = false;
     bool showCollision_ = false;
@@ -56,6 +63,7 @@ private:
     void update(float dt);
     void updateField(float dt);
     void drawFrame();
+    void updateAudio();
     void drawHud();
     void drawInspector();
     void present();

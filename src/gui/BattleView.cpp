@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdio>
 #include "Assets.hpp"
+#include "Audio.hpp"
 #include "Ui.hpp"
 
 static constexpr float VIEW_W = 640, VIEW_H = 360;
@@ -114,17 +115,20 @@ void BattleView::startEvent(const BattleEvent& e) {
         case BattleEvent::TurnStart: activeActor_ = e.src; evDur_ = 0.0f; break;
         case BattleEvent::UseSkill:
             setLog(e.text);
+            if (e.skill != SKL_SERANG && e.skill != SKL_BERTAHAN) audio::play(audio::RAPAL, 0.6f);
             if (e.src >= 0) flash_[e.src] = 0.3f;
             evDur_ = 0.38f;
             break;
         case BattleEvent::ChantStart:
             setLog(e.text);
+            audio::play(audio::RAPAL, 0.8f);
             if (e.src >= 0) chantGlow_[e.src] = 1.0f;
             evDur_ = 0.7f;
             break;
         case BattleEvent::ChantBroken:
             setLog(e.text);
             popup(e.dst, "BUYAR!", ui::CH_B, 16);
+            audio::play(audio::BUYAR);
             evDur_ = 0.5f;
             break;
         case BattleEvent::Damage: {
@@ -135,6 +139,7 @@ void BattleView::startEvent(const BattleEvent& e) {
                 if (e.dst < bs_->partyCount()) shake_ = 0.3f;
             }
             if (!e.text.empty()) setLog(e.text);
+            audio::play(e.critical ? audio::KRITIS : (e.skill == SKL_SERANG ? audio::TEBAS : audio::PUKUL));
             if (e.critical) popup(e.dst, "KRITIS!", ui::AMBER, 16);
             popup(e.dst, std::to_string(e.value), e.dst < bs_->partyCount() ? Color{255, 120, 100, 255} : RAYWHITE,
                   e.critical ? 32 : 24);
@@ -143,17 +148,20 @@ void BattleView::startEvent(const BattleEvent& e) {
         }
         case BattleEvent::Heal:
             if (e.dst >= 0) hpShown_[e.dst] += e.value;
+            audio::play(audio::PULIH, 0.7f);
             popup(e.dst, "+" + std::to_string(e.value), Color{140, 240, 140, 255}, 24);
             evDur_ = 0.4f;
             break;
         case BattleEvent::Miss:
             setLog(e.text);
             popup(e.dst, "Elak!", ui::BONE, 16);
+            audio::play(audio::ELAK);
             evDur_ = 0.4f;
             break;
         case BattleEvent::Counter:
             setLog(e.text);
             popup(e.dst, "Tangkis!", ui::AMBER, 16);
+            audio::play(audio::PUKUL);
             evDur_ = 0.35f;
             break;
         case BattleEvent::StatusAdd:
@@ -169,6 +177,7 @@ void BattleView::startEvent(const BattleEvent& e) {
         case BattleEvent::Death:
             setLog(e.text);
             if (e.dst >= 0) dying_[e.dst] = 0.0001f;
+            audio::play(audio::TUMBANG);
             evDur_ = 0.6f;
             break;
         case BattleEvent::Victory:
@@ -179,6 +188,7 @@ void BattleView::startEvent(const BattleEvent& e) {
         case BattleEvent::Escaped:
         case BattleEvent::EscapeFail:
             setLog(e.text);
+            audio::play(e.kind == BattleEvent::Escaped ? audio::LANGKAH1 : audio::GAGAL);
             evDur_ = 0.8f;
             break;
     }
@@ -220,6 +230,9 @@ void BattleView::handleInput() {
     int actor = bs_->inputActor();
     if (actor < 0) return;
     if (menu_ == MenuNone) openCommand();
+    if (keyUp() || keyDown() || ((keyLeft() || keyRight()) && menu_ == MenuTarget)) audio::play(audio::KURSOR, 0.5f);
+    if (keyConfirm()) audio::play(audio::PILIH, 0.6f);
+    if (keyCancel() && menu_ != MenuCommand) audio::play(audio::BATAL, 0.6f);
 
     if (menu_ == MenuCommand) {
         if (keyUp()) cmdIndex_ = (cmdIndex_ + COMMAND_COUNT - 1) % COMMAND_COUNT;
