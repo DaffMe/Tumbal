@@ -44,6 +44,12 @@ public:
     int  flag(const std::string& name) const;
     void setFlag(const std::string& name, int value);
 
+    // Objek peta dengan property hideIf=<flag> hilang bila flag != 0,
+    // showIf=<flag> baru muncul bila flag != 0 (mis. boss yang sudah kalah).
+    bool hidden(const std::string& hideIf, const std::string& showIf) const {
+        return (!hideIf.empty() && flag(hideIf) != 0) || (!showIf.empty() && flag(showIf) == 0);
+    }
+
     // ---- Tungku & kematian (loop Souls)
     void setLastTungku(int map, int x, int y) { tungkuMap_ = map; tungkuX_ = x; tungkuY_ = y; }
     int  tungkuMap() const { return tungkuMap_; }

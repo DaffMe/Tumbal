@@ -199,7 +199,23 @@ static void testDamageFormula() {
     CHECK(maxSeen > minSeen);
 }
 
+static void testNoEscape() {
+    SECTION("M1: boss dari event tidak bisa dikabur");
+    Battler hero = makeHeroBattler("Tumbal", KL_MALING, 1);
+    BattleSystem bs;
+    bs.setup(&hero, 1, TR_MEMEDI, INIT_PREEMPTIVE, 11);
+    bs.setCanEscape(false);
+    untilInput(bs);
+    CHECK(bs.phase() == BattleSystem::Input);
+    CHECK(!bs.tryEscape());
+    CHECK(bs.phase() == BattleSystem::Input);     // tetap giliran pemain
+    CHECK(!bs.over());
+    // Memedi lemah api: Bom Minyak masuk x2
+    CHECK(enemyDef(EN_MEMEDI_SAWAH)->elementRate[EL_API] == 2.0f);
+}
+
 void runBattleTests() {
+    testNoEscape();
     testTurnOrderBySpeed();
     testWaitMode();
     testChantAndBreak();

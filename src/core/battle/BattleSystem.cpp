@@ -524,6 +524,10 @@ void BattleSystem::checkEnd() {
 
 bool BattleSystem::tryEscape() {
     if (phase_ != Input) return false;
+    if (!canEscape_) {
+        emit(BattleEvent::Message, -1, -1, 0, "Tidak ada jalan untuk kabur!");
+        return false;
+    }
     float pAgi = 0, eAgi = 0;
     int pn = 0, en = 0;
     for (int i = 0; i < count_; ++i) {

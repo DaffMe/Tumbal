@@ -63,6 +63,7 @@ void Game::update(float dt, const GameInput& in) {
             battleEnemyIndex_ = ev.enemyIndex;
             break;
         case FieldEvent::Touch: {
+            if (hidden(*ev.object)) break;
             std::string name = ev.object->props.getString("event");
             std::string once = ev.object->props.getString("once");
             if (once.empty() || state_.flag(once) == 0) interp_.runEvent(name);
@@ -85,6 +86,7 @@ void Game::interact() {
         for (const MapObject* o = m->objects(); o != nullptr; o = o->next) {
             int ox = o->tileX(m->tileW()), oy = o->tileY(m->tileH());
             if (ox != t[0] || oy != t[1]) continue;
+            if (hidden(*o)) continue;
             if (o->type == "tungku") { restAt(*o); return; }
             if (o->type == "loot" && tryLoot(o)) return;
             if (o->type == "npc" || (o->type == "event" && o->props.getString("trigger", "action") == "action")) {
@@ -155,6 +157,7 @@ void Game::checkBloodstain() {
 void Game::setupBattle(BattleSystem& bs, std::uint32_t seed) {
     bs.setup(&state_.hero(), 1, battleTroop_, static_cast<Initiative>(battleInit_), seed);
     bs.setInventory(&state_);
+    bs.setCanEscape(battleEnemyIndex_ >= 0);   // battle dari event (boss) tidak bisa dikabur
 }
 
 void Game::endBattle(const BattleSystem& bs) {

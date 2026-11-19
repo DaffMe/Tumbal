@@ -82,6 +82,9 @@ public:
     GameState& state() { return state_; }
     const GameState& state() const { return state_; }
     bool justEnteredMap() const { return enteredMap_; }
+    bool hidden(const MapObject& o) const {
+        return state_.hidden(o.props.getString("hideIf"), o.props.getString("showIf"));
+    }
 
     // EventHost (dipakai Interpreter)
     void hostStartBattle(int troopId) override;

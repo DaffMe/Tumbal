@@ -74,6 +74,8 @@ public:
     bool submit(const BattleAction& action);
     // Barang: tas pemain (boleh nullptr = tanpa barang).
     void setInventory(ItemBag* bag) { bag_ = bag; }
+    void setCanEscape(bool can) { canEscape_ = can; }
+    bool canEscape() const { return canEscape_; }
     const ItemBag* inventory() const { return bag_; }
     bool canUseItem(int battler, int itemId) const;
     bool validItemTarget(int user, int itemId, int target) const;
@@ -114,6 +116,7 @@ private:
     int     sukma_ = 0;
     int     escapeFails_ = 0;
     ItemBag* bag_ = nullptr;
+    bool    canEscape_ = true;
 
     void useItem(Battler& user, const BattleAction& a);
 

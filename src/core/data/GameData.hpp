@@ -78,6 +78,7 @@ enum SkillIdList {
     SKL_PANAH_SUKMA, SKL_API_TUNGKU, SKL_SEMBUH,
     // jurus musuh
     SKL_GIGIT, SKL_CAKAR_BUSUK, SKL_LUDAH_RACUN, SKL_RAUNG, SKL_HANTAM_GUNCANG, SKL_RAPAL_KUTUK,
+    SKL_RAHANG_SANGIT, SKL_PECAH_BUSUK, SKL_CAKAR_JERAMI, SKL_TEBAR_BIJI, SKL_RITUAL_PANEN, SKL_LOLONG_SAWAH,
     SKL_COUNT
 };
 const SkillDef* skillDef(int id);
@@ -101,7 +102,11 @@ struct EnemyDef {
     const char* walker;             // sprite peta (assets/chars/...)
 };
 
-enum EnemyIdList { EN_TUMBAL_GAGAL = 1, EN_TIKUS_LUMBUNG, EN_BELATUNG, EN_PENJAGA_LUMBUNG, EN_COUNT };
+enum EnemyIdList {
+    EN_TUMBAL_GAGAL = 1, EN_TIKUS_LUMBUNG, EN_BELATUNG, EN_PENJAGA_LUMBUNG,
+    EN_BELALANG_SANGIT, EN_TIMUN_BUSUK, EN_MEMEDI_SAWAH,
+    EN_COUNT
+};
 const EnemyDef* enemyDef(int id);
 
 struct TroopDef {
@@ -110,7 +115,11 @@ struct TroopDef {
     int         members[4];
     int         count;
 };
-enum TroopIdList { TR_TUMBAL_GAGAL = 1, TR_TIKUS_2, TR_TUMBAL_TIKUS, TR_BELATUNG_3, TR_PENJAGA, TR_COUNT };
+enum TroopIdList {
+    TR_TUMBAL_GAGAL = 1, TR_TIKUS_2, TR_TUMBAL_TIKUS, TR_BELATUNG_3, TR_PENJAGA,
+    TR_BELALANG_2, TR_TIMUN_BELALANG, TR_TIMUN_2, TR_MEMEDI,
+    TR_COUNT
+};
 const TroopDef* troopDef(int id);
 
 // ---------------------------------------------------------------- kelas
@@ -144,7 +153,7 @@ struct ItemDef {
 
 enum ItemIdList {
     IT_JAMU = 1, IT_PENAWAR, IT_SUKMA_KECIL, IT_SUKMA_SEDANG, IT_BOM_MINYAK, IT_ABU_PULANG, IT_KUNCI_SEL,
-    IT_COUNT
+    IT_BIJI_TIMUN, IT_COUNT
 };
 const ItemDef* itemDef(int id);
 int itemIdByKey(const char* key);   // 0 bila tidak ada
