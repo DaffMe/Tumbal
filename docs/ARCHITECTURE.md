@@ -41,6 +41,7 @@ GUI dan console memanggil **API core yang sama**. Itu sebabnya `--console` bisa 
 | `src/core/util/Rng.hpp` | RNG xorshift deterministik (ikut disimpan di snapshot) |
 | `src/core/util/Format.hpp` | Helper format string |
 | `src/console/ConsoleGame.*` | Mode console: battle cepat & ekspedisi, trace operasi struktur data |
+| `src/console/Balance.*` | Simulator balancing `--balance` (pemain heuristik, laporan win rate) |
 | `src/gui/App.*` | Loop utama & perpindahan scene (Title, Map, Battle, Death, Won) |
 | `src/gui/MapView.*` | Gambar Graph lantai, input perjalanan, modal shrine/toko/event/relic |
 | `src/gui/BattleView.*` | Gambar battle, memutar Event Queue jadi animasi, input skill/target |

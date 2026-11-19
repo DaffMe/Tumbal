@@ -3,7 +3,8 @@
 Dungeon crawler turn-based bertema dark fantasy, dibuat untuk **Tugas Besar Struktur Data — Semester Ganjil 2026/2027**.
 Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**. GUI memakai **raylib** sebagai antarmuka saja.
 
-> Status: **Fase 4 — aset & audio** (ekspedisi 3 lantai bisa dimainkan penuh dengan GUI raylib, aset visual final dari Codex, audio prosedural). Rencana lengkap ada di [docs/PLAN.md](docs/PLAN.md).
+> Status: **Fase 5 — siap demo.** Ekspedisi 3 lantai bisa dimainkan penuh dengan GUI raylib, aset visual final, audio prosedural, dan sudah di-balancing lewat simulasi.
+> Dokumen: [PLAN](docs/PLAN.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [DEMO_SCRIPT](docs/DEMO_SCRIPT.md) · [ART_BIBLE](docs/ART_BIBLE.md)
 
 ## Mekanik yang direplikasi
 
@@ -37,6 +38,7 @@ Pastikan `C:\msys64\ucrt64\bin` ada di `PATH`, lalu dari folder proyek:
 mingw32-make test   # build + jalankan unit test ADT dan mekanik
 mingw32-make run    # build + jalankan game (GUI)
 bin/cinderwake.exe --console   # mode console
+bin/cinderwake.exe --balance 200   # simulasi balancing otomatis
 ```
 
 ### Kontrol GUI
@@ -52,6 +54,7 @@ bin/cinderwake.exe --console   # mode console
 | **`Tab`** | **Inspector struktur data**: node Timeline + pointer prev/next, Stack rewind, Event Queue, adjacency list Graph, log operasi |
 | `F11` | Layar penuh |
 | `M` | Bisukan / nyalakan suara |
+| `F3` (peta) / `F2` (battle) | Bantuan demo: ungkap seluruh peta / isi penuh Resolve semua hero |
 
 Logika di GUI dan console sama persis: GUI hanya memanggil `Run`/`Battle` di `src/core` lalu menganimasikan isi Battle Event Queue.
 
@@ -72,6 +75,18 @@ Logika di GUI dan console sama persis: GUI hanya memanggil `Run`/`Battle` di `sr
 
 Aksi: `1-3` skill, `i` Interject (Resolve 100%), `r` Rewind (Cracked Hourglass), `a` di menu untuk mode lentera gelap (ambush).
 
+## Balancing
+
+`--balance` memainkan ratusan battle dan run penuh dengan pemain heuristik (memakai core yang sama). Hasil terakhir (300 percobaan per baris):
+
+| Encounter | Menang | HP party tersisa |
+|---|---|---|
+| Battle biasa lantai 1–3 | 94–100% | 70–85% |
+| Boss 1 — The Choir Warden | 99% | 74% |
+| Boss 2 — Sister of Ash | 93% | 79% |
+| Boss 3 — The Last Flame | 64% | 58% |
+| Run penuh 3 lantai | 96% tamat | rata-rata 0,6 kematian |
+
 ## Aset visual & audio
 
 - Aset visual dibuat dengan **Codex (image generation)** mengikuti [docs/ART_BIBLE.md](docs/ART_BIBLE.md), disimpan mentah di `assets/raw/`.
@@ -87,12 +102,12 @@ Aksi: `1-3` skill, `i` Interject (Resolve 100%), `r` Rewind (Cracked Hourglass),
 
 ```
 src/core/      ADT + logika mekanik (C++ murni, tidak bergantung raylib)
-src/gui/       tampilan raylib (scene peta & battle, Inspector, shader, placeholder art)
-src/console/   mode console (logika yang sama tanpa GUI)
+src/gui/       tampilan raylib (scene peta & battle, Inspector, shader, art, audio)
+src/console/   mode console (logika yang sama tanpa GUI) + simulator balancing
 tests/         unit test
 tools/         skrip post-process aset
 assets/        aset visual & audio
-docs/          rencana, art bible, skrip demo
+docs/          rencana, arsitektur, art bible, skrip demo
 ```
 
 ## Anggota kelompok

@@ -27,6 +27,7 @@ mingw32-make run        # jalankan GUI
 bin/cinderwake.exe --console   # mode console
 bin/cinderwake.exe --shots     # screenshot otomatis beberapa scene (shot_*.png)
 bin/cinderwake.exe --gallery   # screenshot semua aset (gallery_*.png)
+bin/cinderwake.exe --balance 200   # simulasi balancing (jalankan ulang setelah mengubah stat/skill)
 /c/msys64/ucrt64/bin/python.exe tools/process_assets.py   # assets/raw → assets/final
 ```
 
