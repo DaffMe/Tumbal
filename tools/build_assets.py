@@ -70,6 +70,12 @@ def build_characters():
         ('medievalshirt+nt+nl+na+0b.png', KAIN_LURIK),
         ('bandana.png', KAIN_COKLAT),
     ])
+    # Lelaki Tua: tumbal lama yang dibiarkan membusuk di sel
+    character('lelaki_tua.png', body((150, 128, 104)) + [
+        ('loincloth+nl+nt.png', (84, 70, 52)),
+        ('full_beard.png', (190, 186, 176)),
+        ('short_receding.png', (190, 186, 176)),
+    ])
     # Musuh di peta (sprite simbol)
     KULIT_MAYAT = (128, 138, 112)
     character('tumbal_gagal.png', body(KULIT_MAYAT) + [

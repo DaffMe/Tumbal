@@ -197,8 +197,8 @@ def map_sel_tumbal():
         "################################",
         "####....#####....#####....######",
         "####....#####....#####..L.######",
-        "####.S..#####....#####....######",
-        "####....#####.L..#####....######",
+        "####.S..#####....#####.N..######",
+        "####....#####.K..#####....######",
         "#####.#########.#########.######",
         "#####.#########.#########.######",
         "#####.#########.#########.######",
@@ -214,12 +214,16 @@ def map_sel_tumbal():
     b.props.update(nama='Sel Tumbal', musik='lumbung', gelap=0.72, battleback='assets/battlebacks/lumbung.png')
     marks = {
         'S': lambda b, x, y: b.obj('spawn', x, y, name='awal', dir=0),
-        'L': lambda b, x, y: b.obj('loot', x, y, item='sukma_kecil'),
+        'L': lambda b, x, y: b.obj('loot', x, y, item='penawar'),
+        'K': lambda b, x, y: b.obj('loot', x, y, event='mayat_sel'),
+        'N': lambda b, x, y: (b.obj('npc', x, y, name='lelaki_tua', event='lelaki_tua',
+                                    walker='assets/chars/lelaki_tua.png', dir=0), b.block(x, y)),
         'M': lambda b, x, y: b.obj('enemy', x, y, troop=TR_TUMBAL_GAGAL, walker='assets/chars/tumbal_gagal.png', dir=1),
         'A': lambda b, x, y: (b.arch(x, y, to=LORONG_LUMBUNG, spawn='dari_sel'),
                               b.obj('spawn', x, y, name='dari_lorong', dir=0)),
     }
     b.build_dungeon(marks)
+    b.obj('event', 0, 0, name='pembuka', event='pembuka', trigger='auto', once='pembuka')
     # hiasan sel: ceruk tengkorak & rantai di muka tembok, tulang di lantai
     b.deco(6, 1, 57)
     b.deco(15, 1, 56)
@@ -257,7 +261,7 @@ def map_lorong_lumbung():
     b = MapBuilder('Lorong Lumbung', rows, ['dungeon', 'bata', 'tabrak'])
     b.props.update(nama='Lorong Lumbung', musik='lumbung', gelap=0.78, battleback='assets/battlebacks/lumbung.png')
     marks = {
-        'L': lambda b, x, y: b.obj('loot', x, y, item='sukma_kecil'),
+        'L': lambda b, x, y: b.obj('loot', x, y, item=('sukma_kecil' if y < 10 else 'abu_pulang')),
         'B': lambda b, x, y: (b.arch(x, y, to=SEL_TUMBAL, spawn='dari_lorong'),
                               b.obj('spawn', x, y, name='dari_sel', dir=0)),
         'A': lambda b, x, y: (b.obj('tungku', x, y, name='tungku_lumbung'), b.block(x, y)),
@@ -270,6 +274,8 @@ def map_lorong_lumbung():
     b.deco(28, 3, 97); b.deco(28, 4, 105, solid=True)
     b.deco(8, 2, 57); b.deco(25, 2, 56); b.deco(33, 2, 58); b.deco(33, 1, 58, layer='tembok')
     b.deco(20, 6, 64); b.deco(30, 14, 65)
+    b.obj('event', 8, 2, name='goresan', event='goresan_dinding', trigger='action')
+    b.obj('event', 30, 10, name='aula_peringatan', event='aula_peringatan', trigger='touch', once='aula_peringatan')
     b.save('lorong_lumbung.tmj')
 
 

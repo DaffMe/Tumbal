@@ -1,0 +1,66 @@
+{
+  "pembuka": [
+    {"cmd": "text", "who": "", "text": "Dingin. Bau timun busuk bercampur anyir darah."},
+    {"cmd": "text", "who": "", "text": "Kamu terbangun di atas jerami basah. Tali ijuk di lehermu putus, ujungnya masih basah oleh sesuatu."},
+    {"cmd": "text", "who": "", "text": "Di luar sel, sesuatu menyeret kakinya pelan-pelan. Lumbung ini bukan tempat menyimpan padi."},
+    {"cmd": "notice", "text": "Z: periksa / pilih    X: batal & menu    Shift: berlari"},
+    {"cmd": "flag", "name": "pembuka", "value": 1}
+  ],
+
+  "lelaki_tua": [
+    {"cmd": "if_flag", "name": "tua_kenal", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "Lelaki Tua", "text": "...Kau bangun? Mereka tidak pernah bangun."},
+        {"cmd": "text", "who": "Lelaki Tua", "text": "Desa di atas sana menanam kita seperti benih timun. Saat musimnya tiba, Buto Ijo turun memanen."},
+        {"cmd": "flag", "name": "tua_kenal", "value": 1}
+      ],
+      "else": [
+        {"cmd": "text", "who": "Lelaki Tua", "text": "Masih di sini, Nak? Lumbung ini lapar. Jangan biarkan dia mengunyahmu dua kali."}
+      ]},
+    {"cmd": "choice", "options": ["Siapa kau?", "Bagaimana aku keluar?", "Pergi"], "branches": [
+      [
+        {"cmd": "text", "who": "Lelaki Tua", "text": "Tumbal tiga musim lalu. Buto tidak suka daging tua, jadi aku dibiarkan membusuk di sini."},
+        {"cmd": "text", "who": "Lelaki Tua", "text": "Kadang aku lupa namaku sendiri. Yang kuingat hanya bunyi lesung di desa pada malam panen."}
+      ],
+      [
+        {"cmd": "text", "who": "Lelaki Tua", "text": "Gerbang lengkung di ujung lorong menuju aula. Di sana ada Tungku: bara yang tidak pernah padam."},
+        {"cmd": "text", "who": "Lelaki Tua", "text": "Beristirahatlah di dekatnya bila tubuhmu remuk. Tapi ingat... setiap kau beristirahat, yang mati di lumbung ini ikut bangun lagi."},
+        {"cmd": "text", "who": "Lelaki Tua", "text": "Dan bila kau mati, sukmamu tercecer di tempat kau jatuh. Pungut kembali sebelum kau mati lagi."}
+      ],
+      []
+    ]},
+    {"cmd": "if_flag", "name": "tua_beri", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "Lelaki Tua", "text": "Ambil ini. Ramuan Jamu. Dulu ada perempuan desa yang selalu menyelipkannya ke tangan tumbal... entah untuk menolong, entah untuk menenangkan hatinya sendiri."},
+        {"cmd": "item", "item": "jamu", "n": 1},
+        {"cmd": "flag", "name": "tua_beri", "value": 1}
+      ],
+      "else": []}
+  ],
+
+  "mayat_sel": [
+    {"cmd": "text", "who": "", "text": "Mayat seorang anak, meringkuk menghadap dinding. Jemarinya menggenggam sesuatu."},
+    {"cmd": "choice", "options": ["Buka genggamannya", "Biarkan"], "branches": [
+      [
+        {"cmd": "text", "who": "", "text": "Jemari kecil itu dingin dan kaku. Kamu membukanya satu per satu."},
+        {"cmd": "item", "item": "sukma_kecil", "n": 1},
+        {"cmd": "item", "item": "bom_minyak", "n": 1}
+      ],
+      [
+        {"cmd": "text", "who": "", "text": "Kamu meninggalkannya. Untuk sekarang."}
+      ]
+    ]}
+  ],
+
+  "goresan_dinding": [
+    {"cmd": "text", "who": "", "text": "Goresan kuku memenuhi dinding. Sebagian sudah tertutup lumut."},
+    {"cmd": "text", "who": "", "text": "\"EMPAT BEKAL. TIMUN, JARUM, GARAM, TERASI. JANGAN BERHENTI BERLARI.\""},
+    {"cmd": "text", "who": "", "text": "Di bawahnya, dengan tulisan lain yang lebih kasar: \"Dia tidak pernah berhenti mengejar.\""}
+  ],
+
+  "aula_peringatan": [
+    {"cmd": "text", "who": "", "text": "Lantai di depan penuh retakan. Sesuatu yang besar bernapas di kegelapan aula atas."},
+    {"cmd": "text", "who": "", "text": "Ia mengangkat senjatanya tinggi-tinggi sebelum menghantam. Saat itulah ia lengah."},
+    {"cmd": "flag", "name": "aula_peringatan", "value": 1}
+  ]
+}
