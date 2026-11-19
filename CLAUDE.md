@@ -33,6 +33,7 @@ bin/tumbal.exe --console   # mode console
 bin/tumbal.exe --shots     # screenshot otomatis beberapa scene (shot_*.png)
 /c/msys64/ucrt64/bin/python.exe tools/build_assets.py   # assets/src → assets/tiles, assets/chars
 /c/msys64/ucrt64/bin/python.exe tools/make_maps.py      # tata letak ASCII → assets/maps/*.tmj + world.json
+/c/msys64/ucrt64/bin/python.exe tools/render_maps.py    # pratinjau seluruh peta → docs/map_preview/*.png
 ```
 
 Toolchain: MSYS2 UCRT64 (g++, raylib 6 dari pacman, Python + Pillow). Makefile jalan dari bash maupun PowerShell.
@@ -61,7 +62,9 @@ GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari, Z = a
   Konvensi: layer `collision` (≠0 = terhalang), property layer `above` = digambar di atas karakter, objek bertipe
   `spawn`, `door` (`to`, `spawn`, `locked`, `oneway`), `tungku`, `loot`. Property peta `nama`, `gelap` (0..1).
 - Objek `prop` = gambar besar (rumah, pohon) dari `assets/props/` (dibuat `build_props()`), digambar terurut-y
-  bersama karakter; generator memblokir tapak bawahnya (`MapBuilder.prop`).
+  bersama karakter; generator memblokir tapak bawahnya (`MapBuilder.prop`). Property `flat` = selalu di bawah
+  karakter (dermaga). Hiasan kecil acak: `MapBuilder.scatter` (tileset `dekor.png`, layer `hiasan`) dan
+  `scatter_props`. Objek event/npc boleh lebih lebar dari 1 tile (`w`); diperiksa dari ubin mana pun di dalamnya.
 - Objek peta lain: `npc` (`event`, `walker`, `dir`, `once`, `after`), `event` (`event`, `trigger` = action/touch/auto,
   `once` = flag yang menandai sudah terjadi), `loot` (`item` + `n`, atau `event`), `enemy` (`troop`, `walker`, `dir`).
 - Skrip event = JSON di `assets/events/*.json` (perintah: text, choice, item, sukma, flag, if_flag, if_item, battle,
