@@ -16,3 +16,4 @@ inline int g_fail = 0;
 
 void runAdtTests();
 void runWorldTests();
+void runBattleTests();

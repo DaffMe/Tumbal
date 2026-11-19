@@ -1,20 +1,21 @@
 #pragma once
 // ============================================================================
-// Timeline — Doubly Linked List terurut berdasarkan Action Value (AV).
-// Struktur data utama Mekanik M1 (Action Timeline).
+// Timeline — Doubly Linked List terurut berdasarkan sisa waktu sampai giliran.
+// Struktur data utama Mekanik M1 (battle ATB + antrean giliran).
 //
-// Setiap node menyimpan satu unit beserta sisa AV-nya. List selalu terurut
-// menaik: head = unit dengan AV terkecil = unit yang bertindak berikutnya.
+// Setiap node menyimpan satu battler beserta sisa waktunya (field `av`, dalam
+// tick ATB). List selalu terurut
+// menaik: head = sisa waktu terkecil = battler yang bertindak berikutnya.
 //
 // Kenapa Doubly Linked List:
-//   - Delay/advance mengubah AV unit di tengah list → node harus dipindah.
+//   - Stun/haste/rapal mengubah sisa waktu battler di tengah list → node harus dipindah.
 //     Dengan linked list cukup lepas (unlink) lalu sambungkan ulang (relink)
 //     pointer; tidak ada pergeseran elemen seperti pada array.
 //   - Pointer prev membuat node bisa bergeser MUNDUR (ke arah head) saat
 //     di-advance tanpa mengulang traversal dari head.
 //   - Unit mati dihapus dari posisi mana pun; summon disisipkan terurut.
 //
-// T adalah tipe payload (nanti: Unit). Timeline hanya menyimpan pointer,
+// T adalah tipe payload (Battler). Timeline hanya menyimpan pointer,
 // tidak memiliki (own) objek unitnya.
 // ============================================================================
 

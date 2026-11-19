@@ -1,0 +1,150 @@
+#include "GameData.hpp"
+
+const char* elementName(int el) {
+    static const char* names[EL_COUNT] = {"-", "Fisik", "Api", "Air", "Angin", "Tanah", "Gaib"};
+    return (el >= 0 && el < EL_COUNT) ? names[el] : "?";
+}
+
+// ------------------------------------------------------------------ status
+static const StatusDef STATUS[ST_COUNT] = {
+    //  nama        singkat turn dot    skip   agi    dmgIn  hitRm  battleOnly
+    {"-",          "",     0,  0.00f, false, 1.0f,  1.0f,  false, true},
+    {"Racun",      "RCN",  5,  0.05f, false, 1.0f,  1.0f,  false, false},
+    {"Berdarah",   "DRH",  4,  0.05f, false, 1.0f,  1.0f,  false, true},
+    {"Terbakar",   "BKR",  2,  0.08f, false, 1.0f,  1.0f,  false, true},
+    {"Lumpuh",     "LMP",  1,  0.00f, true,  1.0f,  1.0f,  false, true},
+    {"Tidur",      "TDR",  3,  0.00f, true,  1.0f,  1.0f,  true,  true},
+    {"Bisu",       "BSU",  3,  0.00f, false, 1.0f,  1.0f,  false, true},
+    {"Takut",      "TKT",  3,  0.00f, false, 0.5f,  1.0f,  false, true},
+    {"Rapuh",      "RPH",  3,  0.00f, false, 1.0f,  1.5f,  false, true},
+    {"Cepat",      "CPT",  3,  0.00f, false, 2.0f,  1.0f,  false, true},
+    {"Lambat",     "LBT",  3,  0.00f, false, 0.5f,  1.0f,  false, true},
+    {"Bertahan",   "THN",  1,  0.00f, false, 1.0f,  0.5f,  false, true},
+    {"Elak",       "ELK",  1,  0.00f, false, 1.0f,  1.0f,  false, true},
+    {"Tangkis",    "TKS",  1,  0.00f, false, 1.0f,  1.0f,  false, true},
+};
+
+const StatusDef& statusDef(int id) {
+    if (id <= 0 || id >= ST_COUNT) return STATUS[0];
+    return STATUS[id];
+}
+
+// ------------------------------------------------------------------ jurus
+// id, nama, deskripsi, tipe, scope, mp, rumus, dasar, mul, elemen, rapal, status, peluang, delay%, hits
+static const SkillDef SKILLS[] = {
+    {SKL_SERANG, "Serang", "Serangan biasa dengan senjata.",
+     SK_SERANG, SC_MUSUH_SATU, 0, FM_FISIK, 0, 1.0f, EL_FISIK, 0, ST_NONE, 0, 0, 1},
+    {SKL_BERTAHAN, "Bertahan", "Damage yang diterima berkurang separuh sampai giliran berikutnya.",
+     SK_DUKUNG, SC_DIRI, 0, FM_NONE, 0, 0.0f, EL_NONE, 0, ST_BERTAHAN, 100, 0, 1},
+    {SKL_ELAK, "Elak", "Menghindari semua serangan sampai giliran berikutnya.",
+     SK_JURUS, SC_DIRI, 3, FM_NONE, 0, 0.0f, EL_NONE, 0, ST_ELAK, 100, 0, 1},
+    {SKL_TANGKIS, "Tangkis", "Membalas setiap serangan fisik x1.5 sampai giliran berikutnya.",
+     SK_JURUS, SC_DIRI, 5, FM_NONE, 0, 0.0f, EL_NONE, 0, ST_TANGKIS, 100, 0, 1},
+    {SKL_TEBAS_BERAT, "Tebas Berat", "Ayunan penuh tenaga. Perlu ancang-ancang sebentar.",
+     SK_JURUS, SC_MUSUH_SATU, 6, FM_FISIK, 0, 1.6f, EL_FISIK, 1200, ST_NONE, 0, 15, 1},
+    {SKL_SAPUAN, "Sapuan", "Menyapu semua musuh dan menunda giliran mereka.",
+     SK_JURUS, SC_MUSUH_SEMUA, 8, FM_FISIK, 0, 0.8f, EL_FISIK, 0, ST_NONE, 0, 20, 1},
+    {SKL_TUSUK_CEPAT, "Tusuk Cepat", "Dua tusukan kilat. Bisa membuat berdarah.",
+     SK_JURUS, SC_MUSUH_SATU, 5, FM_FISIK, 0, 0.7f, EL_FISIK, 0, ST_BERDARAH, 35, 0, 2},
+    {SKL_SERANGAN_GUNCANG, "Hantaman Guncang", "Pukulan ke kepala: menunda giliran target jauh ke belakang.",
+     SK_JURUS, SC_MUSUH_SATU, 7, FM_FISIK, 0, 0.9f, EL_FISIK, 0, ST_NONE, 0, 45, 1},
+    {SKL_PANAH_SUKMA, "Panah Sukma", "Melontarkan sukma sebagai anak panah.",
+     SK_ILMU, SC_MUSUH_SATU, 6, FM_ILMU, 60, 1.0f, EL_GAIB, 0, ST_NONE, 0, 0, 1},
+    {SKL_API_TUNGKU, "Api Tungku", "Bara Tungku menyembur ke semua musuh. Rapal lama.",
+     SK_ILMU, SC_MUSUH_SEMUA, 12, FM_ILMU, 120, 1.0f, EL_API, 2400, ST_TERBAKAR, 40, 0, 1},
+    {SKL_SEMBUH, "Jampi Sembuh", "Memulihkan HP satu kawan.",
+     SK_ILMU, SC_KAWAN_SATU, 5, FM_PULIH, 150, 1.0f, EL_NONE, 800, ST_NONE, 0, 0, 1},
+    // ---- musuh
+    {SKL_GIGIT, "Gigit", "Gigitan kotor yang bisa meracuni.",
+     SK_JURUS, SC_MUSUH_SATU, 0, FM_FISIK, 0, 1.0f, EL_FISIK, 0, ST_RACUN, 30, 0, 1},
+    {SKL_CAKAR_BUSUK, "Cakar Busuk", "Cakaran kuku hitam. Bisa membuat berdarah.",
+     SK_JURUS, SC_MUSUH_SATU, 0, FM_FISIK, 0, 1.15f, EL_FISIK, 0, ST_BERDARAH, 30, 0, 1},
+    {SKL_LUDAH_RACUN, "Ludah Racun", "Menyemburkan lendir beracun.",
+     SK_ILMU, SC_MUSUH_SATU, 0, FM_ILMU, 30, 0.8f, EL_AIR, 0, ST_RACUN, 60, 0, 1},
+    {SKL_RAUNG, "Raung", "Raungan yang membuat ciut nyali.",
+     SK_JURUS, SC_MUSUH_SEMUA, 0, FM_NONE, 0, 0.0f, EL_NONE, 0, ST_TAKUT, 70, 0, 1},
+    {SKL_HANTAM_GUNCANG, "Hantam Tanah", "Mengangkat gada tinggi-tinggi... lalu menghantam. Bersiaplah!",
+     SK_JURUS, SC_MUSUH_SATU, 0, FM_FISIK, 0, 2.2f, EL_FISIK, 2000, ST_NONE, 0, 40, 1},
+    {SKL_RAPAL_KUTUK, "Kutuk Lumbung", "Mantra busuk yang membuat tubuh rapuh.",
+     SK_ILMU, SC_MUSUH_SATU, 0, FM_ILMU, 40, 0.9f, EL_GAIB, 1600, ST_RAPUH, 80, 0, 1},
+};
+static const int SKILL_COUNT = sizeof(SKILLS) / sizeof(SKILLS[0]);
+
+const SkillDef* skillDef(int id) {
+    for (int i = 0; i < SKILL_COUNT; ++i)
+        if (SKILLS[i].id == id) return &SKILLS[i];
+    return nullptr;
+}
+
+// ------------------------------------------------------------------ musuh
+//                        -     fisik api   air   angin tanah gaib
+#define RATES_NORMAL     {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}
+#define RATES_MAYAT      {1.0f, 1.0f, 1.5f, 1.0f, 1.0f, 1.0f, 1.5f}
+#define RATES_SERANGGA   {1.0f, 1.0f, 2.0f, 0.5f, 1.0f, 1.0f, 1.0f}
+
+static const EnemyDef ENEMIES[] = {
+    {EN_TUMBAL_GAGAL, "Tumbal Gagal", {90, 0, 30, 6, 5, 5, 30, 8}, 15, RATES_MAYAT,
+     {{SKL_SERANG, 5, 100}, {SKL_CAKAR_BUSUK, 4, 100}}, 2,
+     "assets/battlers/tumbal_gagal.png", "assets/chars/tumbal_gagal.png"},
+    {EN_TIKUS_LUMBUNG, "Tikus Lumbung", {60, 0, 26, 4, 5, 5, 55, 10}, 8, RATES_NORMAL,
+     {{SKL_SERANG, 5, 100}, {SKL_GIGIT, 5, 100}}, 2,
+     "assets/battlers/tikus_lumbung.png", "assets/chars/tikus.png"},
+    {EN_BELATUNG, "Belatung Lumbung", {70, 20, 22, 10, 10, 5, 20, 5}, 10, RATES_SERANGGA,
+     {{SKL_SERANG, 5, 100}, {SKL_LUDAH_RACUN, 4, 100}}, 2,
+     "assets/battlers/belatung.png", "assets/chars/belatung.png"},
+    {EN_PENJAGA_LUMBUNG, "Penjaga Lumbung", {520, 40, 44, 12, 18, 14, 26, 10}, 220, RATES_MAYAT,
+     {{SKL_SERANG, 5, 100}, {SKL_HANTAM_GUNCANG, 5, 100}, {SKL_RAUNG, 3, 60}, {SKL_RAPAL_KUTUK, 4, 100}}, 4,
+     "assets/battlers/penjaga_lumbung.png", "assets/chars/penjaga_lumbung.png"},
+};
+static const int ENEMY_COUNT = sizeof(ENEMIES) / sizeof(ENEMIES[0]);
+
+const EnemyDef* enemyDef(int id) {
+    for (int i = 0; i < ENEMY_COUNT; ++i)
+        if (ENEMIES[i].id == id) return &ENEMIES[i];
+    return nullptr;
+}
+
+static const TroopDef TROOPS[] = {
+    {TR_TUMBAL_GAGAL, "Tumbal Gagal", {EN_TUMBAL_GAGAL}, 1},
+    {TR_TIKUS_2, "Tikus Lumbung x2", {EN_TIKUS_LUMBUNG, EN_TIKUS_LUMBUNG}, 2},
+    {TR_TUMBAL_TIKUS, "Tumbal & Tikus", {EN_TUMBAL_GAGAL, EN_TIKUS_LUMBUNG}, 2},
+    {TR_BELATUNG_3, "Belatung x3", {EN_BELATUNG, EN_BELATUNG, EN_BELATUNG}, 3},
+    {TR_PENJAGA, "Penjaga Lumbung", {EN_PENJAGA_LUMBUNG}, 1},
+};
+static const int TROOP_COUNT = sizeof(TROOPS) / sizeof(TROOPS[0]);
+
+const TroopDef* troopDef(int id) {
+    for (int i = 0; i < TROOP_COUNT; ++i)
+        if (TROOPS[i].id == id) return &TROOPS[i];
+    return nullptr;
+}
+
+// ------------------------------------------------------------------ kelas
+// Stat awal mengikuti tiga kelas awal Black Souls (Ksatria/Maling/Penyihir).
+static const ClassDef CLASSES[KL_COUNT] = {
+    {"Pendekar", "Kuat dan tahan pukul.",
+     {386, 100, 16, 16, 10, 10, 40, 10}, {52, 2, 3, 3, 2, 2, 4, 3},
+     {SKL_SERANG, SKL_ELAK, SKL_TANGKIS, SKL_TEBAS_BERAT, SKL_SAPUAN}, 5},
+    {"Maling", "Gesit; bertindak lebih sering. Membawa sukma curian.",
+     {386, 100, 10, 10, 10, 10, 50, 14}, {48, 2, 3, 2, 2, 2, 5, 4},
+     {SKL_SERANG, SKL_ELAK, SKL_TANGKIS, SKL_TUSUK_CEPAT, SKL_SERANGAN_GUNCANG}, 5},
+    {"Pawang", "Menguasai ilmu sukma.",
+     {386, 120, 10, 10, 16, 16, 40, 10}, {46, 4, 2, 2, 4, 3, 4, 3},
+     {SKL_SERANG, SKL_ELAK, SKL_TANGKIS, SKL_PANAH_SUKMA, SKL_API_TUNGKU, SKL_SEMBUH}, 6},
+};
+
+const ClassDef& classDef(int id) {
+    if (id < 0 || id >= KL_COUNT) return CLASSES[0];
+    return CLASSES[id];
+}
+
+Stats statsAtLevel(int classId, int level) {
+    const ClassDef& c = classDef(classId);
+    int n = level > 1 ? level - 1 : 0;
+    Stats s = c.base;
+    s.mhp += c.growth.mhp * n; s.mmp += c.growth.mmp * n;
+    s.atk += c.growth.atk * n; s.def += c.growth.def * n;
+    s.mag += c.growth.mag * n; s.res += c.growth.res * n;
+    s.agi += c.growth.agi * n; s.luk += c.growth.luk * n;
+    return s;
+}

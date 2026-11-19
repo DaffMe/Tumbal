@@ -111,8 +111,59 @@ static void testWorldAndField() {
     CHECK(world.nearestTungku(1) == 2);     // lorong sudah dikunjungi lewat travel
 }
 
+static void testSymbolEncounter() {
+    SECTION("Musuh terlihat: arah kontak, kalah, istirahat di Tungku");
+    World world;
+    std::string err;
+    if (!world.load(worldPath(), &err)) { CHECK(false); return; }
+    Field f(world);
+    CHECK(f.enter(1, 5, 5, FACE_DOWN));
+    CHECK(f.enemyCount() == 1);
+    const FieldEnemy& e = f.enemy(0);
+    int ex = e.actor.x, ey = e.actor.y;
+    CHECK(e.actor.facing == FACE_LEFT);
+
+    // dari belakang (musuh menghadap kiri, pemain di kanannya melangkah ke kiri)
+    CHECK(f.enter(1, ex + 1, ey, FACE_LEFT));
+    FieldEvent ev = f.update(0.0f, -1, 0, false);
+    CHECK(ev.kind == FieldEvent::Encounter);
+    CHECK(ev.initiative == 1);
+    CHECK(ev.troop == 1);
+
+    // dari depan → normal
+    CHECK(f.enter(1, ex - 1, ey, FACE_RIGHT));
+    ev = f.update(0.0f, 1, 0, false);
+    CHECK(ev.kind == FieldEvent::Encounter && ev.initiative == 0);
+
+    // menang → musuh hilang dan tetap hilang walau keluar-masuk peta
+    f.resolveEncounter(ev.enemyIndex, true);
+    CHECK(f.enemyAt(ex, ey) < 0);
+    CHECK(world.isDefeated(1, 0));
+    CHECK(f.enter(2, 7, 13, FACE_DOWN));
+    CHECK(f.enter(1, 5, 5, FACE_DOWN));
+    CHECK(f.enemyCount() == 0);
+
+    // istirahat di Tungku: traversal Graph menghidupkan semua musuh
+    CHECK(world.restAtTungku() == 1);
+    CHECK(!world.isDefeated(1, 0));
+    f.respawnEnemies();
+    CHECK(f.enemyCount() == 1);
+
+    // musuh mendeteksi pemain dalam 3 tile lalu mengejar sampai kontak
+    CHECK(f.enter(1, ex + 3, ey, FACE_RIGHT));
+    f.respawnEnemies();
+    bool met = false;
+    for (int i = 0; i < 600 && !met; ++i) {
+        ev = f.update(1.0f / 60.0f, 0, 0, false);
+        if (ev.kind == FieldEvent::Encounter) met = true;
+    }
+    CHECK(met);
+    CHECK(ev.initiative == 2);   // pemain membelakangi musuh → disergap
+}
+
 void runWorldTests() {
     testJson();
     testGraphLocks();
     testWorldAndField();
+    testSymbolEncounter();
 }

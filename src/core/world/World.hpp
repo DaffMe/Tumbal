@@ -23,6 +23,7 @@ struct MapInfo {
     TileMap*    map = nullptr;     // dimiliki World
     bool        visited = false;
     bool        hasTungku = false;
+    unsigned long long defeated = 0;  // bit i = musuh ke-i di peta ini sudah kalah
 };
 
 // Hasil melewati pintu: peta tujuan + tile kedatangan.
@@ -63,6 +64,14 @@ public:
     // M2 subprogram: cari peta ber-Tungku terdekat yang sudah dikunjungi
     // (BFS lewat edge terbuka). Mengembalikan id peta atau 0.
     int nearestTungku(int fromMap);
+
+    // M2 subprogram: istirahat di Tungku — telusuri SEMUA vertex Graph dan
+    // hidupkan kembali musuh di setiap peta (seperti bonfire Black Souls).
+    // Mengembalikan jumlah peta yang musuhnya dihidupkan ulang.
+    int restAtTungku();
+    // Catat musuh ke-i di peta mapId sudah dikalahkan.
+    void markDefeated(int mapId, int enemyIndex);
+    bool isDefeated(int mapId, int enemyIndex) const;
 
     // Tandai peta dikunjungi.
     void markVisited(int mapId);

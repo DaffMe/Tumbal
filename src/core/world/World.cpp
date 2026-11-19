@@ -136,3 +136,25 @@ int World::nearestTungku(int fromMap) {
 void World::markVisited(int mapId) {
     if (MapInfo* i = info(mapId)) i->visited = true;
 }
+
+int World::restAtTungku() {
+    int n = 0;
+    graph_.forEachVertex([&n](MapGraph::Vertex* v) {
+        if (v->data.defeated != 0) ++n;
+        v->data.defeated = 0;
+    });
+    dsOp("Graph.forEachVertex() -> musuh di " + std::to_string(n) + " peta hidup kembali");
+    return n;
+}
+
+void World::markDefeated(int mapId, int enemyIndex) {
+    MapInfo* i = info(mapId);
+    if (i == nullptr || enemyIndex < 0 || enemyIndex >= 64) return;
+    i->defeated |= (1ULL << enemyIndex);
+}
+
+bool World::isDefeated(int mapId, int enemyIndex) const {
+    const MapInfo* i = info(mapId);
+    if (i == nullptr || enemyIndex < 0 || enemyIndex >= 64) return false;
+    return (i->defeated >> enemyIndex) & 1ULL;
+}
