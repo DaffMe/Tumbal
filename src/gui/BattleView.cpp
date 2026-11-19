@@ -93,7 +93,8 @@ void BattleView::popup(int target, const std::string& text, Color c, float size)
 
 Vector2 BattleView::popupAnchor(int i) const {
     if (i < 0) return {VIEW_W / 2, 120};
-    if (i < bs_->partyCount()) return {300.0f, BOTTOM_Y + 4 + i * 22.0f};
+    // anggota party: di celah antara nama dan bar HP agar angka HP tidak tertimpa
+    if (i < bs_->partyCount()) return {226.0f, BOTTOM_Y + 4 + i * 22.0f};
     const Battler& b = bs_->battler(i);
     Texture2D t = Assets::get().texture(b.def ? b.def->battler : "");
     float h = t.id ? static_cast<float>(t.height) : 80.0f;
@@ -203,6 +204,7 @@ void BattleView::openCommand() {
     for (int i = 0; i < me.skillCount; ++i)
         if (me.skills[i] != SKL_SERANG) skillList_[skillCount_++] = me.skills[i];
     if (skillIndex_ >= skillCount_) skillIndex_ = 0;
+    refreshItems();   // untuk meredupkan "Barang" bila kosong
 }
 
 void BattleView::submit(int skill, int target) {
@@ -482,7 +484,10 @@ void BattleView::drawMenus(double time) {
     for (int i = 0; i < COMMAND_COUNT; ++i) {
         float y = cw.y + 6 + i * 17;
         bool sel = input && menu_ != MenuNone && i == cmdIndex_;
-        ui::text(COMMANDS[i], cw.x + 20, y, input ? (sel ? ui::AMBER : ui::BONE) : ui::DIM);
+        // perintah yang tidak bisa dipakai diredupkan (tanpa jurus/barang, boss tidak bisa dikabur)
+        bool usable = !(i == 1 && skillCount_ == 0) && !(i == 3 && itemCount_ == 0) && !(i == 4 && !bs_->canEscape());
+        Color c = !input ? ui::DIM : (!usable ? Fade(ui::DIM, 0.6f) : (sel ? ui::AMBER : ui::BONE));
+        ui::text(COMMANDS[i], cw.x + 20, y, c);
         if (sel && menu_ == MenuCommand) ui::cursor(cw.x + 8, y + 8, time);
     }
     if (!input) return;
@@ -534,7 +539,7 @@ void BattleView::drawMenus(double time) {
                          {pos_[targetIndex_].x + 7, top - 8 + bob}, ui::AMBER);
             ui::textCentered(bs_->battler(targetIndex_).name, pos_[targetIndex_].x, top - 26, ui::AMBER);
         } else {
-            ui::cursor(a.x - 175, a.y + 4, time);
+            ui::cursor(136, a.y + 4, time);
         }
     }
 }
@@ -550,7 +555,12 @@ void BattleView::drawPopups() {
         int stack = 0;
         for (auto& q : popups_) if (&q != &p && q.active && q.target == p.target && q.t < p.t) ++stack;
         float y = a.y + rise - stack * (p.size * 0.8f);
-        ui::text(p.text, a.x - ui::measure(p.text, p.size) / 2, y, Fade(p.color, alpha), p.size);
+        float x = a.x - ui::measure(p.text, p.size) / 2;
+        // garis tepi gelap agar angka terbaca di atas latar apa pun
+        for (int dx = -1; dx <= 1; ++dx)
+            for (int dy = -1; dy <= 1; ++dy)
+                if (dx || dy) ui::text(p.text, x + dx, y + dy, Fade(BLACK, 0.8f * alpha), p.size, false);
+        ui::text(p.text, x, y, Fade(p.color, alpha), p.size, false);
     }
 }
 

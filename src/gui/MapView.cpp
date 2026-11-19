@@ -198,8 +198,8 @@ void MapView::draw(const Field& field, double time, bool showCollision, const Bl
         if (hidden(o)) continue;
         if (o->type == "npc" && !o->props.getString("walker").empty())
             list.push_back({o->y / TS + 1.0f, 2, 0, o});
-        else if (o->type == "prop")
-            list.push_back({(o->y + o->h) / TS - 0.01f, 3, 0, o});
+        else if (o->type == "prop")   // prop "flat" (dermaga, papan) selalu di bawah karakter
+            list.push_back({o->props.getBool("flat") ? -1000.0f : (o->y + o->h) / TS - 0.01f, 3, 0, o});
     }
     std::stable_sort(list.begin(), list.end(), [](const Drawable& l, const Drawable& r) { return l.y < r.y; });
     for (const Drawable& d : list) {
@@ -234,6 +234,19 @@ void MapView::draw(const Field& field, double time, bool showCollision, const Bl
     }
     drawLayers(*m, true, ms);
     drawLighting(field, time);
+    // kilau barang digambar SETELAH kegelapan agar tetap terlihat (seperti kilau item BS1)
+    for (const MapObject* o = m->objects(); o != nullptr; o = o->next) {
+        if (o->type != "loot" || field.world().isCollected(field.mapId(), m->typeIndex(o))) continue;
+        float cx = o->x + TS / 2.0f - cam_.x, cy = o->y + TS / 2.0f + 6 - cam_.y;
+        if (cx < -16 || cy < -16 || cx > viewW_ + 16 || cy > viewH_ + 16) continue;
+        float ph = static_cast<float>(std::fmod(time * 0.9 + o->id * 0.37, 1.0));
+        float tw = ph < 0.35f ? std::sin(ph / 0.35f * 3.14159f) : 0.0f;      // kedip singkat berkala
+        float r = 3.0f + tw * 6.0f;
+        Color c = Fade(Color{235, 245, 255, 255}, 0.55f + 0.45f * tw);
+        DrawLineEx({cx - r, cy}, {cx + r, cy}, 1.0f, c);
+        DrawLineEx({cx, cy - r * 1.3f}, {cx, cy + r * 1.3f}, 1.0f, c);
+        DrawCircleV({cx, cy}, 1.6f + tw, Color{255, 255, 255, 240});
+    }
     if (showCollision) {
         int x0 = static_cast<int>(cam_.x) / TS, y0 = static_cast<int>(cam_.y) / TS;
         for (int y = y0; y <= y0 + viewH_ / TS + 1; ++y)

@@ -11,6 +11,7 @@ class MenuView {
 public:
     bool open() const { return open_; }
     void show() { open_ = true; page_ = Root; index_ = 0; }
+    void hide() { open_ = false; }
     // Mengembalikan pesan hasil (untuk notifikasi), kosong bila tidak ada.
     std::string update(Game& game);
     void draw(const Game& game, double time);

@@ -214,10 +214,10 @@ void App::drawHud() {
         float a = std::fmin(1.0f, bannerTime_ / 0.6f) * std::fmin(1.0f, (3.0f - bannerTime_) / 0.4f);
         float w = ui::measure(bannerText_, 32);
         float x = VIEW_W / 2 - w / 2, y = 30;
-        DrawRectangleGradientH(static_cast<int>(x - 80), static_cast<int>(y - 4), static_cast<int>(w / 2 + 80), 40,
-                               Fade(BLACK, 0.0f), Fade(BLACK, 0.6f * a));
-        DrawRectangleGradientH(static_cast<int>(x + w / 2), static_cast<int>(y - 4), static_cast<int>(w / 2 + 80), 40,
-                               Fade(BLACK, 0.6f * a), Fade(BLACK, 0.0f));
+        // dua gradien bertemu tepat di tengah (bilangan bulat) agar tidak ada garis tumpang di sambungan
+        int mid = VIEW_W / 2, half = static_cast<int>(w / 2) + 80;
+        DrawRectangleGradientH(mid - half, static_cast<int>(y - 4), half, 40, Fade(BLACK, 0.0f), Fade(BLACK, 0.6f * a));
+        DrawRectangleGradientH(mid, static_cast<int>(y - 4), half, 40, Fade(BLACK, 0.6f * a), Fade(BLACK, 0.0f));
         DrawLine(static_cast<int>(x - 40), static_cast<int>(y + 36), static_cast<int>(x + w + 40), static_cast<int>(y + 36),
                  Fade(Color{200, 170, 120, 255}, 0.7f * a));
         ui::text(bannerText_, x, y, Fade(ui::BONE, a), 32);
@@ -399,31 +399,45 @@ int App::run(bool smoke, bool shots) {
         present();
         ++frame;
         if (shots) {
-            // skenario screenshot otomatis: wilayah 2-4 & Buto Ijo
+            // skenario screenshot otomatis: kedelapan peta, dialog, battle biasa, menu, dan Buto Ijo
             Interpreter& it = game_.interpreter();
             auto go = [&](int map, int x, int y, int dir) {
                 game_.field().enter(map, x, y, dir);
                 mapView_.snapCamera(game_.field());
             };
+            auto skipDialog = [&](int from, int to) {
+                if (frame > from && frame < to && game_.inDialog() && frame % 4 == 0) {
+                    if (it.state() == Interpreter::WaitChoice) it.choose(0); else it.resume();
+                }
+            };
             for (const char* f : {"bambu_masuk", "laut_masuk", "rawa_masuk", "sarang_masuk", "ladang_masuk"})
                 game_.state().setFlag(f, 1);
-            if (frame > 5 && frame < 60 && it.state() == Interpreter::WaitMessage && frame % 4 == 0) it.resume();
-            if (frame == 60) go(5, 27, 14, FACE_UP);
-            if (frame == 100) TakeScreenshot("shot_bambu.png");
-            if (frame == 110) go(6, 16, 9, FACE_RIGHT);
-            if (frame == 150) TakeScreenshot("shot_laut.png");
-            if (frame == 155) { it.runEvent("timun_mas"); }
-            if (frame > 155 && frame < 230 && game_.inDialog() && frame % 5 == 0) {
-                if (it.state() == Interpreter::WaitChoice) it.choose(0); else it.resume();
-            }
-            if (frame == 235) go(7, 22, 16, FACE_DOWN);
-            if (frame == 275) TakeScreenshot("shot_rawa.png");
-            if (frame == 280) go(8, 15, 16, FACE_UP);
-            if (frame == 320) TakeScreenshot("shot_sarang.png");
-            if (frame == 325) it.runEvent("buto_bangun");
-            if (frame > 325 && frame < 360 && it.state() == Interpreter::WaitMessage && frame % 4 == 0) it.resume();
-            if (frame == 470) TakeScreenshot("shot_buto_battle.png");
-            if (frame >= 472) break;
+            if (frame == 50) TakeScreenshot("shot_sel.png");          // dialog pembuka
+            skipDialog(55, 100);
+            if (frame == 100) go(2, 30, 6, FACE_UP);
+            if (frame == 140) TakeScreenshot("shot_lorong.png");
+            if (frame == 150) go(3, 22, 18, FACE_UP);
+            if (frame == 190) TakeScreenshot("shot_desa.png");
+            if (frame == 200) go(4, 36, 12, FACE_RIGHT);
+            if (frame == 240) TakeScreenshot("shot_ladang.png");
+            if (frame == 250) go(5, 27, 14, FACE_UP);
+            if (frame == 290) TakeScreenshot("shot_bambu.png");
+            if (frame == 300) go(6, 18, 5, FACE_UP);
+            if (frame == 340) TakeScreenshot("shot_laut.png");
+            if (frame == 345) it.runEvent("timun_mas");
+            skipDialog(345, 420);
+            if (frame == 425) go(7, 22, 16, FACE_DOWN);
+            if (frame == 465) TakeScreenshot("shot_rawa.png");
+            if (frame == 470) go(8, 16, 12, FACE_DOWN);
+            if (frame == 510) TakeScreenshot("shot_sarang.png");
+            if (frame == 515) { go(5, 25, 7, FACE_UP); game_.hostStartBattle(TR_ARWAH_2); }
+            if (frame == 640) TakeScreenshot("shot_battle.png");
+            if (frame == 645) { mode_ = ModeField; go(3, 22, 18, FACE_UP); menu_.show(); }
+            if (frame == 680) TakeScreenshot("shot_menu.png");
+            if (frame == 685) { menu_.hide(); go(8, 16, 22, FACE_DOWN); it.runEvent("buto_bangun"); }
+            skipDialog(685, 740);
+            if (frame == 860) TakeScreenshot("shot_buto_battle.png");
+            if (frame >= 862) break;
         }
         if (smoke && frame > 30) break;
     }
