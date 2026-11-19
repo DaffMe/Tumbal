@@ -477,7 +477,7 @@ def map_desa():
     g[17][W - 4] = 'E'                        # tiba dari ladang
     g[H - 4][22] = 'J'                        # ujung jalan selatan
     g[20][26] = 'L'; g[25][36] = 'L'; g[6][20] = 'L'
-    g[24][28] = 'M'; g[9][35] = 'M'; g[27][10] = 'M'
+    g[24][28] = 'M'; g[9][42] = 'M'; g[27][10] = 'M'   # (42,9): di luar tapak rumah limasan
     rows = [''.join(r) for r in g]
 
     b = MapBuilder('Desa Karangtumbal', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'dekor', 'tabrak'])
@@ -509,8 +509,9 @@ def map_desa():
     lw, lh = b.prop('lumbung.png', 4, 9, foot=(0, 9, 3))
     # pintu lumbung = tile gerbang di baris bawah bangunan
     b.obj('door', 8, 9, to=LORONG_LUMBUNG, spawn='dari_desa', dir=1)
-    b.prop('rumah_panggung.png', 30, 10, foot=(1, 8, 3))
-    b.prop('rumah_panggung_tua.png', 4, 26, foot=(1, 8, 3))
+    # rumah adat Jawa (limasan) dan rumah kampung tua yang runtuh
+    b.prop('rumah_limasan.png', 30, 10, foot=(0, 8, 3))
+    b.prop('rumah_jawa_tua.png', 4, 26, foot=(0, 8, 3))
     b.prop('gubuk.png', 34, 30, foot=(0, 5, 2))
     b.prop('gubuk.png', 25, 9, foot=(0, 5, 2))
     for (tx, ty, img) in [(18, 8, 'pohon_mati_a.png'), (40, 12, 'pohon_mati_b.png'), (5, 21, 'pohon_mati_c.png'),

@@ -31,6 +31,7 @@ diproses (latar dibuang, grid piksel dikembalikan, diskalakan) oleh `tools/build
 | Memedi Sawah (battler + sprite peta) | boss Ladang Timun Busuk |
 | Timun Busuk (battler) | musuh ladang |
 | Props ladang: ajir timun, ajir roboh, gubuk sawah, tumpukan timun, ember, cangkul, pagar bambu | peta ladang |
+| Rumah adat Jawa: rumah limasan & rumah kampung tua yang runtuh (`PROMPT_rumah.md`) | peta Desa Karangtumbal |
 
 ## Font
 

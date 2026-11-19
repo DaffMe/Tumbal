@@ -513,6 +513,9 @@ def build_codex():
         im = _trim(_degrid(os.path.join(CODEX, src), 8))
         im = im.resize((int(im.width * k), int(im.height * k)), Image.NEAREST)
         im.resize((im.width * 2, im.height * 2), Image.NEAREST).save(os.path.join(BATTLERS, out))
+    # rumah adat Jawa (limasan & rumah tua runtuh): grid 4 -> 1 sel = 1 px, 8 tile lebar
+    for src, out in [('rumah_limasan.png', 'rumah_limasan.png'), ('rumah_tua.png', 'rumah_jawa_tua.png')]:
+        save_prop(_night(_trim(_degrid(os.path.join(CODEX, src), 4)), 0.72, 0.62), out)
     head = _trim(_degrid(os.path.join(CODEX, 'buto_kepala.png'), 8))
     save_prop(_night(head, 0.8), 'buto_peta.png')
     # lembar props ladang: grid 4 -> 1 sel = 1 px, sudah seskala tile 32 px
