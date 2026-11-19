@@ -148,3 +148,40 @@ Stats statsAtLevel(int classId, int level) {
     s.agi += c.growth.agi * n; s.luk += c.growth.luk * n;
     return s;
 }
+
+// ------------------------------------------------------------------ barang
+// Ramuan Jamu = Herb Flask Black Souls: pulih 50% HP, terisi ulang di Tungku.
+static const ItemDef ITEMS[] = {
+    {IT_JAMU, "jamu", "Ramuan Jamu", "Memulihkan separuh HP. Terisi ulang setiap beristirahat di Tungku.",
+     IK_PULIH_PERSEN, 50, ST_NONE, EL_NONE, true, true},
+    {IT_PENAWAR, "penawar", "Daun Penawar", "Menyembuhkan racun dan darah yang tak berhenti mengalir.",
+     IK_OBAT, 0, ST_RACUN, EL_NONE, true, true},
+    {IT_SUKMA_KECIL, "sukma_kecil", "Sukma Tumbal Kecil", "Sisa sukma seorang anak tumbal. Pecahkan untuk mendapat 40 sukma.",
+     IK_SUKMA, 40, ST_NONE, EL_NONE, true, false},
+    {IT_SUKMA_SEDANG, "sukma_sedang", "Sukma Penjaga", "Sukma pekat seorang penjaga lumbung. Pecahkan untuk 200 sukma.",
+     IK_SUKMA, 200, ST_NONE, EL_NONE, true, false},
+    {IT_BOM_MINYAK, "bom_minyak", "Bom Minyak Jarak", "Kendi minyak jarak yang dilempar dan terbakar. Damage api 90.",
+     IK_SERANG, 90, ST_TERBAKAR, EL_API, false, true},
+    {IT_ABU_PULANG, "abu_pulang", "Abu Tungku", "Segenggam abu Tungku. Membawamu kembali ke Tungku terakhir.",
+     IK_PULANG, 0, ST_NONE, EL_NONE, true, false},
+    {IT_KUNCI_SEL, "kunci_sel", "Kunci Sel Berkarat", "Kunci kecil berkarat dari lumbung Buto.",
+     IK_KUNCI, 0, ST_NONE, EL_NONE, false, false},
+};
+static const int ITEM_COUNT = sizeof(ITEMS) / sizeof(ITEMS[0]);
+
+const ItemDef* itemDef(int id) {
+    for (int i = 0; i < ITEM_COUNT; ++i)
+        if (ITEMS[i].id == id) return &ITEMS[i];
+    return nullptr;
+}
+
+int itemIdByKey(const char* key) {
+    if (key == nullptr) return 0;
+    for (int i = 0; i < ITEM_COUNT; ++i) {
+        const char* a = ITEMS[i].key;
+        const char* b = key;
+        while (*a && *a == *b) { ++a; ++b; }
+        if (*a == '\0' && *b == '\0') return ITEMS[i].id;
+    }
+    return 0;
+}

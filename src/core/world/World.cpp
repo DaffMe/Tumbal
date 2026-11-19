@@ -158,3 +158,15 @@ bool World::isDefeated(int mapId, int enemyIndex) const {
     if (i == nullptr || enemyIndex < 0 || enemyIndex >= 64) return false;
     return (i->defeated >> enemyIndex) & 1ULL;
 }
+
+void World::markCollected(int mapId, int lootIndex) {
+    MapInfo* i = info(mapId);
+    if (i == nullptr || lootIndex < 0 || lootIndex >= 64) return;
+    i->collected |= (1ULL << lootIndex);
+}
+
+bool World::isCollected(int mapId, int lootIndex) const {
+    const MapInfo* i = info(mapId);
+    if (i == nullptr || lootIndex < 0 || lootIndex >= 64) return false;
+    return (i->collected >> lootIndex) & 1ULL;
+}

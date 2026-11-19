@@ -125,3 +125,26 @@ struct ClassDef {
 };
 const ClassDef& classDef(int id);
 Stats statsAtLevel(int classId, int level);
+
+// ---------------------------------------------------------------- barang
+enum ItemKind { IK_PULIH_PERSEN = 0, IK_PULIH_MP, IK_OBAT, IK_SUKMA, IK_SERANG, IK_PULANG, IK_KUNCI };
+
+struct ItemDef {
+    int         id;
+    const char* key;        // nama pendek untuk data peta/event ("jamu")
+    const char* name;
+    const char* desc;
+    int         kind;       // ItemKind
+    int         value;      // persen pulih / jumlah sukma / damage dasar
+    int         status;     // status yang disembuhkan (IK_OBAT)
+    int         element;    // elemen serangan (IK_SERANG)
+    bool        inField;    // bisa dipakai di peta
+    bool        inBattle;   // bisa dipakai di battle
+};
+
+enum ItemIdList {
+    IT_JAMU = 1, IT_PENAWAR, IT_SUKMA_KECIL, IT_SUKMA_SEDANG, IT_BOM_MINYAK, IT_ABU_PULANG, IT_KUNCI_SEL,
+    IT_COUNT
+};
+const ItemDef* itemDef(int id);
+int itemIdByKey(const char* key);   // 0 bila tidak ada

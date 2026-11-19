@@ -32,6 +32,15 @@ enum Initiative { INIT_NORMAL = 0, INIT_PREEMPTIVE, INIT_SURPRISE };
 struct BattleAction {
     int skill = SKL_SERANG;
     int target = -1;     // indeks battler, -1 = semua (sesuai scope)
+    int item = 0;        // > 0: memakai barang ini (skill diabaikan)
+};
+
+// Tas barang pemain yang bisa dipakai di battle (diisi GameState).
+class ItemBag {
+public:
+    virtual ~ItemBag() = default;
+    virtual int  count(int itemId) const = 0;
+    virtual bool removeItem(int itemId, int n = 1) = 0;
 };
 
 class BattleSystem {
@@ -63,6 +72,12 @@ public:
     bool canUse(int battler, int skill) const;
     // Jalankan aksi untuk aktor yang sedang input. false bila tidak valid.
     bool submit(const BattleAction& action);
+    // Barang: tas pemain (boleh nullptr = tanpa barang).
+    void setInventory(ItemBag* bag) { bag_ = bag; }
+    const ItemBag* inventory() const { return bag_; }
+    bool canUseItem(int battler, int itemId) const;
+    bool validItemTarget(int user, int itemId, int target) const;
+    int  firstItemTarget(int user, int itemId) const;
     // Coba kabur (dipakai saat fase Input).
     bool tryEscape();
 
@@ -98,6 +113,9 @@ private:
     int     inputActor_ = -1;
     int     sukma_ = 0;
     int     escapeFails_ = 0;
+    ItemBag* bag_ = nullptr;
+
+    void useItem(Battler& user, const BattleAction& a);
 
     void emit(BattleEvent::Kind k, int src, int dst, int value = 0, const std::string& text = "", int skill = 0, int status = 0);
     void ds(const std::string& op);

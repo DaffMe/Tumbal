@@ -57,7 +57,7 @@ struct FieldEnemy {
 
 // Kejadian yang dihasilkan update() untuk ditangani lapisan atas.
 struct FieldEvent {
-    enum Kind { None, Transfer, LockedDoor, Encounter } kind = None;
+    enum Kind { None, Transfer, LockedDoor, Encounter, Touch, Arrived } kind = None;
     TravelResult travel;
     const MapObject* object = nullptr;
     // Encounter

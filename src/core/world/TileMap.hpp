@@ -112,6 +112,8 @@ public:
     const Tileset* tilesetFor(int gid) const;
     // Objek pertama bertipe `type` di tile (x,y), atau nullptr.
     const MapObject* objectAt(int x, int y, const char* type = nullptr) const;
+    // Urutan objek di antara objek bertipe sama (untuk status per-objek).
+    int typeIndex(const MapObject* o) const;
     // Objek pertama dengan nama tertentu.
     const MapObject* findObject(const std::string& name) const;
 

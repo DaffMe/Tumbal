@@ -24,6 +24,7 @@ struct MapInfo {
     bool        visited = false;
     bool        hasTungku = false;
     unsigned long long defeated = 0;  // bit i = musuh ke-i di peta ini sudah kalah
+    unsigned long long collected = 0; // bit i = loot ke-i sudah diambil (permanen)
 };
 
 // Hasil melewati pintu: peta tujuan + tile kedatangan.
@@ -72,6 +73,9 @@ public:
     // Catat musuh ke-i di peta mapId sudah dikalahkan.
     void markDefeated(int mapId, int enemyIndex);
     bool isDefeated(int mapId, int enemyIndex) const;
+    // Loot: indeks = urutan objek bertipe "loot" di peta.
+    void markCollected(int mapId, int lootIndex);
+    bool isCollected(int mapId, int lootIndex) const;
 
     // Tandai peta dikunjungi.
     void markVisited(int mapId);

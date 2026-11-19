@@ -165,9 +165,13 @@ FieldEvent Field::update(float dt, int inX, int inY, bool run) {
         p.moving = false;
         p.dx = p.dy = 0;
         ev = arrive();
-        if (ev.kind != FieldEvent::None) return ev;
+        if (ev.kind != FieldEvent::None && ev.kind != FieldEvent::Arrived) return ev;
         // lanjut jalan mulus bila tombol masih ditekan
-        if (inX != 0 || inY != 0) tryPlayerStep(inX, inY, leftover, ev);
+        if (inX != 0 || inY != 0) {
+            FieldEvent step;
+            tryPlayerStep(inX, inY, leftover, step);
+            if (step.kind != FieldEvent::None) return step;
+        }
         if (!p.moving) p.animTime = 0.0f;
         return ev;
     }
@@ -183,7 +187,16 @@ FieldEvent Field::arrive() {
         ev.travel = world_.travel(mapId_, *door);
         ev.object = door;
         ev.kind = ev.travel.ok ? FieldEvent::Transfer : (ev.travel.locked ? FieldEvent::LockedDoor : FieldEvent::None);
+        return ev;
     }
+    if (const MapObject* t = map_->objectAt(player_.x, player_.y, "event")) {
+        if (t->props.getString("trigger", "action") == "touch") {
+            ev.kind = FieldEvent::Touch;
+            ev.object = t;
+            return ev;
+        }
+    }
+    ev.kind = FieldEvent::Arrived;   // tiba di tile baru (untuk cek ceceran sukma)
     return ev;
 }
 

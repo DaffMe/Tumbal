@@ -247,6 +247,16 @@ int BattleSystem::firstTarget(int user, int skill) const {
 
 bool BattleSystem::submit(const BattleAction& action) {
     if (phase_ != Input || inputActor_ < 0) return false;
+    if (action.item > 0) {
+        if (!canUseItem(inputActor_, action.item) || !validItemTarget(inputActor_, action.item, action.target)) return false;
+        Battler& user = b_[inputActor_];
+        phase_ = Filling;
+        inputActor_ = -1;
+        useItem(user, action);
+        scheduleFullTurn(user);
+        checkEnd();
+        return true;
+    }
     if (!canUse(inputActor_, action.skill)) return false;
     if (!validTarget(inputActor_, action.skill, action.target)) return false;
     Battler& user = b_[inputActor_];
@@ -255,6 +265,61 @@ bool BattleSystem::submit(const BattleAction& action) {
     act(user, action);
     checkEnd();
     return true;
+}
+
+bool BattleSystem::canUseItem(int battler, int itemId) const {
+    const ItemDef* d = itemDef(itemId);
+    return bag_ != nullptr && d != nullptr && d->inBattle && bag_->count(itemId) > 0 &&
+           battler >= 0 && battler < count_ && b_[battler].alive();
+}
+
+bool BattleSystem::validItemTarget(int user, int itemId, int target) const {
+    const ItemDef* d = itemDef(itemId);
+    if (d == nullptr || target < 0 || target >= count_ || !b_[target].alive()) return false;
+    bool opposing = b_[target].enemy != b_[user].enemy;
+    return d->kind == IK_SERANG ? opposing : !opposing;
+}
+
+int BattleSystem::firstItemTarget(int user, int itemId) const {
+    const ItemDef* d = itemDef(itemId);
+    if (d != nullptr && d->kind != IK_SERANG) return user;
+    for (int i = 0; i < count_; ++i)
+        if (validItemTarget(user, itemId, i)) return i;
+    return -1;
+}
+
+void BattleSystem::useItem(Battler& user, const BattleAction& a) {
+    const ItemDef* d = itemDef(a.item);
+    if (d == nullptr || bag_ == nullptr || !bag_->removeItem(a.item)) return;
+    Battler& t = b_[a.target];
+    emit(BattleEvent::UseSkill, user.slot, t.slot, 0, user.name + " memakai " + d->name);
+    ds("ItemBag.removeItem(" + std::string(d->name) + ")");
+    switch (d->kind) {
+        case IK_PULIH_PERSEN: {
+            int before = t.hp;
+            t.hp += t.stats.mhp * d->value / 100;
+            if (t.hp > t.stats.mhp) t.hp = t.stats.mhp;
+            emit(BattleEvent::Heal, user.slot, t.slot, t.hp - before);
+            break;
+        }
+        case IK_OBAT:
+            if (t.has(ST_RACUN)) removeStatus(t, ST_RACUN);
+            if (t.has(ST_BERDARAH)) removeStatus(t, ST_BERDARAH);
+            emit(BattleEvent::Message, user.slot, t.slot, 0, t.name + " merasa lebih baik.");
+            break;
+        case IK_SERANG: {
+            float raw = d->value * t.elementRate[d->element >= 0 && d->element < EL_COUNT ? d->element : 0];
+            raw *= 0.9f + rng_.unit() * 0.2f;
+            int dmg = static_cast<int>(raw);
+            if (dmg < 1) dmg = 1;
+            t.hp -= dmg;
+            emit(BattleEvent::Damage, user.slot, t.slot, dmg);
+            if (t.hp <= 0) { kill(t); break; }
+            if (d->status != ST_NONE && rng_.range(1, 100) <= 50) addStatus(t, d->status);
+            break;
+        }
+        default: break;
+    }
 }
 
 void BattleSystem::act(Battler& user, const BattleAction& a) {

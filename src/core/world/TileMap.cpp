@@ -259,3 +259,12 @@ const MapObject* TileMap::findObject(const std::string& name) const {
         if (o->name == name) return o;
     return nullptr;
 }
+
+int TileMap::typeIndex(const MapObject* target) const {
+    int i = 0;
+    for (const MapObject* o = objects_; o != nullptr; o = o->next) {
+        if (o == target) return i;
+        if (o->type == target->type) ++i;
+    }
+    return -1;
+}
