@@ -348,6 +348,18 @@ void BattleSystem::startChant(Battler& user, const BattleAction& a) {
          user.name + (user.enemy ? " bersiap: " : " merapal ") + s->name + "...", a.skill);
 }
 
+int BattleSystem::threatOn(int partyIndex) const {
+    if (partyIndex < 0 || partyIndex >= partyCount_ || !b_[partyIndex].alive()) return 0;
+    for (int i = partyCount_; i < count_; ++i) {
+        const Battler& e = b_[i];
+        if (!e.alive() || !e.chanting) continue;
+        const SkillDef* s = skillDef(e.chantSkill);
+        if (s == nullptr) continue;
+        if (s->scope == SC_MUSUH_SEMUA || (s->scope == SC_MUSUH_SATU && e.chantTarget == partyIndex)) return e.chantSkill;
+    }
+    return 0;
+}
+
 // M1 subprogram: dorong giliran target mundur sebesar pct% dari satu giliran.
 // Target yang sedang merapal kehilangan rapalnya (rapal buyar).
 void BattleSystem::applyDelay(Battler& t, int pct) {

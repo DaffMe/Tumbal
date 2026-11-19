@@ -14,7 +14,7 @@ dan cara cepat mengecek game.
 | 5 | **Hutan Bambu Jarum** | Arwah, gagak, ular. Makam Jarum (**Jarum**). Tebas bambu = jalan pintas balik ke desa. | M2 jalan pintas → BFS warp memendek |
 | 6 | **Laut Garam** | Hantu laut & tengkorak. **Timun Mas** di ujung dermaga bergabung (**Garam**); party jadi dua. Rumah nelayan menyimpan sukma. | M1 party 2 orang di Timeline DLL |
 | 7 | **Rawa Terasi** | Akar & buaya. Pemuda desa penjaga (memberi jamu). **Terasi**. Turun ke sarang = **jalan satu arah**. | M2 `Graph.addArc` (satu arah) |
-| 8 | **Sarang Buto** | Lereng bertiang tengkorak, tumpukan tulang. Boss akhir **Buto Ijo** (kepala + dua tangan; kepala tumbang = tangan runtuh). Tidak bisa kabur. | M1 boss multi-bagian |
+| 8 | **Sarang Buto** | Lereng bertiang tengkorak, tumpukan tulang. Boss akhir **Buto Ijo** (kepala + dua tangan; kepala tumbang = tangan runtuh). Telegraf: "Lapar Buto" dan "Hantam Gada" dirapal dulu, nama jurus muncul di atas musuh dan baris party yang diincar berkedip; tunda/buyarkan rapalnya. Tidak bisa kabur. | M1 boss multi-bagian |
 | — | Tamat | Layar tamat → kembali ke judul. | |
 
 Kurva kesulitan (diukur dengan simulasi battle otomatis per troop × level × kelas): pemain yang melawan semua
@@ -47,7 +47,7 @@ mempercepat. Di menu Tungku halaman Timun Mas: C = panggil/lepas pendamping. F1 
 ## Cek cepat
 
 ```bash
-mingw32-make test            # 327 unit test
+mingw32-make test            # 332 unit test
 bin/tumbal.exe --shots       # screenshot otomatis: judul, 8 peta, dialog, battle biasa, menu, battle Buto
 /c/msys64/ucrt64/bin/python.exe tools/render_maps.py   # pratinjau seluruh peta -> docs/map_preview/*.png
 bin/tumbal.exe --console     # mode teks

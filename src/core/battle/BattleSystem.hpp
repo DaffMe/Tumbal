@@ -83,6 +83,11 @@ public:
     // Coba kabur (dipakai saat fase Input).
     bool tryEscape();
 
+    // ---- telegraf: serangan besar yang sedang dirapal musuh
+    // M1 subprogram: jurus rapalan musuh yang mengincar anggota party `partyIndex`
+    // (sasaran tunggal atau semua), 0 bila tidak ada. Dipakai GUI untuk peringatan.
+    int threatOn(int partyIndex) const;
+
     // ---- prediksi antrean (panel "giliran berikutnya")
     // M1 subprogram: isi `out` dengan indeks battler untuk n giliran ke depan.
     int predictTurns(int* out, int n) const;

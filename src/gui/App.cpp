@@ -448,6 +448,14 @@ int App::run(bool smoke, bool shots) {
             if (frame == 720) TakeScreenshot("shot_tempa.png");
             if (frame == 725) { game_.closeShopMenu(); go(8, 16, 22, FACE_DOWN); it.runEvent("buto_bangun"); }
             skipDialog(725, 780);
+            if (frame == 896 && mode_ == ModeBattle && battle_.count() > 3) {
+                // pamerkan telegraf: tangan kanan seolah sedang merapal Hantam Gada ke Tumbal
+                Battler& kanan = battle_.battler(battle_.count() - 1);
+                kanan.chanting = true;
+                kanan.chantSkill = SKL_HANTAM_GADA;
+                kanan.chantTarget = 0;
+                kanan.chantTicks = 100;
+            }
             if (frame == 900) TakeScreenshot("shot_buto_battle.png");
             if (frame >= 902) break;
         }

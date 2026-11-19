@@ -122,6 +122,10 @@ void BattleView::startEvent(const BattleEvent& e) {
             break;
         case BattleEvent::ChantStart:
             setLog(e.text);
+            if (e.src >= bs_->partyCount()) {
+                // musuh: tampilkan petunjuk jurus (mis. "Hentikan, atau elakkan!") lebih lama
+                if (const SkillDef* cs = skillDef(e.skill)) { log_ = cs->desc; logTime_ = 3.2f; }
+            }
             audio::play(audio::RAPAL, 0.8f);
             if (e.src >= 0) chantGlow_[e.src] = 1.0f;
             evDur_ = 0.7f;
@@ -401,6 +405,17 @@ void BattleView::drawEnemies(double time) {
             EndBlendMode();
         }
         if (dying_[i] > 0) continue;
+        if (b.chanting) {
+            // telegraf: nama jurus yang sedang dirapal melayang di atas musuh
+            const SkillDef* cs = skillDef(b.chantSkill);
+            float a = 0.75f + 0.25f * static_cast<float>(std::sin(time * 8));
+            std::string nm = cs ? cs->name : "";
+            float tw = ui::measure(nm, 16) + 14;
+            float ty = std::fmax(46.0f, y - 22);
+            DrawRectangle(static_cast<int>(pos_[i].x - tw / 2), static_cast<int>(ty), static_cast<int>(tw), 20, Fade(Color{60, 10, 10, 255}, 0.85f));
+            DrawRectangleLines(static_cast<int>(pos_[i].x - tw / 2), static_cast<int>(ty), static_cast<int>(tw), 20, Fade(ui::CH_B, a));
+            ui::textCentered(nm, pos_[i].x, ty + 2, Fade(Color{255, 200, 170, 255}, a));
+        }
         // bar HP (tanpa angka, seperti BS1) + gauge AP / rapal
         float bw = 70;
         float bx = pos_[i].x - bw / 2, by = pos_[i].y + 8;
@@ -452,6 +467,14 @@ void BattleView::drawStatus(double time) {
         if (active) DrawRectangle(static_cast<int>(r.x + 4), static_cast<int>(y - 2), static_cast<int>(r.width - 8), 20, Fade(ui::AMBER, 0.12f));
         if (flash_[i] > 0) DrawRectangle(static_cast<int>(r.x + 4), static_cast<int>(y - 2), static_cast<int>(r.width - 8), 20, Fade(ui::BLOOD, flash_[i]));
         ui::text(b.name, r.x + 12 + sx, y, b.alive() ? ui::BONE : ui::BLOOD);
+        if (int th = bs_->threatOn(i)) {
+            // telegraf: anggota ini diincar jurus besar yang sedang dirapal
+            bool on = static_cast<int>(time * 4) % 2 == 0;
+            DrawRectangle(static_cast<int>(r.x + 4), static_cast<int>(y - 2), static_cast<int>(r.width - 8), 20,
+                          Fade(ui::BLOOD, on ? 0.22f : 0.1f));
+            const SkillDef* ts = skillDef(th);
+            ui::textRight(std::string("! ") + (ts ? ts->name : ""), r.x + r.width - 10, y + 2, on ? Color{255, 120, 100, 255} : ui::BLOOD, 10);
+        }
         // HP
         ui::text("HP", r.x + 120, y + 4, ui::DIM, 10);
         ui::bar({r.x + 136, y + 9, 110, 4}, hpBar_[i] / b.stats.mhp, ui::HP_A, ui::HP_B);

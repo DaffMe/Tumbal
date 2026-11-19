@@ -227,7 +227,44 @@ static void testNoEscape() {
     CHECK(enemyDef(EN_MEMEDI_SAWAH)->elementRate[EL_API] == 2.0f);
 }
 
+static void testTelegraph() {
+    SECTION("M1: telegraf - jurus besar yang dirapal musuh terlihat mengincar siapa");
+    Battler party[2] = {makeHeroBattler("Tumbal", KL_PENDEKAR, 12), makeHeroBattler("Timun Mas", KL_TIMUN_MAS, 12)};
+    BattleSystem bs;
+    bs.setup(party, 2, TR_BUTO, INIT_NORMAL, 21);
+    CHECK(skillDef(SKL_HANTAM_GADA)->chant > 0 && skillDef(SKL_LAPAR_BUTO)->chant > 0);
+    CHECK(bs.threatOn(0) == 0 && bs.threatOn(1) == 0);
+    // jalankan battle: party hanya bertahan sampai ada musuh yang mulai merapal
+    int seen = 0;
+    for (int guard = 0; guard < 200 && !bs.over() && seen == 0; ++guard) {
+        untilInput(bs);
+        if (bs.phase() != BattleSystem::Input) break;
+        for (int p = 0; p < 2; ++p) {
+            int sk = bs.threatOn(p);
+            if (sk == 0) continue;
+            seen = sk;
+            // pasti ada musuh yang sedang merapal jurus itu dengan sasaran yang cocok
+            bool match = false;
+            for (int i = bs.partyCount(); i < bs.count(); ++i) {
+                const Battler& e = bs.battler(i);
+                if (e.alive() && e.chanting && e.chantSkill == sk &&
+                    (skillDef(sk)->scope == SC_MUSUH_SEMUA || e.chantTarget == p)) match = true;
+            }
+            CHECK(match);
+        }
+        bs.submit(BattleAction{SKL_BERTAHAN, -1, 0});
+    }
+    CHECK(seen == SKL_HANTAM_GADA || seen == SKL_LAPAR_BUTO);
+    // rapal dibuyarkan (tunda) -> ancaman hilang
+    for (int i = bs.partyCount(); i < bs.count(); ++i) {
+        Battler& e = bs.battler(i);
+        if (e.chanting) { e.chanting = false; }
+    }
+    CHECK(bs.threatOn(0) == 0 && bs.threatOn(1) == 0);
+}
+
 void runBattleTests() {
+    testTelegraph();
     testNoEscape();
     testTurnOrderBySpeed();
     testWaitMode();

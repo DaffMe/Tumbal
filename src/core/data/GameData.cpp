@@ -103,8 +103,8 @@ static const SkillDef SKILLS[] = {
      SK_ILMU, SC_MUSUH_SEMUA, 0, FM_ILMU, 50, 0.9f, EL_AIR, 0, ST_RACUN, 60, 0, 1},
     {SKL_CENGKERAM, "Cengkeram", "Tangan raksasa meremas tubuhmu.",
      SK_JURUS, SC_MUSUH_SATU, 0, FM_FISIK, 0, 1.2f, EL_FISIK, 0, ST_LUMPUH, 35, 0, 1},
-    {SKL_HANTAM_GADA, "Hantam Gada", "Gada kayu menghantam dan membuatmu terhuyung.",
-     SK_JURUS, SC_MUSUH_SATU, 0, FM_FISIK, 0, 1.6f, EL_FISIK, 0, ST_NONE, 0, 30, 1},
+    {SKL_HANTAM_GADA, "Hantam Gada", "Tangan kanan mengangkat gada tinggi-tinggi... Tunda atau buyarkan sebelum jatuh!",
+     SK_JURUS, SC_MUSUH_SATU, 0, FM_FISIK, 0, 2.3f, EL_FISIK, 1800, ST_NONE, 0, 30, 1},
     {SKL_RAPAL_KUTUK, "Kutuk Lumbung", "Mantra busuk yang membuat tubuh rapuh.",
      SK_ILMU, SC_MUSUH_SATU, 0, FM_ILMU, 40, 0.9f, EL_GAIB, 1600, ST_RAPUH, 80, 0, 1},
 };
