@@ -3,9 +3,13 @@
 // Queue (antrean FIFO) berbasis linked node — dibuat manual, tanpa std::queue.
 //
 // Dipakai oleh:
-//   - Battle Event Queue : logika battle meng-enqueue event (DAMAGE, DELAY, ...)
-//                          lalu GUI men-dequeue satu per satu untuk dianimasikan.
-//   - Graph::bfs         : antrean vertex yang akan dikunjungi.
+//   - M1 Battle Event Queue : BattleSystem meng-enqueue kejadian (damage, rapal,
+//                             buyar, ...) lalu GUI/console men-dequeue satu per
+//                             satu untuk dianimasikan berurutan.
+//   - M3 notifikasi         : Interpreter & Game ("Didapat: ...") ditampilkan
+//                             satu per satu tanpa menghentikan permainan.
+//   - Graph::bfs (M2)       : antrean vertex saat mencari Tungku terdekat dan
+//                             daftar tujuan warp.
 //
 // Representasi: singly linked list dengan pointer head (depan) dan tail
 // (belakang) sehingga enqueue dan dequeue sama-sama O(1).

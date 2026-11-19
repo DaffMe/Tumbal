@@ -3,11 +3,12 @@
 // Stack (tumpukan LIFO) berbasis linked node — dibuat manual, tanpa std::stack.
 //
 // Dipakai oleh:
-//   - M3 Cracked Hourglass : snapshot state battle di-push setiap awal giliran
-//                            pemain, di-pop saat pemain me-rewind giliran.
+//   - M3 Interpreter event : Stack<Frame>; masuk cabang pilihan / if / skrip
+//                            lain = push, daftar perintah habis = pop (LIFO),
+//                            sehingga eksekusi kembali ke baris pemanggil.
 //   - Graph::dijkstra      : rekonstruksi jalur (dari target mundur ke start)
-//                            di-push lalu di-pop sehingga urutannya terbalik
-//                            menjadi start → target.
+//                            di-push lalu di-pop sehingga urutannya start -> target
+//                            (dipakai unit test; mekanik memakai BFS).
 //
 // Representasi: singly linked list, top = node pertama. push/pop O(1).
 // ============================================================================

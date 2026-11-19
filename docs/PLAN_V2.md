@@ -1,6 +1,6 @@
 # Rencana v2 — TUMBAL
 
-> Status: **disetujui 2026-11-19; fase 1–11 dikerjakan dengan beberapa sisa, fase 12–13 belum** (demo lengkap 8 peta sampai tamat sudah dapat dimainkan; lihat docs/DEMO.md dan bagian 8). Disusun 2026-11-19 dari brainstorming dan
+> Status: **disetujui 2026-11-19; fase 1–13 selesai; tersisa playtest penuh oleh pemilik proyek & tabel tim README** (demo lengkap 8 peta sampai tamat sudah dapat dimainkan; lihat docs/DEMO.md dan bagian 8). Disusun 2026-11-19 dari brainstorming dan
 > [bedah sistem Black Souls 1](research/black-souls-1-analysis.md).
 > Judul game: **TUMBAL** (disepakati 2026-11-19).
 
@@ -204,7 +204,7 @@ hari kerja, 2026-11-19). Status di bawah dicocokkan dengan kode pada commit `e03
 | 10 | Audio, cahaya/kabut, getar layar, transisi, judul & ending | Terasa "jadi" | Selesai (kabut: property peta `kabut`, dua lapis noise bergeser di Ladang, Bambu, Laut, Rawa, Sarang) |
 | 11 | Polish visual tiap wilayah, kejelasan battle, teks cerita reaktif | — | Selesai |
 | 12 | Balancing, playtest penuh, perbaikan | — | `--balance` selesai (Buto ternyata ±1–3 level lebih berat dari kurva untuk bot); **playtest penuh belum** |
-| 13 | README, dokumentasi struktur data, skrip demo, bahan Pendampingan | — | `docs/DEMO.md` ada; **tabel tim README & bahan Pendampingan belum** |
+| 13 | README, dokumentasi struktur data, skrip demo, bahan Pendampingan | — | `docs/DEMO.md` (rute & titik demo) dan `docs/STRUKTUR_DATA.md` (ADT, kompleksitas, subprogram, tanya-jawab Pendampingan) selesai; **tabel tim README diisi tim** |
 
 
 ---

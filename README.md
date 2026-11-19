@@ -10,7 +10,8 @@ Seluruh struktur data dan logika mekanik ditulis manual dalam **C++17**; GUI mem
 > Laut Garam (Timun Mas bergabung) → Rawa Terasi → Sarang Buto (boss akhir Buto Ijo). Battle ATB dengan antrean
 > giliran, Tungku (naik level, warp BFS), sukma tercecer, pendamping, simpan/muat 3 slot, layar judul & tamat,
 > musik & efek suara, Inspector (F1), mode console.
-> Panduan uji & presentasi: [docs/DEMO.md](docs/DEMO.md) · Rencana: [docs/PLAN_V2.md](docs/PLAN_V2.md) ·
+> Panduan uji & presentasi: [docs/DEMO.md](docs/DEMO.md) · Struktur data: [docs/STRUKTUR_DATA.md](docs/STRUKTUR_DATA.md) ·
+> Rencana: [docs/PLAN_V2.md](docs/PLAN_V2.md) ·
 > Bedah sistem acuan: [docs/research/black-souls-1-analysis.md](docs/research/black-souls-1-analysis.md)
 
 ## Mekanik yang direplikasi
