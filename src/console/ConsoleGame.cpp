@@ -206,12 +206,51 @@ void consoleTungku(Game& game) {
     }
 }
 
+// Menu pedagang / pandai besi versi teks.
+void consoleShop(Game& game) {
+    std::string line;
+    while (game.shopMenu() != Game::SHOP_NONE) {
+        flushNotices(game);
+        const GameState& gs = game.state();
+        if (game.shopMenu() == Game::SHOP_DAGANG) {
+            std::printf("\n  == PEDAGANG ==  Sukma %d\n", gs.sukma());
+            for (int i = 0; i < shopCount(); ++i) {
+                const ShopEntry& e = shopEntry(i);
+                int st = gs.shopStock(i);
+                std::string sisa = st < 0 ? "" : (st == 0 ? "  (habis)" : "  (sisa " + std::to_string(st) + ")");
+                std::printf("  %d) %-20s %4d sukma%s\n", i + 1, itemDef(e.item)->name, e.price, sisa.c_str());
+            }
+            std::printf("  beli nomor (0 = pergi): ");
+            int k = 0;
+            if (!std::getline(std::cin, line)) { game.closeShopMenu(); return; }
+            std::sscanf(line.c_str(), "%d", &k);
+            if (k >= 1 && k <= shopCount()) std::printf("  %s\n", game.buy(k - 1).c_str());
+            else game.closeShopMenu();
+        } else {
+            const WeaponDef& w = weaponDef(gs.classId());
+            int lv = gs.weaponLevel();
+            std::printf("\n  == PANDAI BESI ==  %s +%d   Sukma %d   Bijih Besi %d\n", w.name, lv, gs.sukma(),
+                        gs.count(IT_BIJIH_BESI));
+            if (lv < WEAPON_MAX)
+                std::printf("  1) Tempa ke +%d (%d sukma, %d bijih)\n", lv + 1, w.costSukma[lv], w.costOre[lv]);
+            std::printf("  0) Pergi\n  pilih: ");
+            if (!std::getline(std::cin, line)) { game.closeShopMenu(); return; }
+            if (line == "1") std::printf("  %s\n", game.forge().c_str());
+            else game.closeShopMenu();
+        }
+    }
+}
+
 // Tuntaskan permintaan Game setelah setiap langkah (dialog, battle, pindah peta).
 void settle(Game& game) {
     for (int guard = 0; guard < 50; ++guard) {
         flushNotices(game);
         if (game.tungkuMenuOpen()) {
             consoleTungku(game);
+            continue;
+        }
+        if (game.shopMenu() != Game::SHOP_NONE) {
+            consoleShop(game);
             continue;
         }
         if (game.inDialog()) {

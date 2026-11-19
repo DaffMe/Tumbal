@@ -9,7 +9,7 @@ dan cara cepat mengecek game.
 |---|---|---|---|
 | 1 | **Sel Tumbal** | Bangun di sel. Lelaki tua, Tungku pertama, satu Tumbal Gagal. | M3 dialog (Stack frame), M1 battle pertama |
 | 2 | **Lorong Lumbung** | Musuh yang mengejar, Abu Pulang, boss kecil **Penjaga Lumbung** di gerbang. | M1 antrean giliran, rapal & buyar rapal |
-| 3 | **Desa Karangtumbal** (hub) | Mbok Srini, warga lesung, Tungku desa. Pintu selatan ke hutan bambu terkunci. | M2 edge terkunci (Graph) |
+| 3 | **Desa Karangtumbal** (hub) | Mbok Srini, warga lesung, Tungku desa, **Empu Karta** (tempa senjata +1..+3 dengan sukma + Bijih Besi), **pedagang keliling** (Kendi Jamu menambah wadah jamu). Pintu selatan ke hutan bambu terkunci. | M2 edge terkunci (Graph) |
 | 4 | **Ladang Timun Busuk** | Belalang & Timun Busuk. Boss **Memedi Sawah**: hentikan rapal "Ritual Panen". Hadiah **Biji Timun**. Kemenangan membuka jalan ke timur. | M3 `battle` + `unlock` dari event; M2 `Graph.setOpen` |
 | 5 | **Hutan Bambu Jarum** | Arwah, gagak, ular. Makam Jarum (**Jarum**). Tebas bambu = jalan pintas balik ke desa. | M2 jalan pintas → BFS warp memendek |
 | 6 | **Laut Garam** | Hantu laut & tengkorak. **Timun Mas** di ujung dermaga bergabung (**Garam**); party jadi dua. Rumah nelayan menyimpan sukma. | M1 party 2 orang di Timeline DLL |
@@ -47,7 +47,7 @@ mempercepat. Di menu Tungku halaman Timun Mas: C = panggil/lepas pendamping. F1 
 ## Cek cepat
 
 ```bash
-mingw32-make test            # 294 unit test
+mingw32-make test            # 327 unit test
 bin/tumbal.exe --shots       # screenshot otomatis: judul, 8 peta, dialog, battle biasa, menu, battle Buto
 /c/msys64/ucrt64/bin/python.exe tools/render_maps.py   # pratinjau seluruh peta -> docs/map_preview/*.png
 bin/tumbal.exe --console     # mode teks

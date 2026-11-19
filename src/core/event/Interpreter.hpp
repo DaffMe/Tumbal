@@ -31,6 +31,8 @@ public:
     virtual void hostTransfer(int mapId, const std::string& spawn) = 0;
     virtual void hostUnlock(int a, int b) = 0;
     virtual void hostHeal() = 0;
+    // Buka menu pedagang (kind "dagang") atau pandai besi ("tempa"). Bawaan: abaikan.
+    virtual void hostOpenShop(const std::string& kind) { (void)kind; }
 };
 
 class Interpreter {

@@ -472,6 +472,8 @@ def map_desa():
     g[16][23] = 'T'                           # Tungku alun-alun
     g[15][21] = 'B'                           # Mbok Srini
     g[17][32] = 'W'                           # warga di jalan timur
+    g[11][28] = 'P'                           # Empu Karta di depan gubuk tempa
+    g[20][19] = 'D'                           # pedagang keliling di sudut alun-alun
     g[17][W - 4] = 'E'                        # tiba dari ladang
     g[H - 4][22] = 'J'                        # ujung jalan selatan
     g[20][26] = 'L'; g[25][36] = 'L'; g[6][20] = 'L'
@@ -486,6 +488,10 @@ def map_desa():
         'T': lambda b, x, y: (b.obj('tungku', x, y, name='tungku_desa'), b.block(x, y)),
         'B': lambda b, x, y: (b.obj('npc', x, y, name='mbok_srini', event='mbok_srini',
                                     walker='assets/chars/mbok_srini.png', dir=0), b.block(x, y)),
+        'P': lambda b, x, y: (b.obj('npc', x, y, name='pandai_besi', event='pandai_besi',
+                                    walker='assets/chars/empu_karta.png', dir=0), b.block(x, y)),
+        'D': lambda b, x, y: (b.obj('npc', x, y, name='pedagang', event='pedagang',
+                                    walker='assets/chars/pedagang.png', dir=0), b.block(x, y)),
         'W': lambda b, x, y: (b.obj('npc', x, y, name='warga_lesung', event='warga_lesung',
                                     walker='assets/chars/warga_lelaki.png', dir=1), b.block(x, y)),
         'E': lambda b, x, y: (b.obj('spawn', x, y, name='dari_ladang', dir=1),
@@ -645,7 +651,7 @@ def map_hutan_bambu():
     b.props.update(nama='Hutan Bambu Jarum', musik='lumbung', gelap=0.7, battleback='assets/battlebacks/hutan_bambu.png')
     troops = {(24, 7): TR_ARWAH_2, (38, 15): TR_GAGAK, (33, 27): TR_ULAR_ARWAH, (20, 23): TR_GAGAK, (12, 14): TR_ARWAH_2}
     walk = {TR_ARWAH_2: 'assets/chars/arwah.png', TR_GAGAK: 'assets/chars/gagak.png', TR_ULAR_ARWAH: 'assets/chars/ular.png'}
-    loots = {(30, 7): 'jamu', (39, 27): 'sukma_sedang', (15, 23): 'penawar'}
+    loots = {(30, 7): 'jamu', (39, 27): 'sukma_sedang', (15, 23): 'bijih_besi'}
     marks = {
         'S': lambda b, x, y: (b.obj('spawn', x, y, name='dari_ladang', dir=2),
                               [b.obj('door', 0, yy, to=LADANG, spawn='dari_bambu') for yy in (20, 21, 22)],
@@ -699,7 +705,7 @@ def map_laut_garam():
     troops = {(8, 14): TR_HANTU_LAUT, (30, 18): TR_TENGKORAK_2, (14, 24): TR_HANTU_TENGKORAK, (24, 12): TR_TENGKORAK_2}
     walk = {TR_HANTU_LAUT: 'assets/chars/arwah.png', TR_TENGKORAK_2: 'assets/chars/tumbal_gagal.png',
             TR_HANTU_TENGKORAK: 'assets/chars/tumbal_gagal.png'}
-    loots = {(6, 20): 'bom_minyak', (28, 10): 'jamu', (38, 25): 'sukma_sedang'}
+    loots = {(6, 20): 'bijih_besi', (28, 10): 'jamu', (38, 25): 'sukma_sedang'}
     marks = {
         'S': lambda b, x, y: (b.obj('spawn', x, y, name='dari_bambu', dir=0),
                               b.obj('event', 0, 0, name='laut_masuk', event='laut_masuk', trigger='auto', once='laut_masuk'),
@@ -765,7 +771,7 @@ def map_rawa_terasi():
     b.base_ts, b.path_ts, b.forest_ts = 'rumput_rawa', 'tanah_rawa', 'hutan_rawa'
     b.props.update(nama='Rawa Terasi', musik='rawa', gelap=0.72, battleback='assets/battlebacks/rawa.png')
     troops = {(22, 10): TR_AKAR_2, (32, 17): TR_BUAYA, (22, 25): TR_AKAR_BELATUNG, (43, 22): TR_BUAYA, (6, 16): TR_AKAR_2}
-    loots = {(29, 5): 'jamu', (12, 30): 'bom_minyak'}
+    loots = {(29, 5): 'jamu', (12, 30): 'bijih_besi'}
     marks = {
         'S': lambda b, x, y: (b.obj('spawn', x, y, name='dari_laut', dir=0),
                               [b.obj('door', xx, 0, to=LAUT_GARAM, spawn='dari_rawa') for xx in (26, 27, 28)],

@@ -14,6 +14,7 @@
 #include "MenuView.hpp"
 #include "TitleView.hpp"
 #include "TungkuView.hpp"
+#include "ShopView.hpp"
 #include "core/game/Game.hpp"
 
 class App {
@@ -31,6 +32,7 @@ private:
     DialogView dialog_;
     MenuView   menu_;
     TungkuView tungku_;
+    ShopView   shop_;
     TitleView  title_;
     bool       quit_ = false;
     float      endingTime_ = 0.0f;

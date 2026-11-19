@@ -41,7 +41,7 @@ bool Game::inDialog() const {
 
 void Game::update(float dt, const GameInput& in) {
     enteredMap_ = false;
-    if (battlePending_ || transferPending_ || tungkuMenu_) return;
+    if (battlePending_ || transferPending_ || tungkuMenu_ || shopMenu_) return;
     if (interp_.busy()) {
         interp_.update();
         return;             // dialog & cutscene membekukan peta
@@ -257,6 +257,34 @@ void Game::hostUnlock(int a, int b) {
 
 void Game::hostHeal() { state_.rest(); }
 
+void Game::hostOpenShop(const std::string& kind) { shopMenu_ = kind == "tempa" ? SHOP_TEMPA : SHOP_DAGANG; }
+
+// ------------------------------------------------------------------ pedagang & pandai besi
+
+std::string Game::buy(int entry) {
+    const ShopEntry& e = shopEntry(entry);
+    const ItemDef* d = itemDef(e.item);
+    switch (state_.buy(entry)) {
+        case GameState::BUY_OK:
+            return e.item == IT_KENDI_JAMU ? "Wadah Ramuan Jamu bertambah (" + std::to_string(state_.jamuMax()) + ")."
+                                          : std::string("Dibeli: ") + (d ? d->name : "?") + ".";
+        case GameState::BUY_SOLD_OUT: return "Barang itu sudah habis.";
+        case GameState::BUY_NO_SUKMA: return "Sukma tidak cukup (butuh " + std::to_string(e.price) + ").";
+        default: return "Tidak bisa membawa lebih banyak.";
+    }
+}
+
+std::string Game::forge() {
+    const WeaponDef& w = weaponDef(state_.classId());
+    int lv = state_.weaponLevel();
+    switch (state_.forge()) {
+        case GameState::FORGE_OK: return std::string(w.name) + " ditempa menjadi +" + std::to_string(state_.weaponLevel()) + ".";
+        case GameState::FORGE_MAX: return "Senjatamu sudah tidak bisa ditempa lagi.";
+        case GameState::FORGE_NO_SUKMA: return "Sukma tidak cukup (butuh " + std::to_string(w.costSukma[lv]) + ").";
+        default: return "Bijih Besi kurang (butuh " + std::to_string(w.costOre[lv]) + ").";
+    }
+}
+
 // ------------------------------------------------------------------ Tungku
 
 std::string Game::levelUp() {
@@ -326,6 +354,7 @@ bool Game::loadFrom(const std::string& path, std::string* error) {
     }
     interp_.abort();
     battlePending_ = transferPending_ = tungkuMenu_ = false;
+    shopMenu_ = SHOP_NONE;
     std::string n;
     while (notices_.dequeue(n)) {}
     field_.enter(map, x, y, dir);

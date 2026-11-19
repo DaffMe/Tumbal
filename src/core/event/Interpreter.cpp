@@ -114,6 +114,10 @@ void Interpreter::execute(const Command* c) {
             host_.hostTransfer(c->n1, c->s1);
             break;
         case CMD_NOTICE: notices_.enqueue(c->s1); break;
+        case CMD_SHOP:
+            host_.hostOpenShop(c->s1);
+            dsOp("Interpreter: buka menu " + c->s1);
+            break;
         case CMD_JOIN:
             gs_.joinCompanion();
             dsOp("GameState.joinCompanion() -> party 2 orang");

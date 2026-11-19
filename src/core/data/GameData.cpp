@@ -274,6 +274,10 @@ static const ItemDef ITEMS[] = {
      IK_KUNCI, 0, ST_NONE, EL_NONE, false, false},
     {IT_KUNCI_SEL, "kunci_sel", "Kunci Sel Berkarat", "Kunci kecil berkarat dari lumbung Buto.",
      IK_KUNCI, 0, ST_NONE, EL_NONE, false, false},
+    {IT_BIJIH_BESI, "bijih_besi", "Bijih Besi", "Bongkah besi hitam dari dasar rawa. Pandai besi desa bisa menempanya.",
+     IK_KUNCI, 0, ST_NONE, EL_NONE, false, false},
+    {IT_KENDI_JAMU, "kendi_jamu", "Kendi Jamu", "Kendi tanah liat kosong. Menambah satu wadah Ramuan Jamu.",
+     IK_KUNCI, 0, ST_NONE, EL_NONE, false, false},
 };
 static const int ITEM_COUNT = sizeof(ITEMS) / sizeof(ITEMS[0]);
 
@@ -293,3 +297,28 @@ int itemIdByKey(const char* key) {
     }
     return 0;
 }
+
+// ------------------------------------------------------------------ senjata
+static const WeaponDef WEAPONS[KL_COUNT] = {
+    {"Golok Penebas",   {0, 5, 11, 18}, {0, 0, 0, 0},   {120, 260, 450}, {1, 2, 3}},   // Pendekar
+    {"Keris Luk Tujuh", {0, 4, 9, 15},  {0, 1, 2, 4},   {120, 260, 450}, {1, 2, 3}},   // Maling
+    {"Tongkat Pawang",  {0, 2, 4, 6},   {0, 5, 11, 18}, {120, 260, 450}, {1, 2, 3}},   // Pawang
+    {"Selendang Emas",  {0, 0, 0, 0},   {0, 0, 0, 0},   {0, 0, 0},       {0, 0, 0}},   // Timun Mas (tidak ditempa)
+};
+
+const WeaponDef& weaponDef(int classId) {
+    return WEAPONS[(classId >= 0 && classId < KL_COUNT) ? classId : 0];
+}
+
+// ------------------------------------------------------------------ dagangan
+static const ShopEntry SHOP[] = {
+    {IT_PENAWAR, 30, -1},
+    {IT_BOM_MINYAK, 60, -1},
+    {IT_ABU_PULANG, 80, -1},
+    {IT_BIJIH_BESI, 150, 3},
+    {IT_KENDI_JAMU, 400, 2},
+};
+static const int SHOP_COUNT = sizeof(SHOP) / sizeof(SHOP[0]);
+
+int shopCount() { return SHOP_COUNT; }
+const ShopEntry& shopEntry(int i) { return SHOP[(i >= 0 && i < SHOP_COUNT) ? i : 0]; }

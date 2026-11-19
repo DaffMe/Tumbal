@@ -119,6 +119,12 @@ void App::updateField(float dt) {
         mapView_.updateCamera(game_.field(), dt);
         return;
     }
+    if (game_.shopMenu() != Game::SHOP_NONE) {
+        std::string r = shop_.update(game_);
+        if (!r.empty()) { toast_ = r; toastTime_ = 2.4f; }
+        mapView_.updateCamera(game_.field(), dt);
+        return;
+    }
     if (menu_.open()) {
         std::string r = menu_.update(game_);
         if (!r.empty()) { toast_ = r; toastTime_ = 2.2f; }
@@ -178,7 +184,7 @@ void App::updateAudio() {
 
     // efek suara menu (judul, Tungku, menu, pilihan dialog)
     bool inMenu = mode_ == ModeTitle ||
-                  (mode_ == ModeField && (game_.tungkuMenuOpen() || menu_.open() ||
+                  (mode_ == ModeField && (game_.tungkuMenuOpen() || menu_.open() || game_.shopMenu() != Game::SHOP_NONE ||
                                           game_.interpreter().state() == Interpreter::WaitChoice));
     if (inMenu) {
         if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_W) || IsKeyPressed(KEY_S))
@@ -210,7 +216,8 @@ void App::updateAudio() {
 // ------------------------------------------------------------------ draw
 
 void App::drawHud() {
-    if (bannerTime_ > 0) {
+    bool menuOpen = game_.tungkuMenuOpen() || game_.shopMenu() != Game::SHOP_NONE || menu_.open();
+    if (bannerTime_ > 0 && !menuOpen) {
         float a = std::fmin(1.0f, bannerTime_ / 0.6f) * std::fmin(1.0f, (3.0f - bannerTime_) / 0.4f);
         float w = ui::measure(bannerText_, 32);
         float x = VIEW_W / 2 - w / 2, y = 30;
@@ -325,6 +332,7 @@ void App::drawFrame() {
         dialog_.draw(game_.interpreter(), time_);
         menu_.draw(game_, time_);
         tungku_.draw(game_, time_);
+        shop_.draw(game_, time_);
         drawHud();
         if (mode_ == ModeBattleIntro) {
             // transisi masuk battle: kilat putih lalu tirai hitam dari tengah
@@ -434,10 +442,14 @@ int App::run(bool smoke, bool shots) {
             if (frame == 640) TakeScreenshot("shot_battle.png");
             if (frame == 645) { mode_ = ModeField; go(3, 22, 18, FACE_UP); menu_.show(); }
             if (frame == 680) TakeScreenshot("shot_menu.png");
-            if (frame == 685) { menu_.hide(); go(8, 16, 22, FACE_DOWN); it.runEvent("buto_bangun"); }
-            skipDialog(685, 740);
-            if (frame == 860) TakeScreenshot("shot_buto_battle.png");
-            if (frame >= 862) break;
+            if (frame == 685) { menu_.hide(); game_.state().addSukma(300); game_.hostOpenShop("dagang"); }
+            if (frame == 700) TakeScreenshot("shot_toko.png");
+            if (frame == 705) { game_.closeShopMenu(); game_.state().addItem(IT_BIJIH_BESI, 1); game_.hostOpenShop("tempa"); }
+            if (frame == 720) TakeScreenshot("shot_tempa.png");
+            if (frame == 725) { game_.closeShopMenu(); go(8, 16, 22, FACE_DOWN); it.runEvent("buto_bangun"); }
+            skipDialog(725, 780);
+            if (frame == 900) TakeScreenshot("shot_buto_battle.png");
+            if (frame >= 902) break;
         }
         if (smoke && frame > 30) break;
     }

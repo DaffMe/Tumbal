@@ -91,6 +91,20 @@ public:
     const Bloodstain& bloodstain() const { return blood_; }
     int  deaths() const { return deaths_; }
 
+    // ---- pandai besi: tempa senjata kelas +0..+3 (sukma + Bijih Besi)
+    enum ForgeResult { FORGE_OK = 0, FORGE_MAX, FORGE_NO_SUKMA, FORGE_NO_ORE };
+    int  weaponLevel() const { return weaponLevel_; }
+    ForgeResult canForge() const;
+    ForgeResult forge();
+    // Stat tokoh utama = stat level + bonus senjata.
+    Stats heroStats(int level) const;
+
+    // ---- pedagang: beli dengan sukma; sebagian barang stoknya terbatas
+    enum BuyResult { BUY_OK = 0, BUY_SOLD_OUT, BUY_NO_SUKMA, BUY_FULL };
+    int  shopStock(int entry) const;      // sisa stok, -1 = tak terbatas
+    BuyResult canBuy(int entry) const;
+    BuyResult buy(int entry);
+
 private:
     Battler hero_;
     int     classId_ = 0;
@@ -108,4 +122,9 @@ private:
     bool    companionJoined_ = false;
     bool    companionActive_ = false;
     int     companionLevel_ = 1;
+    int     weaponLevel_ = 0;
+    static constexpr int MAX_SHOP = 16;
+    int     shopBought_[MAX_SHOP] = {};
+
+    void refreshHeroStats();   // pasang ulang stat (level + senjata) tanpa mengubah HP/MP
 };

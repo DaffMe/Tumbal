@@ -160,7 +160,31 @@ struct ItemDef {
 
 enum ItemIdList {
     IT_JAMU = 1, IT_PENAWAR, IT_SUKMA_KECIL, IT_SUKMA_SEDANG, IT_BOM_MINYAK, IT_ABU_PULANG, IT_KUNCI_SEL,
-    IT_BIJI_TIMUN, IT_JARUM, IT_GARAM, IT_TERASI, IT_COUNT
+    IT_BIJI_TIMUN, IT_JARUM, IT_GARAM, IT_TERASI,
+    IT_BIJIH_BESI, IT_KENDI_JAMU,      // ditambah di akhir agar berkas simpan lama tetap terbaca
+    IT_COUNT
 };
 const ItemDef* itemDef(int id);
 int itemIdByKey(const char* key);   // 0 bila tidak ada
+
+// ---------------------------------------------------------------- senjata (pandai besi)
+// Satu senjata per kelas, ditempa +0..+3 (seperti upgrade senjata BS1).
+// Bonus ditambahkan ke stat level; biaya = sukma + Bijih Besi.
+struct WeaponDef {
+    const char* name;
+    int atk[4];          // bonus Serang per tingkat tempa
+    int mag[4];          // bonus Ilmu per tingkat tempa
+    int costSukma[3];    // biaya naik ke +1, +2, +3
+    int costOre[3];      // Bijih Besi yang dibutuhkan
+};
+constexpr int WEAPON_MAX = 3;
+const WeaponDef& weaponDef(int classId);
+
+// ---------------------------------------------------------------- dagangan (pedagang desa)
+struct ShopEntry {
+    int item;
+    int price;           // dalam sukma
+    int stock;           // -1 = tak terbatas
+};
+int shopCount();
+const ShopEntry& shopEntry(int i);

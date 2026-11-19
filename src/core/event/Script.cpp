@@ -23,7 +23,7 @@ EventLibrary::~EventLibrary() {
 
 static int opFromName(const std::string& s) {
     static const char* names[CMD_COUNT] = {"text", "choice", "item", "sukma", "flag", "if_flag", "if_item",
-                                           "battle", "call", "heal", "unlock", "transfer", "notice", "end", "join"};
+                                           "battle", "call", "heal", "unlock", "transfer", "notice", "end", "join", "shop"};
     for (int i = 0; i < CMD_COUNT; ++i)
         if (s == names[i]) return i;
     return -1;
@@ -96,6 +96,7 @@ static Command* parseOne(const JsonValue* c, std::string* error) {
             cmd->s1 = c->getString("spawn");
             break;
         case CMD_NOTICE: cmd->s1 = c->getString("text"); break;
+        case CMD_SHOP: cmd->s1 = c->getString("kind", "dagang"); break;
         default: break;
     }
     return cmd;

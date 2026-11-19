@@ -119,11 +119,76 @@ bool GameState::levelUp() {
     if (sukma_ < cost) return false;
     sukma_ -= cost;
     ++level_;
-    Stats s = statsAtLevel(classId_, level_);
+    Stats s = heroStats(level_);
     hero_.stats = s;
     hero_.hp = s.mhp;   // naik level di Tungku = tubuh pulih
     hero_.mp = s.mmp;
     return true;
+}
+
+// ------------------------------------------------------------------ pandai besi & pedagang
+
+Stats GameState::heroStats(int level) const {
+    Stats s = statsAtLevel(classId_, level);
+    const WeaponDef& w = weaponDef(classId_);
+    s.atk += w.atk[weaponLevel_];
+    s.mag += w.mag[weaponLevel_];
+    return s;
+}
+
+void GameState::refreshHeroStats() {
+    hero_.stats = heroStats(level_);
+    if (hero_.hp > hero_.stats.mhp) hero_.hp = hero_.stats.mhp;
+    if (hero_.mp > hero_.stats.mmp) hero_.mp = hero_.stats.mmp;
+}
+
+GameState::ForgeResult GameState::canForge() const {
+    if (weaponLevel_ >= WEAPON_MAX) return FORGE_MAX;
+    const WeaponDef& w = weaponDef(classId_);
+    if (sukma_ < w.costSukma[weaponLevel_]) return FORGE_NO_SUKMA;
+    if (count(IT_BIJIH_BESI) < w.costOre[weaponLevel_]) return FORGE_NO_ORE;
+    return FORGE_OK;
+}
+
+GameState::ForgeResult GameState::forge() {
+    ForgeResult r = canForge();
+    if (r != FORGE_OK) return r;
+    const WeaponDef& w = weaponDef(classId_);
+    sukma_ -= w.costSukma[weaponLevel_];
+    removeItem(IT_BIJIH_BESI, w.costOre[weaponLevel_]);
+    ++weaponLevel_;
+    refreshHeroStats();
+    return FORGE_OK;
+}
+
+int GameState::shopStock(int entry) const {
+    if (entry < 0 || entry >= shopCount() || entry >= MAX_SHOP) return 0;
+    const ShopEntry& e = shopEntry(entry);
+    if (e.stock < 0) return -1;
+    return e.stock - shopBought_[entry];
+}
+
+GameState::BuyResult GameState::canBuy(int entry) const {
+    if (shopStock(entry) == 0) return BUY_SOLD_OUT;
+    const ShopEntry& e = shopEntry(entry);
+    if (sukma_ < e.price) return BUY_NO_SUKMA;
+    if (e.item != IT_KENDI_JAMU && count(e.item) >= 99) return BUY_FULL;
+    return BUY_OK;
+}
+
+GameState::BuyResult GameState::buy(int entry) {
+    BuyResult r = canBuy(entry);
+    if (r != BUY_OK) return r;
+    const ShopEntry& e = shopEntry(entry);
+    sukma_ -= e.price;
+    ++shopBought_[entry];
+    if (e.item == IT_KENDI_JAMU) {
+        ++jamuMax_;                 // wadah baru langsung terisi
+        addItem(IT_JAMU, 1);
+    } else {
+        addItem(e.item, 1);
+    }
+    return BUY_OK;
 }
 
 // ------------------------------------------------------------------ pendamping
@@ -204,7 +269,9 @@ std::string GameState::toJson() const {
     o += ",\"companion\":[" + std::to_string(companionJoined_ ? 1 : 0) + "," + std::to_string(companionActive_ ? 1 : 0) +
          "," + std::to_string(companionLevel_) + "],";
     writeBattler(o, "companionState", companion_);
-    o += "}";
+    o += ",\"weapon\":" + std::to_string(weaponLevel_) + ",\"shop\":[";
+    for (int i = 0; i < MAX_SHOP; ++i) o += (i ? "," : "") + std::to_string(shopBought_[i]);
+    o += "]}";
     return o;
 }
 
@@ -225,7 +292,14 @@ bool GameState::fromJson(const JsonValue* v) {
     classId_ = v->getInt("class");
     level_ = v->getInt("level", 1);
     hero_ = makeHeroBattler("Tumbal", classId_, level_);
+    weaponLevel_ = v->getInt("weapon", 0);
+    if (weaponLevel_ < 0 || weaponLevel_ > WEAPON_MAX) weaponLevel_ = 0;
+    refreshHeroStats();
     readBattler(v->get("hero"), hero_);
+    if (const JsonValue* sh = v->get("shop")) {
+        int i = 0;
+        for (const JsonValue* c = sh->first(); c != nullptr && i < MAX_SHOP; c = c->next(), ++i) shopBought_[i] = c->asInt();
+    }
     sukma_ = v->getInt("sukma");
     jamuMax_ = v->getInt("jamuMax", 3);
     deaths_ = v->getInt("deaths");

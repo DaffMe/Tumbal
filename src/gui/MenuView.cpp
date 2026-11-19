@@ -134,8 +134,10 @@ void MenuView::draw(const Game& game, double time) {
             ui::text(names[i], x, y, ui::DIM);
             ui::textRight(std::to_string(vals[i]), x + 180, y, ui::BONE);
         }
-        ui::text("Mati: " + std::to_string(gs.deaths()) + " kali", stw.x + 16, stw.y + 184, ui::DIM);
+        ui::text(std::string("Senjata: ") + weaponDef(gs.classId()).name + " +" + std::to_string(gs.weaponLevel()) +
+                     "    Wadah jamu: " + std::to_string(gs.jamuMax()), stw.x + 16, stw.y + 174, ui::BONE);
+        ui::text("Mati: " + std::to_string(gs.deaths()) + " kali", stw.x + 16, stw.y + 196, ui::DIM);
         if (gs.bloodstain().active)
-            ui::text("Sukma tercecer: " + std::to_string(gs.bloodstain().sukma), stw.x + 16, stw.y + 206, ui::BLOOD);
+            ui::text("Sukma tercecer: " + std::to_string(gs.bloodstain().sukma), stw.x + 16, stw.y + 218, ui::BLOOD);
     }
 }

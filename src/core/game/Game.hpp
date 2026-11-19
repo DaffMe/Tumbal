@@ -78,6 +78,12 @@ public:
     // Pendamping: naik level dengan sukma, atau panggil/lepas.
     std::string companionLevelUp();
     std::string toggleCompanion();
+    // ---- pedagang & pandai besi (dibuka oleh perintah event "shop")
+    enum ShopKind { SHOP_NONE = 0, SHOP_DAGANG, SHOP_TEMPA };
+    int  shopMenu() const { return shopMenu_; }
+    void closeShopMenu() { shopMenu_ = SHOP_NONE; }
+    std::string buy(int entry);     // pesan hasil untuk notifikasi
+    std::string forge();
     // M2 subprogram: daftar tujuan warp (Tungku menyala & terjangkau).
     int warpTargets(int* outMap, int* outDepth, int max);
     // M2 subprogram: warp ke Tungku di peta mapId (lewat transfer).
@@ -102,6 +108,7 @@ public:
     void hostTransfer(int mapId, const std::string& spawn) override;
     void hostUnlock(int a, int b) override;
     void hostHeal() override;
+    void hostOpenShop(const std::string& kind) override;
 
 private:
     World        world_;
@@ -122,6 +129,7 @@ private:
     bool respawnAfterTransfer_ = false;
     bool enteredMap_ = false;
     bool tungkuMenu_ = false;
+    int  shopMenu_ = SHOP_NONE;
 
     void notice(const std::string& s);
     void interact();

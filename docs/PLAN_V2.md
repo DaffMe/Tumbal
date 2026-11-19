@@ -199,14 +199,13 @@ hari kerja, 2026-11-19). Status di bawah dicocokkan dengan kode pada commit `e03
 | 5 | Musuh terlihat di peta, transisi ke battle, Tungku, sukma, mati/ambil sukma | Loop Souls jalan | Selesai |
 | 6 | Interpreter event (dialog, pilihan, loot), menu (Barang/Jurus/Status/Save), save/load | Tutorial bisa dimainkan | Selesai |
 | 7 | **Vertical slice**: tutorial + desa + ladang + mini-boss. **Playtest pemilik proyek** | ±15 menit main | Konten selesai; **playtest belum** |
-| 8 | Peta 4–5, pendamping Timun Mas, pandai besi, toko | ±35 menit | Peta & Timun Mas selesai; **pandai besi & toko belum** |
+| 8 | Peta 4–5, pendamping Timun Mas, pandai besi, toko | ±35 menit | Selesai (Empu Karta menempa +0..+3 dengan sukma + Bijih Besi; pedagang dengan stok terbatas & Kendi Jamu) |
 | 9 | Rawa + boss Buto Ijo (3 bagian, telegraf) | Demo tamat | Selesai, kecuali **telegraf serangan besar** |
 | 10 | Audio, cahaya/kabut, getar layar, transisi, judul & ending | Terasa "jadi" | Selesai, kecuali **kabut** |
 | 11 | Polish visual tiap wilayah, kejelasan battle, teks cerita reaktif | — | Selesai |
 | 12 | Balancing, playtest penuh, perbaikan | — | Balancing lewat simulasi sekali pakai; **`--balance` & playtest penuh belum** |
 | 13 | README, dokumentasi struktur data, skrip demo, bahan Pendampingan | — | `docs/DEMO.md` ada; **tabel tim README & bahan Pendampingan belum** |
 
-Kalau waktu sempit: fase 8 (pandai besi & toko) boleh dicoret, asal tabel ini diperbarui.
 
 ---
 

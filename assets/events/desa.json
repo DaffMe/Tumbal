@@ -71,6 +71,39 @@
       ]}
   ],
 
+  "pandai_besi": [
+    {"cmd": "if_flag", "name": "empu_kenal", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "Pandai Besi", "text": "Jangan lihat palunya. Lihat tanganmu sendiri. Ada bekas tali di sana, bukan?"},
+        {"cmd": "text", "who": "Empu Karta", "text": "Aku yang menempa rantai lumbung. Tiga puluh musim, tiga puluh anak. Bayarannya beras dan diam."},
+        {"cmd": "text", "who": "Empu Karta", "text": "Bawakan sukma dan bijih besi dari tanah busuk itu. Akan kutempa senjatamu. Anggap saja aku sedang mencicil."},
+        {"cmd": "flag", "name": "empu_kenal", "value": 1}
+      ],
+      "else": [
+        {"cmd": "text", "who": "Empu Karta", "text": "Besi yang baik mengingat setiap pukulan. Begitu juga desa ini."}
+      ]},
+    {"cmd": "choice", "options": ["Tempa senjata", "Pergi"], "branches": [
+      [ {"cmd": "shop", "kind": "tempa"} ],
+      []
+    ]}
+  ],
+
+  "pedagang": [
+    {"cmd": "if_flag", "name": "pedagang_kenal", "value": 0,
+      "then": [
+        {"cmd": "text", "who": "Pedagang Keliling", "text": "Pembeli! Sudah lama sekali. Orang desa tidak berbelanja, mereka cuma berdoa dan menumbuk."},
+        {"cmd": "text", "who": "Pedagang Keliling", "text": "Barangku dari mana? Dari kantong-kantong yang tidak akan dipakai lagi. Tumbal tidak butuh bekal, kan?"},
+        {"cmd": "flag", "name": "pedagang_kenal", "value": 1}
+      ],
+      "else": [
+        {"cmd": "text", "who": "Pedagang Keliling", "text": "Sukma, sukma. Di desa ini cuma itu yang laku."}
+      ]},
+    {"cmd": "choice", "options": ["Lihat dagangan", "Pergi"], "branches": [
+      [ {"cmd": "shop", "kind": "dagang"} ],
+      []
+    ]}
+  ],
+
   "jalan_ladang": [
     {"cmd": "text", "who": "", "text": "Jalan setapak ke timur menuju Ladang Timun Busuk. Bau manis yang membusuk terbawa angin dari sana."}
   ],

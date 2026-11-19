@@ -93,7 +93,7 @@ void TungkuView::draw(Game& game, double time) {
         std::snprintf(buf, sizeof buf, "Butuh %d sukma", cost);
         ui::textRight(buf, lw.x + lw.width - 16, lw.y + 10, gs.canLevelUp() ? ui::AMBER : ui::BLOOD);
         Stats now = gs.hero().stats;
-        Stats next = statsAtLevel(gs.classId(), gs.level() + 1);
+        Stats next = gs.heroStats(gs.level() + 1);   // termasuk bonus senjata tempaan
         const char* names[] = {"HP", "MP", "Serang", "Tahan", "Ilmu", "Tolak", "Gesit", "Untung"};
         int a[] = {now.mhp, now.mmp, now.atk, now.def, now.mag, now.res, now.agi, now.luk};
         int b[] = {next.mhp, next.mmp, next.atk, next.def, next.mag, next.res, next.agi, next.luk};

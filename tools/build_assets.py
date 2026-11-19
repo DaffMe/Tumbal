@@ -70,6 +70,20 @@ def build_characters():
         ('medievalshirt+nt+nl+na+0b.png', KAIN_LURIK),
         ('bandana.png', KAIN_COKLAT),
     ])
+    # Empu Karta: pandai besi bertubuh tebal, celemek gelap, kepala gundul, janggut kelabu
+    thick0 = lambda skin: [('human_legs_thick!tl.png', skin), ('human_torso_thick!tt.png', skin),
+                           ('human_arms_beefy!ba.png', skin), ('human_head!nh.png', skin),
+                           ('human_ears!ne.png', skin)]
+    character('empu_karta.png', thick0((150, 104, 72)) + [
+        ('great_kilt+tt+ba-sl.png', (52, 44, 40)),
+        ('full_beard.png', (120, 116, 108)),
+    ])
+    # Pedagang keliling: celana longgar, baju lurik, ikat kepala merah tua
+    character('pedagang.png', body(KULIT_SAWO) + [
+        ('desert_pants+nl-tt.png', (96, 80, 58)),
+        ('medievalshirt+nt+nl+na+0b.png', (120, 60, 44)),
+        ('bandana_with_hair.png', (110, 36, 30)),
+    ])
     # Lelaki Tua: tumbal lama yang dibiarkan membusuk di sel
     character('lelaki_tua.png', body((150, 128, 104)) + [
         ('loincloth+nl+nt.png', (84, 70, 52)),

@@ -33,6 +33,7 @@ enum CommandOp {
     CMD_NOTICE,      // s1 = teks notifikasi singkat (tidak menunggu)
     CMD_END,         // hentikan skrip
     CMD_JOIN,        // Timun Mas bergabung ke party
+    CMD_SHOP,        // s1 = "dagang" (pedagang) / "tempa" (pandai besi): buka menu, taruh di akhir skrip
     CMD_COUNT
 };
 

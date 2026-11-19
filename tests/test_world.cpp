@@ -280,7 +280,90 @@ static void testWideEventAndNpc() {
     CHECK(g.state().count(IT_JAMU) == jamu + 1 && g.state().flag("pemuda_beri") == 1);
 }
 
+static void testForgeAndShop() {
+    SECTION("Pandai besi (tempa +0..+3) & pedagang (stok terbatas), ikut tersimpan");
+    GameState gs;
+    gs.newGame("Tumbal", KL_PENDEKAR);
+    int atk0 = gs.hero().stats.atk;
+    CHECK(gs.weaponLevel() == 0);
+    CHECK(gs.canForge() == GameState::FORGE_NO_SUKMA);
+    gs.addSukma(1000);
+    CHECK(gs.canForge() == GameState::FORGE_NO_ORE);
+    gs.addItem(IT_BIJIH_BESI, 6);
+    CHECK(gs.forge() == GameState::FORGE_OK);
+    CHECK(gs.weaponLevel() == 1 && gs.hero().stats.atk == atk0 + weaponDef(KL_PENDEKAR).atk[1]);
+    CHECK(gs.sukma() == 1000 - 120 && gs.count(IT_BIJIH_BESI) == 5);
+    CHECK(gs.forge() == GameState::FORGE_OK);
+    CHECK(gs.forge() == GameState::FORGE_OK);                 // +3: total 830 sukma, 6 bijih
+    CHECK(gs.weaponLevel() == 3 && gs.count(IT_BIJIH_BESI) == 0 && gs.sukma() == 170);
+    CHECK(gs.forge() == GameState::FORGE_MAX);
+    // bonus senjata bertahan setelah naik level
+    int atk3 = gs.hero().stats.atk;
+    gs.addSukma(500);
+    CHECK(gs.levelUp());
+    CHECK(gs.hero().stats.atk == statsAtLevel(KL_PENDEKAR, 2).atk + weaponDef(KL_PENDEKAR).atk[3]);
+    CHECK(gs.hero().stats.atk > atk3);
+
+    // pedagang: Kendi Jamu stok 2 menambah wadah jamu
+    int kendi = -1, bijih = -1;
+    for (int i = 0; i < shopCount(); ++i) {
+        if (shopEntry(i).item == IT_KENDI_JAMU) kendi = i;
+        if (shopEntry(i).item == IT_BIJIH_BESI) bijih = i;
+    }
+    CHECK(kendi >= 0 && bijih >= 0);
+    GameState g2;
+    g2.newGame("Tumbal", KL_PAWANG);
+    CHECK(g2.buy(kendi) == GameState::BUY_NO_SUKMA);
+    g2.addSukma(5000);
+    int max0 = g2.jamuMax();
+    CHECK(g2.buy(kendi) == GameState::BUY_OK && g2.buy(kendi) == GameState::BUY_OK);
+    CHECK(g2.buy(kendi) == GameState::BUY_SOLD_OUT);
+    CHECK(g2.jamuMax() == max0 + 2 && g2.count(IT_JAMU) == max0 + 2);
+    CHECK(g2.shopStock(bijih) == shopEntry(bijih).stock);
+    CHECK(g2.buy(bijih) == GameState::BUY_OK && g2.shopStock(bijih) == shopEntry(bijih).stock - 1);
+    CHECK(g2.forge() == GameState::FORGE_OK);
+    int mag1 = g2.hero().stats.mag;
+    // simpan/muat: tingkat tempa, stok yang sudah dibeli, dan wadah jamu kembali
+    std::string err;
+    JsonValue* v = JsonValue::parse(g2.toJson(), &err);
+    CHECK(v != nullptr);
+    GameState g3;
+    CHECK(g3.fromJson(v));
+    delete v;
+    CHECK(g3.weaponLevel() == 1 && g3.hero().stats.mag == mag1);
+    CHECK(g3.shopStock(kendi) == 0 && g3.shopStock(bijih) == shopEntry(bijih).stock - 1);
+    CHECK(g3.jamuMax() == max0 + 2);
+}
+
+static void testShopEvent() {
+    SECTION("Perintah event \"shop\" membuka menu pedagang / pandai besi");
+    Game g;
+    std::string err;
+    std::string root = std::string(worldPath()).substr(0, std::string(worldPath()).find("maps/world.json"));
+    std::string ev[] = {root + "events/desa.json"};
+    CHECK(g.load(worldPath(), ev, 1, &err));
+    g.newGame("Tumbal", KL_PENDEKAR);
+    CHECK(g.interpreter().runEvent("pandai_besi"));
+    for (int i = 0; i < 30 && g.interpreter().busy(); ++i) {
+        if (g.interpreter().state() == Interpreter::WaitChoice) g.interpreter().choose(0); else g.interpreter().resume();
+        g.update(0.016f, GameInput{});
+    }
+    CHECK(g.shopMenu() == Game::SHOP_TEMPA);
+    CHECK(g.forge().find("Sukma") != std::string::npos);    // belum punya sukma
+    g.closeShopMenu();
+    CHECK(g.interpreter().runEvent("pedagang"));
+    for (int i = 0; i < 30 && g.interpreter().busy(); ++i) {
+        if (g.interpreter().state() == Interpreter::WaitChoice) g.interpreter().choose(0); else g.interpreter().resume();
+        g.update(0.016f, GameInput{});
+    }
+    CHECK(g.shopMenu() == Game::SHOP_DAGANG);
+    g.state().addSukma(30);
+    CHECK(g.buy(0).find("Dibeli") != std::string::npos);
+}
+
 void runWorldTests() {
+    testForgeAndShop();
+    testShopEvent();
     testWideEventAndNpc();
     testBossGate();
     testSaveLoad();
