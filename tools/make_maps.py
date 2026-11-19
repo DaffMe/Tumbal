@@ -183,6 +183,9 @@ class MapBuilder:
 
 
 # ============================================================== PETA
+# id troop (sama dengan src/core/data/GameData.hpp)
+TR_TUMBAL_GAGAL, TR_TIKUS_2, TR_TUMBAL_TIKUS, TR_BELATUNG_3, TR_PENJAGA = 1, 2, 3, 4, 5
+
 # id peta (sama dengan world.json)
 SEL_TUMBAL, LORONG_LUMBUNG = 1, 2
 
@@ -202,16 +205,17 @@ def map_sel_tumbal():
         "#####.#########.#########.######",
         "###,,,,,,,,,,,,,,,,,,,,,,,,A,###",
         "###,,,,,,,,,,,,,,,,,,,,,,,,,,###",
-        "###,,,,,,,,,,,,,,,,,,,,,,,,,,###",
+        "###,,,,,,,,,,,,,,,M,,,,,,,,,,###",
         "###,,,,,,,,,,,,,,,,,,,,,,,,,,###",
         "################################",
         "################################",
     ]
     b = MapBuilder('Sel Tumbal', rows, ['dungeon', 'bata', 'tabrak'])
-    b.props.update(nama='Sel Tumbal', musik='lumbung', gelap=0.72)
+    b.props.update(nama='Sel Tumbal', musik='lumbung', gelap=0.72, battleback='assets/battlebacks/lumbung.png')
     marks = {
         'S': lambda b, x, y: b.obj('spawn', x, y, name='awal', dir=0),
         'L': lambda b, x, y: b.obj('loot', x, y, item='sukma_kecil'),
+        'M': lambda b, x, y: b.obj('enemy', x, y, troop=TR_TUMBAL_GAGAL, walker='assets/chars/tumbal_gagal.png', dir=1),
         'A': lambda b, x, y: (b.arch(x, y, to=LORONG_LUMBUNG, spawn='dari_sel'),
                               b.obj('spawn', x, y, name='dari_lorong', dir=0)),
     }
@@ -235,9 +239,9 @@ def map_lorong_lumbung():
         "##########################################",
         "######,,,,,,,,,,,######,,,,,,,,,,,,,######",
         "######,,,,,,,,,,,######,,,,,,,,,,,,,######",
+        "######,,,,,,,,R,,,,,,,,,,,,,,,,,,,,,######",
         "######,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,######",
-        "######,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,######",
-        "######,,,,,,,,,,,######,,,,,,,,,,,,,######",
+        "######,,,,,,,,,,,######,,,,,P,,,,,,,######",
         "######,,,,,,,,,,,######,,,,,,L,,,,,,######",
         "##########,,,################,,,##########",
         "##########,,,################,,,##########",
@@ -251,12 +255,14 @@ def map_lorong_lumbung():
         "##########################################",
     ]
     b = MapBuilder('Lorong Lumbung', rows, ['dungeon', 'bata', 'tabrak'])
-    b.props.update(nama='Lorong Lumbung', musik='lumbung', gelap=0.78)
+    b.props.update(nama='Lorong Lumbung', musik='lumbung', gelap=0.78, battleback='assets/battlebacks/lumbung.png')
     marks = {
         'L': lambda b, x, y: b.obj('loot', x, y, item='sukma_kecil'),
         'B': lambda b, x, y: (b.arch(x, y, to=SEL_TUMBAL, spawn='dari_lorong'),
                               b.obj('spawn', x, y, name='dari_sel', dir=0)),
-        'A': lambda b, x, y: b.obj('tungku', x, y, name='tungku_lumbung'),
+        'A': lambda b, x, y: (b.obj('tungku', x, y, name='tungku_lumbung'), b.block(x, y)),
+        'R': lambda b, x, y: b.obj('enemy', x, y, troop=TR_TIKUS_2, walker='assets/chars/tikus.png'),
+        'P': lambda b, x, y: b.obj('enemy', x, y, troop=TR_PENJAGA, walker='assets/chars/penjaga_lumbung.png'),
     }
     b.build_dungeon(marks)
     # kursi tengkorak & patung di aula atas

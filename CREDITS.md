@@ -17,6 +17,15 @@ Lisensi diperiksa di halaman aslinya pada 2026-11-19.
 | NPC Faceset | Sevarihk | https://opengameart.org/content/npc-faceset | CC-BY 4.0 | potret NPC |
 | Tribal Hide and Wood UI | Sevarihk | https://opengameart.org/content/tribal-hide-and-wood-ui | CC-BY 4.0 | bingkai UI |
 | Aurora Character Generator (potongan sprite) | Sevarihk; generator oleh RedoxGames | https://redoxgames.itch.io/aurora-character-generator | CC-BY 4.0 | sprite karakter (dirakit & diwarnai ulang oleh `tools/build_assets.py`) |
+| 10 Basic RPG Enemies, 6 More RPG Enemies, More RPG Enemies, Fossil Undead | Stephen "Redshrike" Challener (beberapa sprite hasil edit dari karya Blarumyrran & LordNeo) | https://opengameart.org/users/redshrike | CC-BY 3.0 | battler musuh (dipotong & diperbesar) |
+| Backgrounds (battleback) | Nidhoggn | https://opengameart.org/content/backgrounds-3 | CC0 | battleback (digelapkan & diberi vinyet) |
+| Plant & Mushroom Enemies | NettySvit | https://opengameart.org/content/plant-and-mushroom-enemies-charset-and-battlers | CC0 | calon musuh ladang |
+
+## Font
+
+| Font | Pembuat | Sumber | Lisensi |
+|---|---|---|---|
+| Jersey 10 | The Soft Type Project Authors | https://github.com/google/fonts/tree/main/ofl/jersey10 | SIL OFL 1.1 (`assets/fonts/OFL_Jersey10.txt`) |
 
 Perubahan: autotile RPG Maker XP dibakar ulang menjadi lembar 47 tile (`tools/autotile.py`); sprite karakter
 dirakit dari beberapa lapisan dan diwarnai ulang.
