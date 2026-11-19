@@ -48,7 +48,11 @@ bool World::load(const std::string& worldJsonPath, std::string* error) {
             }
             mi.hasTungku = false;
             for (const MapObject* o = mi.map->objects(); o != nullptr; o = o->next)
-                if (o->type == "tungku") mi.hasTungku = true;
+                if (o->type == "tungku") {
+                    mi.hasTungku = true;
+                    mi.tungkuX = o->tileX(mi.map->tileW());
+                    mi.tungkuY = o->tileY(mi.map->tileH());
+                }
             int id = m->getInt("id");
             if (graph_.addVertex(id, mi) == nullptr) {
                 delete mi.map;
@@ -169,4 +173,26 @@ bool World::isCollected(int mapId, int lootIndex) const {
     const MapInfo* i = info(mapId);
     if (i == nullptr || lootIndex < 0 || lootIndex >= 64) return false;
     return (i->collected >> lootIndex) & 1ULL;
+}
+
+void World::lightTungku(int mapId) {
+    MapInfo* i = info(mapId);
+    if (i != nullptr && i->hasTungku && !i->tungkuLit) {
+        i->tungkuLit = true;
+        dsOp("Tungku menyala di vertex " + std::to_string(mapId) + " (" + i->name + ")");
+    }
+}
+
+int World::warpTargets(int fromMap, int* outMap, int* outDepth, int max) {
+    int n = 0;
+    // BFS mengunjungi vertex berurutan menurut jarak (jumlah jalan)
+    graph_.bfs(fromMap, -1, [&](MapGraph::Vertex* v, int depth) {
+        if (n < max && v->data.tungkuLit) {
+            outMap[n] = v->id;
+            outDepth[n] = depth;
+            ++n;
+        }
+    });
+    dsOp("Graph.bfs(" + std::to_string(fromMap) + ") -> " + std::to_string(n) + " Tungku bisa dituju");
+    return n;
 }

@@ -144,6 +144,19 @@ void testBloodstain() {
     CHECK(!gs.useItemInField(IT_JAMU).empty());
     CHECK(gs.hero().hp == 100 + gs.hero().stats.mhp / 2);
     CHECK(gs.useItemInField(IT_BOM_MINYAK).empty());  // tidak bisa di peta
+
+    // naik level: tukar sukma, stat bertambah sesuai kelas
+    GameState lv;
+    lv.newGame("Tumbal", KL_PENDEKAR);
+    int cost = lv.levelUpCost();
+    CHECK(cost == 60);
+    CHECK(!lv.levelUp());
+    lv.addSukma(cost + 5);
+    int atk = lv.hero().stats.atk;
+    CHECK(lv.levelUp());
+    CHECK(lv.level() == 2 && lv.sukma() == 5);
+    CHECK(lv.hero().stats.atk == atk + classDef(KL_PENDEKAR).growth.atk);
+    CHECK(lv.levelUpCost() > cost);
 }
 
 void testBattleItems() {

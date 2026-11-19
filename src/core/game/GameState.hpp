@@ -51,6 +51,11 @@ public:
     int  tungkuY() const { return tungkuY_; }
     // Istirahat: HP/MP penuh, status bersih, Ramuan Jamu terisi ulang.
     void rest();
+
+    // ---- naik level (tukar sukma, seperti BS1)
+    int  levelUpCost() const;           // sukma untuk naik ke level berikutnya
+    bool canLevelUp() const { return sukma_ >= levelUpCost(); }
+    bool levelUp();                     // false bila sukma kurang
     // Mati di (map,x,y): sukma yang dibawa tercecer di sana. Ceceran lama
     // (bila belum diambil) hilang selamanya. Mengembalikan sukma yang hilang.
     int  die(int map, int x, int y);

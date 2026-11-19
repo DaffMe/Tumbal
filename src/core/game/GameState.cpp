@@ -100,3 +100,21 @@ int GameState::retrieveBloodstain(int map, int x, int y) {
     blood_ = Bloodstain();
     return got;
 }
+
+int GameState::levelUpCost() const {
+    // kurva menanjak: 60, 96, 144, 204, 276, ...
+    int l = level_ - 1;
+    return 60 + 30 * l + 6 * l * l;
+}
+
+bool GameState::levelUp() {
+    int cost = levelUpCost();
+    if (sukma_ < cost) return false;
+    sukma_ -= cost;
+    ++level_;
+    Stats s = statsAtLevel(classId_, level_);
+    hero_.stats = s;
+    hero_.hp = s.mhp;   // naik level di Tungku = tubuh pulih
+    hero_.mp = s.mmp;
+    return true;
+}

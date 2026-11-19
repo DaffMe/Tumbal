@@ -161,7 +161,26 @@ static void testSymbolEncounter() {
     CHECK(ev.initiative == 2);   // pemain membelakangi musuh → disergap
 }
 
+static void testTungkuWarp() {
+    SECTION("M2: Tungku menyala & warp mengikuti Graph (BFS)");
+    World world;
+    std::string err;
+    if (!world.load(worldPath(), &err)) { CHECK(false); return; }
+    int maps[8], depth[8];
+    CHECK(world.warpTargets(1, maps, depth, 8) == 0);       // belum ada Tungku menyala
+    world.lightTungku(2);
+    world.lightTungku(1);                                   // peta tanpa Tungku: diabaikan
+    CHECK(!world.info(1)->tungkuLit && world.info(2)->tungkuLit);
+    int n = world.warpTargets(1, maps, depth, 8);
+    CHECK(n == 1 && maps[0] == 2 && depth[0] == 1);
+    // jalan terkunci memutus warp: Tungku di wilayah yang tak terjangkau hilang
+    world.graph().setOpen(1, 2, false);
+    CHECK(world.warpTargets(1, maps, depth, 8) == 0);
+    CHECK(world.warpTargets(2, maps, depth, 8) == 1 && depth[0] == 0);
+}
+
 void runWorldTests() {
+    testTungkuWarp();
     testJson();
     testGraphLocks();
     testWorldAndField();

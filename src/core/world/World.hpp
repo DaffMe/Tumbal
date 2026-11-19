@@ -23,6 +23,8 @@ struct MapInfo {
     TileMap*    map = nullptr;     // dimiliki World
     bool        visited = false;
     bool        hasTungku = false;
+    bool        tungkuLit = false;    // Tungku peta ini sudah dinyalakan (tujuan warp)
+    int         tungkuX = 0, tungkuY = 0;
     unsigned long long defeated = 0;  // bit i = musuh ke-i di peta ini sudah kalah
     unsigned long long collected = 0; // bit i = loot ke-i sudah diambil (permanen)
 };
@@ -76,6 +78,14 @@ public:
     // Loot: indeks = urutan objek bertipe "loot" di peta.
     void markCollected(int mapId, int lootIndex);
     bool isCollected(int mapId, int lootIndex) const;
+
+    // Nyalakan Tungku di peta (setelah pemain beristirahat di sana).
+    void lightTungku(int mapId);
+    // M2 subprogram: daftar Tungku menyala yang TERJANGKAU dari fromMap
+    // lewat jalan terbuka (BFS). outMap/outDepth diisi berurutan dari yang
+    // terdekat; mengembalikan jumlahnya. Tungku di wilayah yang jalannya
+    // masih terkunci tidak muncul: warp mengikuti keterhubungan Graph.
+    int warpTargets(int fromMap, int* outMap, int* outDepth, int max);
 
     // Tandai peta dikunjungi.
     void markVisited(int mapId);

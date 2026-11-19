@@ -62,6 +62,16 @@ public:
     // ---- menu
     std::string useItem(int itemId);
 
+    // ---- menu Tungku (terbuka setelah beristirahat)
+    bool tungkuMenuOpen() const { return tungkuMenu_; }
+    void closeTungkuMenu() { tungkuMenu_ = false; }
+    // Naik level dengan sukma. Mengembalikan teks hasil.
+    std::string levelUp();
+    // M2 subprogram: daftar tujuan warp (Tungku menyala & terjangkau).
+    int warpTargets(int* outMap, int* outDepth, int max);
+    // M2 subprogram: warp ke Tungku di peta mapId (lewat transfer).
+    bool warpTo(int mapId);
+
     // ---- notifikasi singkat (Queue): loot, sukma, Tungku, dll.
     bool popNotice(std::string& out);
 
@@ -97,6 +107,7 @@ private:
     std::string transferSpawn_;
     bool respawnAfterTransfer_ = false;
     bool enteredMap_ = false;
+    bool tungkuMenu_ = false;
 
     void notice(const std::string& s);
     void interact();

@@ -39,7 +39,7 @@ bool Game::inDialog() const {
 
 void Game::update(float dt, const GameInput& in) {
     enteredMap_ = false;
-    if (battlePending_ || transferPending_) return;
+    if (battlePending_ || transferPending_ || tungkuMenu_) return;
     if (interp_.busy()) {
         interp_.update();
         return;             // dialog & cutscene membekukan peta
@@ -129,6 +129,8 @@ void Game::restAt(const MapObject& t) {
     if (field_.map()->blocked(bx, by)) { bx = tx + 1; }
     if (field_.map()->blocked(bx, by)) { bx = tx; by = ty + 1; }
     state_.setLastTungku(field_.mapId(), bx, by);
+    world_.lightTungku(field_.mapId());
+    tungkuMenu_ = true;
     notice("Kamu beristirahat di Tungku. HP pulih, Ramuan Jamu terisi.");
     if (revived > 0) notice("...musuh-musuh bangkit kembali.");
 }
@@ -242,3 +244,33 @@ void Game::hostUnlock(int a, int b) {
 }
 
 void Game::hostHeal() { state_.rest(); }
+
+// ------------------------------------------------------------------ Tungku
+
+std::string Game::levelUp() {
+    int cost = state_.levelUpCost();
+    if (!state_.levelUp()) return "Sukma tidak cukup (butuh " + std::to_string(cost) + ").";
+    return "Naik ke level " + std::to_string(state_.level()) + ".";
+}
+
+int Game::warpTargets(int* outMap, int* outDepth, int max) {
+    return world_.warpTargets(field_.mapId(), outMap, outDepth, max);
+}
+
+bool Game::warpTo(int mapId) {
+    const MapInfo* mi = world_.info(mapId);
+    if (mi == nullptr || !mi->tungkuLit) return false;
+    // tujuan harus terjangkau lewat jalan terbuka (diperiksa lewat BFS)
+    int maps[16], depth[16];
+    int n = warpTargets(maps, depth, 16);
+    bool ok = false;
+    for (int i = 0; i < n; ++i) ok = ok || maps[i] == mapId;
+    if (!ok) return false;
+    int x = mi->tungkuX - 1, y = mi->tungkuY;
+    if (mi->map->blocked(x, y)) x = mi->tungkuX + 1;
+    if (mi->map->blocked(x, y)) { x = mi->tungkuX; y = mi->tungkuY + 1; }
+    tungkuMenu_ = false;
+    state_.setLastTungku(mapId, x, y);
+    requestTransfer(mapId, x, y, FACE_DOWN, false);
+    return true;
+}

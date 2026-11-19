@@ -92,7 +92,7 @@ static const EnemyDef ENEMIES[] = {
     {EN_BELATUNG, "Belatung Lumbung", {70, 20, 22, 10, 10, 5, 20, 5}, 10, RATES_SERANGGA,
      {{SKL_SERANG, 5, 100}, {SKL_LUDAH_RACUN, 4, 100}}, 2,
      "assets/battlers/belatung.png", "assets/chars/belatung.png"},
-    {EN_PENJAGA_LUMBUNG, "Penjaga Lumbung", {520, 40, 44, 12, 18, 14, 26, 10}, 220, RATES_MAYAT,
+    {EN_PENJAGA_LUMBUNG, "Penjaga Lumbung", {440, 40, 36, 12, 18, 14, 26, 10}, 220, RATES_MAYAT,
      {{SKL_SERANG, 5, 100}, {SKL_HANTAM_GUNCANG, 5, 100}, {SKL_RAUNG, 3, 60}, {SKL_RAPAL_KUTUK, 4, 100}}, 4,
      "assets/battlers/penjaga_lumbung.png", "assets/chars/penjaga_lumbung.png"},
 };
