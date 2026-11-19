@@ -1,58 +1,68 @@
-# CLAUDE.md — aturan proyek Cinderwake
+# CLAUDE.md — aturan proyek TUMBAL
 
 Dibaca otomatis oleh AI agent di setiap sesi. Proyek ini adalah **Tugas Besar Struktur Data** (kelompok 3 orang):
-game turn-based dark fantasy dalam C++17 + raylib. Ketentuan resmi: [Konteks-Tugas/](Konteks-Tugas/).
-Peta kode: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Rencana & justifikasi: [docs/PLAN.md](docs/PLAN.md).
+JRPG turn-based bernuansa cerita rakyat Nusantara versi kelam, dalam C++17 + raylib. Acuan mekanik: Black Souls 1.
+Ketentuan resmi: [Konteks-Tugas/](Konteks-Tugas/). Rencana v2: [docs/PLAN_V2.md](docs/PLAN_V2.md).
+Bedah sistem Black Souls: [docs/research/black-souls-1-analysis.md](docs/research/black-souls-1-analysis.md).
+Versi lama (Cinderwake v1) ada di branch `legacy/cinderwake-v1` / tag `v1-cinderwake`; jangan diubah.
 
 ## Aturan yang TIDAK boleh dilanggar (ketentuan dosen)
 
 1. **Struktur data yang dinilai dibuat manual** di `src/core/adt/` dengan node + pointer sendiri.
-   Jangan pakai `std::list`, `std::queue`, `std::stack`, `std::vector`, `std::map`, `std::priority_queue`,
-   `std::deque`, atau `std::sort` di `src/core/`. Yang boleh: `std::string`, `<cmath>`, `<cstdint>`, `std::unique_ptr`.
-2. **Seluruh logika mekanik ada di `src/core/` dan tidak boleh `#include "raylib.h"`.** GUI (`src/gui/`) hanya
-   membaca state dan memanggil API core. Jangan memindahkan aturan game ke GUI.
+   Jangan pakai `std::list`, `std::queue`, `std::stack`, `std::vector`, `std::map`, `std::unordered_map`,
+   `std::priority_queue`, `std::deque`, atau `std::sort` di `src/core/`. Yang boleh: `std::string`, `<cmath>`,
+   `<cstdint>`, `std::unique_ptr`, array mentah. (GUI di `src/gui/` boleh memakai container std.)
+2. **Seluruh logika mekanik ada di `src/core/` dan tidak boleh `#include "raylib.h"`.** GUI hanya membaca state dan
+   memanggil API core. Jangan memindahkan aturan game ke GUI.
 3. Setiap ADT harus **benar-benar dipakai** mekanik yang berjalan. Jangan buat ADT pajangan.
 4. Setiap mekanik punya ≥2 **subprogram** di luar operasi primitif ADT, ditandai komentar `// M1/M2/M3 subprogram`.
-5. Minimal 1 struktur linear + 1 non-linear (saat ini: Timeline DLL, Queue, Stack + Graph).
+   M1 = battle ATB + antrean giliran (Timeline DLL), M2 = dunia & Tungku (Graph), M3 = interpreter event (Stack + Queue).
+5. Minimal 1 struktur linear + 1 non-linear.
 6. Mode console (`--console`) harus tetap jalan. Ini bukti logika tidak bergantung pada GUI.
-7. Yang direplikasi hanya **mekanik** game sumber. Dunia, nama, karakter, dan art harus orisinal.
+7. Yang direplikasi hanya **mekanik** Black Souls. Dunia, nama, karakter, cerita orisinal; jangan salin aset/teks/peta BS.
 8. Laporan final ditulis tim sendiri. Jangan menulis laporan atas nama mereka; dokumentasi teknis boleh.
+9. Inventaris jangan dibuat sebagai linked list "gear" dan progresi jangan sebagai pohon skill (dua contoh terlarang di PDF).
 
 ## Perintah
 
 ```bash
-mingw32-make            # build game → bin/cinderwake.exe (+ salin DLL raylib)
+mingw32-make            # build game → bin/tumbal.exe (+ salin DLL raylib)
 mingw32-make test       # build + jalankan semua unit test (wajib lulus sebelum commit)
 mingw32-make run        # jalankan GUI
-bin/cinderwake.exe --console   # mode console
-bin/cinderwake.exe --shots     # screenshot otomatis beberapa scene (shot_*.png)
-bin/cinderwake.exe --gallery   # screenshot semua aset (gallery_*.png)
-bin/cinderwake.exe --balance 200   # simulasi balancing (jalankan ulang setelah mengubah stat/skill)
-/c/msys64/ucrt64/bin/python.exe tools/process_assets.py   # assets/raw → assets/final
+bin/tumbal.exe --console   # mode console
+bin/tumbal.exe --shots     # screenshot otomatis beberapa scene (shot_*.png)
+/c/msys64/ucrt64/bin/python.exe tools/build_assets.py   # assets/src → assets/tiles, assets/chars
+/c/msys64/ucrt64/bin/python.exe tools/make_maps.py      # tata letak ASCII → assets/maps/*.tmj + world.json
 ```
 
-Toolchain: MSYS2 UCRT64 (g++, raylib dari pacman). Makefile jalan dari bash maupun PowerShell.
+Toolchain: MSYS2 UCRT64 (g++, raylib 6 dari pacman, Python + Pillow). Makefile jalan dari bash maupun PowerShell.
+GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari.
 
 ## Konvensi kode
 
 - Identifier bahasa Inggris, **komentar & teks UI bahasa Indonesia**.
 - Header file diawali blok komentar yang menjelaskan peran file dan struktur data yang dipakai.
-- Logika battle menghasilkan `BattleEvent` ke Queue; operasi struktur data dicatat sebagai event `DsOp`
-  (`dsOp("Timeline.updateAV(...)")`) agar terlihat di trace console & Inspector GUI. Tambahkan `dsOp` setiap kali
-  menambah operasi ADT baru di mekanik.
+- Operasi struktur data di mekanik dicatat dengan `dsOp("Graph.setOpen(...)")` (`src/core/util/DsTrace.hpp`) agar
+  terlihat di trace console & Inspector GUI. Tambahkan `dsOp` setiap kali menambah operasi ADT baru di mekanik.
 - Fitur mekanik baru wajib punya unit test di `tests/` (framework `CHECK` di `tests/TestFramework.hpp`).
 - Kompilasi tanpa warning (`-Wall -Wextra -Wpedantic`).
-- raylib `DrawTriangle` butuh urutan counter-clockwise. Di `Art.cpp` pakai helper `tri()`.
+- raylib `DrawTriangle` butuh urutan counter-clockwise di layar (atas, kiri-bawah, kanan-bawah).
+- raylib tidak mendukung `BeginTextureMode` bersarang: siapkan render-texture lain (mis. lightmap) sebelum layar utama.
+- Resolusi logis 640x360, tile 32px, karakter Aurora 64x74 per frame (4 frame x 4 arah: bawah, kiri, kanan, atas).
 
-## Aset
+## Peta & aset
 
-- Visual dibuat oleh **Codex** (`codex exec ... "<prompt>" -i <referensi.png>`; **prompt sebelum `-i`**, karena `-i` menelan
-  argumen berikutnya) mengikuti [docs/ART_BIBLE.md](docs/ART_BIBLE.md), disimpan di `assets/raw/`.
-- Claude mengerjakan detail: post-process (`tools/process_assets.py`), integrasi, shader, animasi, audio prosedural.
-- Game otomatis memakai `assets/final/...` bila ada, dan placeholder prosedural bila tidak.
+- Peta = berkas Tiled JSON (`assets/maps/*.tmj`, tileset embedded) + `assets/maps/world.json` (daftar peta).
+  Konvensi: layer `collision` (≠0 = terhalang), property layer `above` = digambar di atas karakter, objek bertipe
+  `spawn`, `door` (`to`, `spawn`, `locked`, `oneway`), `tungku`, `loot`. Property peta `nama`, `gelap` (0..1).
+- Peta saat ini dibuat oleh `tools/make_maps.py`. Peta yang disunting manual di Tiled harus dikeluarkan dari generator.
+- Aset utama: CC-BY 4.0 (Sevarihk/Aurora) & CC0 dari internet. **Setiap aset baru wajib dicatat di `CREDITS.md`**
+  (pembuat, URL, lisensi). Hindari lisensi share-alike dan "no redistribution".
+- Codex hanya untuk celah yang tidak ada aset gratisnya (`codex exec ... "<prompt>" -i <ref.png>`; prompt sebelum `-i`).
+- Unduhan mentah disimpan di luar repo; yang dipakai disalin ke `assets/src/` lalu diproses `tools/build_assets.py`.
 
 ## Git
 
-- Repo: https://github.com/DaffMe/Cinderwake (public, branch `main`).
+- Repo: https://github.com/DaffMe/Cinderwake (public, branch `main`) — rencana ganti nama ke TUMBAL belum diputuskan.
 - Commit **bertahap per bagian logis** (bukan satu commit besar), pesan bahasa Indonesia gaya `feat(x): ...`,
   diakhiri baris `Co-Authored-By` AI. Commit/push hanya bila diminta.
