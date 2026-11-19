@@ -13,9 +13,45 @@ void MapView::init(int viewW, int viewH) {
     viewW_ = viewW;
     viewH_ = viewH;
     lightmap_ = LoadRenderTexture(viewW, viewH);
+    // kabut: noise Perlin lembut dijadikan alpha putih keabuan; ukuran 256 diulang (wrap)
+    Image noise = GenImagePerlinNoise(256, 256, 0, 0, 3.0f);
+    Image fog = GenImageColor(256, 256, BLANK);
+    Color* src = LoadImageColors(noise);
+    for (int y = 0; y < 256; ++y)
+        for (int x = 0; x < 256; ++x) {
+            // bobot tepi agar sambungan ulang tidak terlihat: campur dengan versi tercermin
+            Color a = src[y * 256 + x], b = src[(255 - y) * 256 + (255 - x)];
+            float v = (a.r + b.r) / 510.0f;
+            v = v < 0.38f ? 0.0f : (v - 0.38f) / 0.62f;
+            ImageDrawPixel(&fog, x, y, Color{150, 160, 165, static_cast<unsigned char>(v * 255)});
+        }
+    UnloadImageColors(src);
+    fog_ = LoadTextureFromImage(fog);
+    SetTextureWrap(fog_, TEXTURE_WRAP_REPEAT);
+    SetTextureFilter(fog_, TEXTURE_FILTER_BILINEAR);
+    UnloadImage(noise);
+    UnloadImage(fog);
 }
 
-void MapView::shutdown() { UnloadRenderTexture(lightmap_); }
+void MapView::shutdown() {
+    UnloadRenderTexture(lightmap_);
+    UnloadTexture(fog_);
+}
+
+void MapView::drawFog(const Field& field, double time) {
+    float k = std::stof(field.map()->props().getString("kabut", "0"));
+    if (k <= 0.01f || fog_.id == 0) return;
+    // dua lapis kabut bergeser pelan berlawanan arah, ikut kamera (parallax ringan)
+    float t = static_cast<float>(time);
+    for (int layer = 0; layer < 2; ++layer) {
+        float scale = layer == 0 ? 2.0f : 3.2f;
+        float sx = cam_.x * (layer == 0 ? 1.0f : 1.15f) + t * (layer == 0 ? 9.0f : -6.0f);
+        float sy = cam_.y * (layer == 0 ? 1.0f : 1.15f) + t * (layer == 0 ? 2.0f : 3.5f);
+        Rectangle src{sx / scale, sy / scale, viewW_ / scale, viewH_ / scale};
+        DrawTexturePro(fog_, src, {0, 0, static_cast<float>(viewW_), static_cast<float>(viewH_)}, {0, 0}, 0,
+                       Fade(WHITE, k * (layer == 0 ? 0.42f : 0.28f)));
+    }
+}
 
 Vector2 MapView::targetFor(const Field& field) const {
     const Actor& p = field.player();
@@ -234,6 +270,7 @@ void MapView::draw(const Field& field, double time, bool showCollision, const Bl
     }
     drawLayers(*m, true, ms);
     drawLighting(field, time);
+    drawFog(field, time);       // setelah kegelapan: kabut pucat tetap terlihat seperti diterangi bulan
     // kilau barang digambar SETELAH kegelapan agar tetap terlihat (seperti kilau item BS1)
     for (const MapObject* o = m->objects(); o != nullptr; o = o->next) {
         if (o->type != "loot" || field.world().isCollected(field.mapId(), m->typeIndex(o))) continue;

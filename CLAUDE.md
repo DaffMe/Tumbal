@@ -60,7 +60,7 @@ GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari, Z = a
 
 - Peta = berkas Tiled JSON (`assets/maps/*.tmj`, tileset embedded) + `assets/maps/world.json` (daftar peta).
   Konvensi: layer `collision` (≠0 = terhalang), property layer `above` = digambar di atas karakter, objek bertipe
-  `spawn`, `door` (`to`, `spawn`, `locked`, `oneway`), `tungku`, `loot`. Property peta `nama`, `gelap` (0..1).
+  `spawn`, `door` (`to`, `spawn`, `locked`, `oneway`), `tungku`, `loot`. Property peta `nama`, `gelap` (0..1), `kabut` (0..1).
 - Objek `prop` = gambar besar (rumah, pohon) dari `assets/props/` (dibuat `build_props()`), digambar terurut-y
   bersama karakter; generator memblokir tapak bawahnya (`MapBuilder.prop`). Property `flat` = selalu di bawah
   karakter (dermaga). Hiasan kecil acak: `MapBuilder.scatter` (tileset `dekor.png`, layer `hiasan`) dan

@@ -561,7 +561,7 @@ def map_ladang():
     rows = [''.join(r) for r in g]
 
     b = MapBuilder('Ladang Timun Busuk', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'dekor', 'tabrak'])
-    b.props.update(nama='Ladang Timun Busuk', musik='ladang', gelap=0.58, battleback='assets/battlebacks/hutan.png')
+    b.props.update(nama='Ladang Timun Busuk', musik='ladang', gelap=0.58, kabut=0.15, battleback='assets/battlebacks/hutan.png')
     troops = {(10, 16): TR_BELALANG_2, (26, 9): TR_TIMUN_BELALANG, (12, 28): TR_TIMUN_2,
               (30, 27): TR_BELALANG_2, (36, 17): TR_TIMUN_BELALANG}
     walkers = {TR_BELALANG_2: 'assets/chars/belalang.png', TR_TIMUN_2: 'assets/chars/timun_busuk.png',
@@ -648,7 +648,7 @@ def map_hutan_bambu():
     g[7][30] = 'K'; g[27][39] = 'K'; g[23][15] = 'K'
     rows = [''.join(r) for r in g]
     b = MapBuilder('Hutan Bambu Jarum', rows, ['rumput', 'tanah', 'semak', 'hutan', 'lumpur', 'bambu', 'kanopi', 'dekor', 'tabrak'])
-    b.props.update(nama='Hutan Bambu Jarum', musik='lumbung', gelap=0.7, battleback='assets/battlebacks/hutan_bambu.png')
+    b.props.update(nama='Hutan Bambu Jarum', musik='lumbung', gelap=0.7, kabut=0.25, battleback='assets/battlebacks/hutan_bambu.png')
     troops = {(24, 7): TR_ARWAH_2, (38, 15): TR_GAGAK, (33, 27): TR_ULAR_ARWAH, (20, 23): TR_GAGAK, (12, 14): TR_ARWAH_2}
     walk = {TR_ARWAH_2: 'assets/chars/arwah.png', TR_GAGAK: 'assets/chars/gagak.png', TR_ULAR_ARWAH: 'assets/chars/ular.png'}
     loots = {(30, 7): 'jamu', (39, 27): 'sukma_sedang', (15, 23): 'bijih_besi'}
@@ -701,7 +701,7 @@ def map_laut_garam():
     b = MapBuilder('Laut Garam', rows, ['pasir', 'tanah', 'semak', 'hutan', 'laut', 'dekor', 'tabrak'])
     b.base_ts = 'pasir'
     b.water_ts = 'laut'
-    b.props.update(nama='Laut Garam', musik='laut', gelap=0.55, battleback='assets/battlebacks/pantai_garam.png')
+    b.props.update(nama='Laut Garam', musik='laut', gelap=0.55, kabut=0.5, battleback='assets/battlebacks/pantai_garam.png')
     troops = {(8, 14): TR_HANTU_LAUT, (30, 18): TR_TENGKORAK_2, (14, 24): TR_HANTU_TENGKORAK, (24, 12): TR_TENGKORAK_2}
     walk = {TR_HANTU_LAUT: 'assets/chars/arwah.png', TR_TENGKORAK_2: 'assets/chars/tumbal_gagal.png',
             TR_HANTU_TENGKORAK: 'assets/chars/tumbal_gagal.png'}
@@ -769,7 +769,7 @@ def map_rawa_terasi():
     rows = [''.join(r) for r in g]
     b = MapBuilder('Rawa Terasi', rows, ['rumput_rawa', 'tanah_rawa', 'semak', 'hutan_rawa', 'lumpur', 'dekor', 'tabrak'])
     b.base_ts, b.path_ts, b.forest_ts = 'rumput_rawa', 'tanah_rawa', 'hutan_rawa'
-    b.props.update(nama='Rawa Terasi', musik='rawa', gelap=0.72, battleback='assets/battlebacks/rawa.png')
+    b.props.update(nama='Rawa Terasi', musik='rawa', gelap=0.72, kabut=0.55, battleback='assets/battlebacks/rawa.png')
     troops = {(22, 10): TR_AKAR_2, (32, 17): TR_BUAYA, (22, 25): TR_AKAR_BELATUNG, (43, 22): TR_BUAYA, (6, 16): TR_AKAR_2}
     loots = {(29, 5): 'jamu', (12, 30): 'bijih_besi'}
     marks = {
@@ -822,7 +822,7 @@ def map_sarang_buto():
     rows = [''.join(r) for r in g]
     b = MapBuilder('Sarang Buto', rows, ['rumput_sarang', 'tanah_rawa', 'semak', 'hutan_sarang', 'lumpur', 'dekor', 'tabrak'])
     b.base_ts, b.path_ts, b.forest_ts = 'rumput_sarang', 'tanah_rawa', 'hutan_sarang'
-    b.props.update(nama='Sarang Buto', musik='rawa', gelap=0.66, battleback='assets/battlebacks/sarang_buto.png')
+    b.props.update(nama='Sarang Buto', musik='rawa', gelap=0.66, kabut=0.6, battleback='assets/battlebacks/sarang_buto.png')
     marks = {
         'S': lambda b, x, y: (b.obj('spawn', x, y, name='dari_rawa', dir=0),
                               b.obj('event', 0, 0, name='sarang_masuk', event='sarang_masuk', trigger='auto',

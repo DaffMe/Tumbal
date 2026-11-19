@@ -32,12 +32,14 @@ private:
     int viewW_ = 640, viewH_ = 360;
     Vector2 cam_{0, 0};
     RenderTexture2D lightmap_{};
+    Texture2D fog_{};               // tekstur kabut (Perlin, bisa diulang), dibuat saat init
 
     Vector2 targetFor(const Field& field) const;
     void drawLayers(const TileMap& map, bool above, long long ms);
     void drawActor(const Actor& a, const char* sheet, float alpha = 1.0f);
     void drawObjects(const Field& field, double time, const Bloodstain* blood);
     void drawLighting(const Field& field, double time);
+    void drawFog(const Field& field, double time);   // property peta "kabut" (0..1)
     bool lightReady_ = false;
     const GameState* gs_ = nullptr;
     bool hidden(const MapObject* o) const {
