@@ -203,7 +203,7 @@ hari kerja, 2026-11-19). Status di bawah dicocokkan dengan kode pada commit `e03
 | 9 | Rawa + boss Buto Ijo (3 bagian, telegraf) | Demo tamat | Selesai (telegraf: jurus besar dirapal, namanya tampil di atas musuh dan baris party yang diincar berkedip) |
 | 10 | Audio, cahaya/kabut, getar layar, transisi, judul & ending | Terasa "jadi" | Selesai (kabut: property peta `kabut`, dua lapis noise bergeser di Ladang, Bambu, Laut, Rawa, Sarang) |
 | 11 | Polish visual tiap wilayah, kejelasan battle, teks cerita reaktif | — | Selesai |
-| 12 | Balancing, playtest penuh, perbaikan | — | Balancing lewat simulasi sekali pakai; **`--balance` & playtest penuh belum** |
+| 12 | Balancing, playtest penuh, perbaikan | — | `--balance` selesai (Buto ternyata ±1–3 level lebih berat dari kurva untuk bot); **playtest penuh belum** |
 | 13 | README, dokumentasi struktur data, skrip demo, bahan Pendampingan | — | `docs/DEMO.md` ada; **tabel tim README & bahan Pendampingan belum** |
 
 

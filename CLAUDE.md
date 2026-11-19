@@ -31,6 +31,7 @@ mingw32-make test       # build + jalankan semua unit test (wajib lulus sebelum 
 mingw32-make run        # jalankan GUI
 bin/tumbal.exe --console   # mode console
 bin/tumbal.exe --shots     # screenshot otomatis beberapa scene (shot_*.png)
+bin/tumbal.exe --balance   # simulasi kesulitan (kelas x troop x level), lihat docs/DEMO.md
 /c/msys64/ucrt64/bin/python.exe tools/build_assets.py   # assets/src → assets/tiles, assets/chars
 /c/msys64/ucrt64/bin/python.exe tools/make_maps.py      # tata letak ASCII → assets/maps/*.tmj + world.json
 /c/msys64/ucrt64/bin/python.exe tools/render_maps.py    # pratinjau seluruh peta → docs/map_preview/*.png

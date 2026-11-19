@@ -17,10 +17,16 @@ dan cara cepat mengecek game.
 | 8 | **Sarang Buto** | Lereng bertiang tengkorak, tumpukan tulang. Boss akhir **Buto Ijo** (kepala + dua tangan; kepala tumbang = tangan runtuh). Telegraf: "Lapar Buto" dan "Hantam Gada" dirapal dulu, nama jurus muncul di atas musuh dan baris party yang diincar berkedip; tunda/buyarkan rapalnya. Tidak bisa kabur. | M1 boss multi-bagian |
 | — | Tamat | Layar tamat → kembali ke judul. | |
 
-Kurva kesulitan (diukur dengan simulasi battle otomatis per troop × level × kelas): pemain yang melawan semua
-musuh sekali tiba di Hutan Bambu sekitar level 5–6, di Laut level 7, dan di Buto level 8–9.
-Buto bisa dikalahkan di level 9 dengan hati-hati, dan aman di level 11. Musuh muncul lagi setelah
-istirahat di Tungku, jadi pemain bisa mengumpulkan sukma lebih dulu.
+Kurva kesulitan diukur dengan `bin/tumbal.exe --balance` (simulasi battle otomatis per kelas × troop × level,
+40 battle per sel, BattleSystem yang sama dengan game). Pemain yang melawan semua musuh sekali tiba di
+Hutan Bambu sekitar level 5–6, di Laut level 7, dan di Buto level 8–9. Musuh muncul lagi setelah istirahat
+di Tungku, jadi pemain bisa mengumpulkan sukma lebih dulu.
+
+Hasil `--balance` terakhir (fase 12): musuh biasa dan Memedi sesuai kurva (Memedi menang ≥90% di L5–6).
+**Buto Ijo lebih berat dari kurva:** bot (hanya jamu, jurus serang, tunda rapal; tanpa Elak/Tangkis, bom,
+dan bekal Timun Mas) baru menang ±50% di L10–11 (Maling/Pawang) dan L12 (Pendekar); senjata +3 menurunkannya
+±1 level. Pemain sungguhan memakai lebih banyak alat daripada bot, jadi angka ini batas atas. **Perlu dicek
+lewat playtest** sebelum Buto dilemahkan; Pendekar paling terdampak.
 
 ## Loop Souls yang perlu ditunjukkan
 
@@ -51,6 +57,7 @@ mingw32-make test            # 332 unit test
 bin/tumbal.exe --shots       # screenshot otomatis: judul, 8 peta, dialog, battle biasa, menu, battle Buto
 /c/msys64/ucrt64/bin/python.exe tools/render_maps.py   # pratinjau seluruh peta -> docs/map_preview/*.png
 bin/tumbal.exe --console     # mode teks
+bin/tumbal.exe --balance     # simulasi kesulitan: level menang 50%/90% per troop & kurva Buto (senjata +0/+3)
 ```
 
 Audio: musik per peta (property peta `musik`) dengan crossfade, musik battle/boss, efek suara menu & battle
