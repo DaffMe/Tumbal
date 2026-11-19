@@ -16,7 +16,10 @@ namespace art {
 Vector2 enemySize(EnemyKind k);
 
 // Gambar musuh dengan titik tengah-bawah di `foot`. flash 0..1 = kilat putih saat terkena.
-void drawEnemy(EnemyKind k, Vector2 foot, float alpha, float flash, float t, bool highlight);
+void drawEnemy(EnemyKind k, Vector2 foot, float alpha, float flash, float t, bool highlight, bool mirror = false);
+
+// Potongan wajah/bagian atas musuh untuk token kecil (timeline). false jika aset belum ada.
+bool drawEnemyToken(EnemyKind k, Rectangle r, float alpha);
 
 // Potret hero di dalam kotak r
 void drawPortrait(HeroKind k, Rectangle r, float alpha, bool active);

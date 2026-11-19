@@ -178,7 +178,19 @@ void drawPlaceholder(EnemyKind k, Vector2 f, float a, float fl, float t) {
 
 }  // namespace
 
-void drawEnemy(EnemyKind k, Vector2 foot, float alpha, float flash, float t, bool highlight) {
+bool drawEnemyToken(EnemyKind k, Rectangle r, float alpha) {
+    Texture2D* tx = tex(std::string("final/enemies/") + enemySlug(k) + ".png");
+    if (tx == nullptr) return false;
+    // ambil potongan persegi di sekitar kepala (bagian atas tengah)
+    float side = tx->width * 0.62f;
+    float headY = (k == EnemyKind::Wisp || k == EnemyKind::Gargoyle) ? tx->height * 0.12f : tx->height * 0.02f;
+    Rectangle src = {(tx->width - side) / 2, headY, side, side};
+    DrawRectangleRec(r, fade(Color{24, 16, 18, 255}, alpha));
+    DrawTexturePro(*tx, src, r, {0, 0}, 0, fade(WHITE, alpha));
+    return true;
+}
+
+void drawEnemy(EnemyKind k, Vector2 foot, float alpha, float flash, float t, bool highlight, bool mirror) {
     Vector2 size = enemySize(k);
     if (highlight) glow({foot.x, foot.y - size.y * 0.45f}, size.x * 0.75f, fade(col::ember, 0.22f * alpha));
 
@@ -187,12 +199,20 @@ void drawEnemy(EnemyKind k, Vector2 foot, float alpha, float flash, float t, boo
         float breathe = 1.0f + std::sin(t * 2.0f) * 0.012f;
         float h = size.y * breathe;
         float w = h * tx->width / static_cast<float>(tx->height);
-        DrawEllipse(static_cast<int>(foot.x), static_cast<int>(foot.y), w * 0.38f, 14, fade(BLACK, 0.55f * alpha));
-        Rectangle dst = {foot.x - w / 2, foot.y - h, w, h};
-        DrawTexturePro(*tx, {0, 0, static_cast<float>(tx->width), static_cast<float>(tx->height)}, dst, {0, 0}, 0, fade(WHITE, alpha));
+        // Makhluk melayang: sprite diangkat & bergoyang, bayangan mengecil dan memudar
+        float hover = 0.0f;
+        if (k == EnemyKind::Wisp) hover = 46.0f + std::sin(t * 3.0f) * 10.0f;
+        else if (k == EnemyKind::CandleWraith) hover = 26.0f + std::sin(t * 1.6f) * 7.0f;
+        float shadowScale = 1.0f - hover / 120.0f;
+        DrawEllipse(static_cast<int>(foot.x), static_cast<int>(foot.y), w * 0.38f * shadowScale, 14 * shadowScale,
+                    fade(BLACK, 0.55f * alpha * shadowScale));
+        Rectangle dst = {foot.x - w / 2, foot.y - h - hover, w, h};
+        // lebar sumber negatif = gambar dicerminkan horizontal
+        Rectangle src = {0, 0, static_cast<float>(mirror ? -tx->width : tx->width), static_cast<float>(tx->height)};
+        DrawTexturePro(*tx, src, dst, {0, 0}, 0, fade(WHITE, alpha));
         if (flash > 0.01f) {
             BeginBlendMode(BLEND_ADDITIVE);
-            DrawTexturePro(*tx, {0, 0, static_cast<float>(tx->width), static_cast<float>(tx->height)}, dst, {0, 0}, 0, fade(WHITE, flash * alpha));
+            DrawTexturePro(*tx, src, dst, {0, 0}, 0, fade(WHITE, flash * alpha));
             EndBlendMode();
         }
         return;

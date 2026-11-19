@@ -367,7 +367,7 @@ void BattleView::drawTimeline() {
         DrawRectangleRec(r, fade(Color{18, 14, 18, 255}, 0.92f * alpha));
         if (u.side == Side::Hero) {
             art::drawPortrait(static_cast<HeroKind>(u.kind), {r.x + 3, r.y + 3, r.height - 6, r.height - 6}, alpha, current);
-        } else {
+        } else if (!art::drawEnemyToken(static_cast<EnemyKind>(u.kind), {r.x + 3, r.y + 3, r.height - 6, r.height - 6}, alpha)) {
             DrawRectangle(static_cast<int>(r.x + 3), static_cast<int>(r.y + 3), static_cast<int>(r.height - 6),
                           static_cast<int>(r.height - 6), fade(Color{60, 24, 24, 255}, alpha));
             text(head(), u.name.substr(0, 1), r.x + r.height / 2, r.y + r.height / 2 - 12, 22, fade(col::enemy, alpha), Center);
@@ -406,7 +406,7 @@ void BattleView::drawEnemies() {
         if (u.side != Side::Enemy || !(v.present || v.dying) || v.alpha <= 0) continue;
         Vector2 foot = {v.x, 455.0f + v.lunge * 24.0f};
         bool hl = (i == hoverTarget_);
-        art::drawEnemy(static_cast<EnemyKind>(u.kind), foot, v.alpha, v.flash, t + i * 1.3f, hl);
+        art::drawEnemy(static_cast<EnemyKind>(u.kind), foot, v.alpha, v.flash, t + i * 1.3f, hl, i % 2 == 0);
 
         float w = 160;
         float bx = v.x - w / 2, by = 470;
