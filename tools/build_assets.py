@@ -585,25 +585,40 @@ def _face_frame(im):
     return out
 
 
-def build_faces():
-    """Potret pembicara untuk kotak dialog. Faceset Sevarihk (5x3, 150 px) untuk manusia;
-    kepala Buto & Memedi dipotong dari battler (Codex)."""
-    os.makedirs(FACES, exist_ok=True)
-    sheet = Image.open(os.path.join(SEV, 'npcs_faceset.png')).convert('RGBA')
+def _sprite_bust(sprite):
+    """Potret piksel dari sprite peta (frame diam menghadap bawah): kepala & bahu diperbesar 4x
+    tanpa penghalusan, di atas latar gelap bergradasi. Wajah di dialog = wajah di peta."""
+    from PIL import ImageDraw
+    im = Image.open(os.path.join(CHARS, sprite)).convert('RGBA')
+    fw, fh = im.width // 4, im.height // 4
+    frame = im.crop((0, 0, fw, fh))
+    top = frame.getbbox()[1]
+    side = FACE // 4                                   # 21 px sprite -> 84 px potret (4x)
+    cx = fw // 2
+    bust = frame.crop((cx - side // 2, top - 2, cx - side // 2 + side, top - 2 + side))
+    bg = Image.new('RGBA', (side, side), (0, 0, 0, 255))
+    d = ImageDraw.Draw(bg)
+    for y in range(side):                              # latar: cokelat gelap ke hitam (cahaya Tungku dari atas)
+        k = 1 - y / side
+        d.line([(0, y), (side, y)], fill=(int(46 * k + 12), int(32 * k + 9), int(26 * k + 10), 255))
+    bg.alpha_composite(bust)
+    out = bg.resize((FACE, FACE), Image.NEAREST)
+    d = ImageDraw.Draw(out)
+    d.rectangle([0, 0, FACE - 1, FACE - 1], outline=(120, 98, 76, 255))
+    return out
 
-    def cell(c, r):
-        return sheet.crop((c * 150, r * 150, c * 150 + 150, r * 150 + 150))
+
+def build_faces():
+    """Potret pembicara untuk kotak dialog. Manusia: diperbesar dari sprite peta mereka sendiri
+    (agar wajah di dialog sama dengan karakter di peta); Buto & Memedi: kepala dari battler."""
+    os.makedirs(FACES, exist_ok=True)
     faces = {
-        'timun_mas': cell(2, 0), 'mbok_srini': cell(4, 0), 'pemuda_desa': cell(1, 0),
-        'lelaki_tua': cell(0, 1), 'pedagang': cell(1, 1), 'empu_karta': cell(2, 1),
-        'penumbuk_lesung': cell(1, 2),
+        'timun_mas': 'timun_mas.png', 'mbok_srini': 'mbok_srini.png', 'pemuda_desa': 'warga_lelaki.png',
+        'lelaki_tua': 'lelaki_tua.png', 'pedagang': 'pedagang.png', 'empu_karta': 'empu_karta.png',
+        'penumbuk_lesung': 'warga_lelaki.png',
     }
-    # Lelaki Tua: hiasan bulan sabit di ikat kepala ditutup potongan ikat kepala polos di sebelahnya
-    tua = faces['lelaki_tua']
-    tua.paste(tua.crop((44, 26, 62, 39)), (60, 26))
-    tua.paste(tua.crop((44, 26, 62, 39)).transpose(Image.FLIP_LEFT_RIGHT), (68, 26))
-    for name, im in faces.items():
-        _face_frame(im).save(os.path.join(FACES, name + '.png'))
+    for name, sprite in faces.items():
+        _sprite_bust(sprite).save(os.path.join(FACES, name + '.png'))
     # monster: kepala dari battler, latar gelap
     for name, src, box in [('buto_ijo', 'buto_kepala.png', (30, 10, 174, 154)),
                            ('memedi_sawah', 'memedi_sawah.png', (48, 8, 136, 96))]:

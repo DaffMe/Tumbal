@@ -14,7 +14,6 @@ Lisensi diperiksa di halaman aslinya pada 2026-11-19.
 | Ground and Foliage Autotiles | Sevarihk | https://opengameart.org/content/ground-and-foliage-autotiles | CC-BY 4.0 | rumput, semak |
 | Animated Water Tiles | Sevarihk | https://opengameart.org/content/animated-water-tiles-0 | CC-BY 4.0 | air |
 | Fisher's Hut / Tree Trunk / Palm | Sevarihk | https://opengameart.org/users/sevarihk | CC-BY 4.0 | rumah panggung desa (dipotong, digelapkan), properti peta |
-| NPC Faceset | Sevarihk | https://opengameart.org/content/npc-faceset | CC-BY 4.0 | potret NPC |
 | Tribal Hide and Wood UI | Sevarihk | https://opengameart.org/content/tribal-hide-and-wood-ui | CC-BY 4.0 | bingkai UI |
 | Aurora Character Generator (potongan sprite) | Sevarihk; generator oleh RedoxGames | https://redoxgames.itch.io/aurora-character-generator | CC-BY 4.0 | sprite karakter (dirakit & diwarnai ulang oleh `tools/build_assets.py`) |
 | 10 Basic RPG Enemies, 6 More RPG Enemies, More RPG Enemies, Fossil Undead | Stephen "Redshrike" Challener (beberapa sprite hasil edit dari karya Blarumyrran & LordNeo) | https://opengameart.org/users/redshrike | CC-BY 3.0 | battler musuh (dipotong & diperbesar) |
@@ -48,8 +47,8 @@ tekstur daun pada kanopi bambu (dari Ground and Foliage Autotiles); tileset hias
 (semanggi & batu dari Tree Trunk, daun gugur/tengkorak/ranting dari Dead Swamp, tulang dari Evil Dungeon);
 props `gelagah`, `tiang_tengkorak`, `pagar_tali`, `ranting_mati`, `pohon_akar` (Dead Swamp); `dermaga`, `tong`,
 `jemuran_jala` (Fisher's Hut); `tunggul_rawa` dijahit dari dua potongan lembar Tree Trunk (swamp).
-Potret dialog `assets/faces/` dipotong dari NPC Faceset Sevarihk (diperkecil, diwarnai gelap-sepia, diberi vinyet;
-hiasan bulan sabit pada potret Lelaki Tua ditutup); potret Buto Ijo & Memedi dipotong dari battler buatan Codex.
+Potret dialog `assets/faces/`: kepala & bahu sprite peta karakter (Aurora) diperbesar 4x agar sama dengan yang
+terlihat di peta; potret Buto Ijo & Memedi dipotong dari battler buatan Codex.
 
 ## Audio
 

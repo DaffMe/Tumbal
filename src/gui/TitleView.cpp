@@ -11,6 +11,8 @@ static bool confirm() { return IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER) ||
 static bool cancel() { return IsKeyPressed(KEY_X) || IsKeyPressed(KEY_ESCAPE); }
 static bool up() { return IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W); }
 static bool down() { return IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S); }
+static bool left() { return IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A); }
+static bool right() { return IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D); }
 
 static const char* ROOT[] = {"Mulai Baru", "Lanjutkan", "Keluar"};
 static const char* GIFTS[] = {"Dua Ramuan Jamu", "Sukma Penjaga", "Tiga Bom Minyak Jarak", "Tiga Abu Tungku"};
@@ -65,8 +67,9 @@ TitleView::Result TitleView::update(float dt) {
             break;
         }
         case Class:
-            if (up()) classIndex_ = (classIndex_ + 2) % 3;
-            if (down()) classIndex_ = (classIndex_ + 1) % 3;
+            // kartu kelas tersusun mendatar: kiri/kanan (atas/bawah tetap bisa)
+            if (left() || up()) classIndex_ = (classIndex_ + 2) % 3;
+            if (right() || down()) classIndex_ = (classIndex_ + 1) % 3;
             if (cancel()) page_ = Name;
             if (confirm()) page_ = Gift;
             break;
@@ -143,21 +146,22 @@ void TitleView::draw(double time) {
         ui::textCentered("Dulu, sebelum ditanam, kamu adalah...", 320, 36, ui::BONE, 30);
         for (int i = 0; i < 3; ++i) {
             const ClassDef& c = classDef(i);
-            Rectangle w{40.0f + i * 190, 90, 180, 200};
+            Rectangle w{40.0f + i * 190, 84, 180, 222};
             bool sel = i == classIndex_;
             ui::window(w, sel ? 0.96f : 0.75f);
             if (sel) DrawRectangleLinesEx(w, 2, ui::AMBER);
             ui::textCentered(c.name, w.x + w.width / 2, w.y + 10, sel ? ui::AMBER : ui::BONE, 30);
             std::vector<std::string> lines = ui::wrap(c.desc, w.width - 20);
-            for (size_t k = 0; k < lines.size() && k < 2; ++k) ui::text(lines[k], w.x + 10, w.y + 46 + k * 18.0f, ui::DIM);
+            for (size_t k = 0; k < lines.size() && k < 3; ++k) ui::text(lines[k], w.x + 10, w.y + 44 + k * 18.0f, ui::DIM);
             const char* names[] = {"HP", "MP", "Serang", "Tahan", "Ilmu", "Gesit"};
             int vals[] = {c.base.mhp, c.base.mmp, c.base.atk, c.base.def, c.base.mag, c.base.agi};
             for (int k = 0; k < 6; ++k) {
-                float y = w.y + 88 + k * 18;
+                float y = w.y + 106 + k * 18;
                 ui::text(names[k], w.x + 14, y, ui::DIM);
                 ui::textRight(std::to_string(vals[k]), w.x + w.width - 14, y, ui::BONE);
             }
         }
+        ui::textCentered("kiri/kanan pilih    Z lanjut    X kembali", 320, 326, ui::DIM);
     } else if (page_ == Gift) {
         ui::textCentered("Satu benda yang kau genggam saat ditanam:", 320, 50, ui::BONE, 30);
         Rectangle w{120, 110, 400, 110};

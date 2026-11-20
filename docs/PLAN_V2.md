@@ -176,7 +176,7 @@ setiap pembuat. Tile 32×32 gaya RPG Maker XP, cocok dengan nuansa BS1.
 ### 7.2 Celah → dibuat sendiri / Codex
 1. Battler **Buto Ijo** (boss 3 bagian) dan **Memedi Sawah** (mini-boss orang-orangan sawah).
 2. Potret & sprite **tokoh utama, Timun Mas, Mbok Srini**, warga berpakaian Jawa. *(Potret dialog untuk 9 pembicara
-   sudah dipasang dari NPC Faceset + battler Codex; tokoh utama sengaja tanpa potret, seperti BS1.)*
+   dibuat dari sprite peta masing-masing (diperbesar 4x) + battler Codex; tokoh utama tanpa potret, seperti BS1.)*
 3. Tile **ladang timun busuk** dan **rumah desa Jawa**. *(Selesai: rumah limasan & rumah tua runtuh dibuat Codex,
    dipasang di Desa.)*
 4. Battleback **pantai garam** dan **rawa** (bila Nidhoggn tidak cocok).
