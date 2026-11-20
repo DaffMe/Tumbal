@@ -145,6 +145,11 @@ mingw32-make dist          # buat zip rilis di folder release/
 | F1 | Inspector struktur data |
 | F3 | Tampilkan collision |
 | F9 | Menu cheat |
+| Alt+Enter / F11 | Jendela ↔ layar penuh |
+
+**Settings** (layar judul atau menu X) berisi: bahasa, mode layar (Windowed / Borderless / Fullscreen
+eksklusif), ukuran jendela, skala gambar (pixel-perfect atau penuhi layar), VSync, batas FPS (ikut monitor,
+30/60/120/144, tanpa batas), volume musik & efek, dan tampilkan FPS. Semua tersimpan di `saves/settings.json`.
 
 > [!NOTE]
 > Sama seperti Black Souls, game **tidak menyimpan otomatis saat kamu mati**. Simpan manual lewat menu

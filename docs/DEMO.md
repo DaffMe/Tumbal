@@ -52,7 +52,9 @@ lewat playtest** sebelum Buto dilemahkan; Pendekar paling terdampak.
 Panah/WASD jalan (8 arah), Shift lari, Z/Enter aksi/konfirmasi, X/Esc menu/batal, tahan Z di battle untuk
 mempercepat. Di menu Tungku halaman Timun Mas: C = panggil/lepas pendamping. F1 Inspector, F3 collision.
 Bahasa: **English** bawaan; ganti ke Bahasa Indonesia di **Settings** (layar judul atau menu X), tersimpan di
-`saves/settings.json`. Menu X → **Keluar** (ke layar judul / keluar game) dan **Cheat** (juga F9; console: `cheat`): sukma +1000, naik level
+`saves/settings.json`. Settings juga berisi mode layar (Windowed/Borderless/Fullscreen eksklusif; cepat: Alt+Enter
+atau F11), ukuran jendela, skala gambar (pixel-perfect/penuhi layar), VSync, batas FPS, volume musik & efek, dan
+tampilkan FPS. Menu X → **Keluar** (ke layar judul / keluar game) dan **Cheat** (juga F9; console: `cheat`): sukma +1000, naik level
 gratis, tambah stat, pulih penuh, bekal barang, senjata +3, kebal, sekali pukul, buka semua jalan & Tungku, panggil
 Timun Mas. Pemakaian cheat tersimpan di berkas simpan dan disebut di layar tamat.
 
