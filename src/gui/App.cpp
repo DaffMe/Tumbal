@@ -352,12 +352,17 @@ void App::present() {
     BeginDrawing();
     ClearBackground(BLACK);
     int sw = GetScreenWidth(), sh = GetScreenHeight();
+    // skala bilangan bulat saja (sisanya bingkai hitam): skala pecahan dengan sampling piksel
+    // membuat sebagian baris piksel dobel dan "berkedip" sebagai garis saat layar bergulir
     int scale = std::max(1, std::min(sw / VIEW_W, sh / VIEW_H));
     float fw = static_cast<float>(VIEW_W * scale), fh = static_cast<float>(VIEW_H * scale);
-    float fs = std::fmin(static_cast<float>(sw) / VIEW_W, static_cast<float>(sh) / VIEW_H);
-    if (fs - scale > 0.25f) { fw = VIEW_W * fs; fh = VIEW_H * fs; }
+    if (sw < VIEW_W || sh < VIEW_H) {   // jendela lebih kecil dari resolusi logis: perkecil halus
+        float fs = std::fmin(static_cast<float>(sw) / VIEW_W, static_cast<float>(sh) / VIEW_H);
+        fw = VIEW_W * fs;
+        fh = VIEW_H * fs;
+    }
     Rectangle src{0, 0, static_cast<float>(VIEW_W), -static_cast<float>(VIEW_H)};
-    Rectangle dst{(sw - fw) / 2.0f, (sh - fh) / 2.0f, fw, fh};
+    Rectangle dst{std::floor((sw - fw) / 2.0f), std::floor((sh - fh) / 2.0f), fw, fh};
     DrawTexturePro(screen_.texture, src, dst, {0, 0}, 0, WHITE);
     EndDrawing();
 }
@@ -366,7 +371,10 @@ int App::run(bool smoke, bool shots) {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(VIEW_W * 2, VIEW_H * 2, "TUMBAL");
     SetExitKey(KEY_NULL);
-    SetTargetFPS(60);
+    // ikuti refresh rate monitor (laptop 120/144 Hz): batas 60 FPS + VSync di layar 144 Hz
+    // membuat frame tampil tidak merata (gerak tersendat) dan memicu sobekan layar
+    int hz = GetMonitorRefreshRate(GetCurrentMonitor());
+    SetTargetFPS(hz >= 30 && hz <= 240 ? hz : 60);
     ui::init();
     audio::init();
     screen_ = LoadRenderTexture(VIEW_W, VIEW_H);

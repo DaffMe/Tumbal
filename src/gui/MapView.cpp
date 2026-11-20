@@ -56,22 +56,25 @@ void MapView::drawFog(const Field& field, double time) {
 Vector2 MapView::targetFor(const Field& field) const {
     const Actor& p = field.player();
     const TileMap* m = field.map();
-    float tx = p.drawX() * TS + TS / 2.0f - viewW_ / 2.0f;
-    float ty = p.drawY() * TS + TS / 2.0f - viewH_ / 2.0f;
+    // posisi kamera selalu bilangan bulat dan dihitung dari floor posisi pemain, sehingga
+    // pemain diam tepat di tengah layar dan tile, karakter, props bergeser bersama tanpa
+    // getaran 1 piksel (penyebab gerak terasa "goyang")
+    float tx = std::floor(p.drawX() * TS) + TS / 2 - viewW_ / 2;
+    float ty = std::floor(p.drawY() * TS) + TS / 2 - viewH_ / 2;
     float mw = static_cast<float>(m->width() * TS), mh = static_cast<float>(m->height() * TS);
     // peta lebih kecil dari layar → di tengah
-    tx = mw <= viewW_ ? (mw - viewW_) / 2.0f : std::fmax(0.0f, std::fmin(tx, mw - viewW_));
-    ty = mh <= viewH_ ? (mh - viewH_) / 2.0f : std::fmax(0.0f, std::fmin(ty, mh - viewH_));
+    tx = mw <= viewW_ ? std::floor((mw - viewW_) / 2.0f) : std::fmax(0.0f, std::fmin(tx, mw - viewW_));
+    ty = mh <= viewH_ ? std::floor((mh - viewH_) / 2.0f) : std::fmax(0.0f, std::fmin(ty, mh - viewH_));
     return {tx, ty};
 }
 
 void MapView::snapCamera(const Field& field) { cam_ = targetFor(field); }
 
 void MapView::updateCamera(const Field& field, float dt) {
-    Vector2 t = targetFor(field);
-    float k = 1.0f - std::exp(-dt * 12.0f);
-    cam_.x += (t.x - cam_.x) * k;
-    cam_.y += (t.y - cam_.y) * k;
+    // kamera terkunci ke pemain seperti RPG Maker (tanpa pelambatan yang membuat pemain
+    // tertinggal lalu "ditarik" di setiap langkah tile)
+    (void)dt;
+    cam_ = targetFor(field);
 }
 
 void MapView::drawLayers(const TileMap& map, bool above, long long ms) {
