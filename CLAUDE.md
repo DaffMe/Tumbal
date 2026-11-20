@@ -99,6 +99,6 @@ X = batal/menu (Barang, Status, Simpan, Cheat, Keluar). Console: perintah `cheat
 
 ## Git
 
-- Repo: https://github.com/DaffMe/Cinderwake (public, branch `main`) — rencana ganti nama ke TUMBAL belum diputuskan.
+- Repo: https://github.com/DaffMe/Tumbal (public, branch `main`; dulu bernama Cinderwake).
 - Commit **bertahap per bagian logis** (bukan satu commit besar), pesan bahasa Indonesia gaya `feat(x): ...`,
   diakhiri baris `Co-Authored-By` AI. Commit/push hanya bila diminta.

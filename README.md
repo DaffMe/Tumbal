@@ -103,8 +103,8 @@ Lalu tambahkan `C:\msys64\ucrt64\bin` ke `PATH` Windows.
 ### Clone & Jalankan
 
 ```bash
-git clone https://github.com/DaffMe/Cinderwake.git
-cd Cinderwake
+git clone https://github.com/DaffMe/Tumbal.git
+cd Tumbal
 mingw32-make run
 ```
 
