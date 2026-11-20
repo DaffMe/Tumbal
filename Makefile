@@ -15,7 +15,7 @@ CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -Wpedantic -Isrc
 LDLIBS   := -lraylib
 LDFLAGS  := -static-libgcc -static-libstdc++
 DLLS     := bin/libraylib.dll bin/glfw3.dll bin/libwinpthread-1.dll
-VERSION  ?= 1.0.1
+VERSION  ?= 1.0.2
 
 # Lokasi folder bin toolchain (tempat DLL raylib berada). `where` tersedia
 # baik dari cmd/PowerShell maupun dari bash di Windows.

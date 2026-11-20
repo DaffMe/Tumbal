@@ -29,7 +29,7 @@ Versi lama (Cinderwake v1) ada di branch `legacy/cinderwake-v1` / tag `v1-cinder
 mingw32-make            # build game → bin/tumbal.exe (+ salin DLL raylib)
 mingw32-make test       # build + jalankan semua unit test (wajib lulus sebelum commit)
 mingw32-make run        # jalankan GUI
-mingw32-make dist       # paket rilis Windows → release/TUMBAL-v<VERSION>-windows.zip (VERSION=1.0.1 bawaan)
+mingw32-make dist       # paket rilis Windows → release/TUMBAL-v<VERSION>-windows.zip (VERSION=1.0.2 bawaan)
 bin/tumbal.exe --console   # mode console
 bin/tumbal.exe --shots     # screenshot otomatis beberapa scene (shot_*.png)
 bin/tumbal.exe --balance   # simulasi kesulitan (kelas x troop x level), lihat docs/DEMO.md
