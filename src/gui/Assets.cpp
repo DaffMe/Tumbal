@@ -7,11 +7,28 @@ Assets& Assets::get() {
     return a;
 }
 
+const std::string& Assets::base() const {
+    if (baseReady_) return base_;
+    std::string app = GetApplicationDirectory();
+    const std::string candidates[] = {"", app, app + "../"};
+    for (const std::string& c : candidates) {
+        if (FileExists((c + "assets/maps/world.json").c_str())) { base_ = c; break; }
+    }
+    baseReady_ = true;
+    return base_;
+}
+
 std::string Assets::path(const std::string& rel) const {
     if (FileExists(rel.c_str()) || DirectoryExists(rel.c_str())) return rel;
-    std::string alt = std::string(GetApplicationDirectory()) + "../" + rel;
-    if (FileExists(alt.c_str()) || DirectoryExists(alt.c_str())) return alt;
+    std::string p = base() + rel;
+    if (FileExists(p.c_str()) || DirectoryExists(p.c_str())) return p;
     return rel;
+}
+
+std::string Assets::savesDir() const {
+    std::string dir = base() + "saves";
+    if (!DirectoryExists(dir.c_str())) MakeDirectory(dir.c_str());
+    return dir;
 }
 
 Texture2D Assets::texture(const std::string& p) {

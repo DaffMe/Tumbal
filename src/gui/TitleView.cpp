@@ -26,12 +26,7 @@ static const char* GIFT_DESC[] = {
 };
 
 std::string TitleView::slotPath(int slot) {
-    std::string dir = Assets::get().path("saves");
-    if (!DirectoryExists(dir.c_str())) {
-        dir = std::string(GetApplicationDirectory()) + "../saves";
-        if (!DirectoryExists(dir.c_str())) MakeDirectory(dir.c_str());
-    }
-    return dir + "/slot" + std::to_string(slot) + ".json";
+    return Assets::get().savesDir() + "/slot" + std::to_string(slot) + ".json";
 }
 
 void TitleView::refreshSlots() {

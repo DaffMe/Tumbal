@@ -386,6 +386,10 @@ int App::run(bool smoke, bool shots) {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(VIEW_W * 2, VIEW_H * 2, "TUMBAL");
     SetExitKey(KEY_NULL);
+    {   // ikon jendela & taskbar
+        Image icon = LoadImage(Assets::get().path("assets/icon/tumbal.png").c_str());
+        if (icon.data != nullptr) { SetWindowIcon(icon); UnloadImage(icon); }
+    }
     // ikuti refresh rate monitor (laptop 120/144 Hz): batas 60 FPS + VSync di layar 144 Hz
     // membuat frame tampil tidak merata (gerak tersendat) dan memicu sobekan layar
     int hz = GetMonitorRefreshRate(GetCurrentMonitor());

@@ -12,11 +12,13 @@
 
 namespace {
 
-std::string findAssets() {
-    const char* candidates[] = {"assets/", "../assets/"};
-    for (const char* c : candidates) {
-        std::string p = std::string(c) + "maps/world.json";
-        if (std::FILE* f = std::fopen(p.c_str(), "rb")) {
+// Folder assets/: folder kerja, folder exe (rilis), atau di atas exe (bin/ pengembangan).
+std::string findAssets(const char* exePath) {
+    std::string exeDir = exePath ? std::filesystem::path(exePath).parent_path().string() : "";
+    if (!exeDir.empty()) exeDir += "/";
+    const std::string candidates[] = {"assets/", exeDir + "assets/", exeDir + "../assets/"};
+    for (const std::string& c : candidates) {
+        if (std::FILE* f = std::fopen((c + "maps/world.json").c_str(), "rb")) {
             std::fclose(f);
             return c;
         }
@@ -276,11 +278,11 @@ void settle(Game& game) {
 
 }  // namespace
 
-int runConsole() {
+int runConsole(const char* exePath) {
     DsTrace::instance().setEcho(true);
     Game game;
     std::string err;
-    std::string root = findAssets();
+    std::string root = findAssets(exePath);
     // bahasa: kamus Inggris + pengaturan yang sama dengan GUI (saves/settings.json, bawaan English)
     lang::load(root + "lang/en.json");
     lang::setLanguage(LANG_EN);

@@ -1,7 +1,8 @@
 #pragma once
 // ============================================================================
 // Assets — cache tekstur & lokasi folder aset (lapisan GUI).
-// Path aset dicari relatif ke folder kerja, lalu ke folder exe ("bin/../").
+// Folder dasar dicari sekali: folder kerja, folder exe (rilis: TUMBAL.exe di samping assets/),
+// lalu folder di atas exe (pengembangan: bin/../assets).
 // ============================================================================
 
 #include <string>
@@ -14,6 +15,8 @@ public:
 
     // "assets/chars/tumbal.png" -> path yang benar-benar ada.
     std::string path(const std::string& rel) const;
+    // Folder simpanan (saves/) di folder dasar game; dibuat bila belum ada.
+    std::string savesDir() const;
     // Tekstur dari path (relatif atau hasil path()). Dimuat sekali.
     Texture2D texture(const std::string& p);
     void unloadAll();
@@ -25,4 +28,7 @@ private:
     std::unordered_map<std::string, Texture2D> cache_;
     Texture2D light_{};
     bool lightReady_ = false;
+    mutable std::string base_;
+    mutable bool baseReady_ = false;
+    const std::string& base() const;
 };
