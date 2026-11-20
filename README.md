@@ -1,111 +1,144 @@
 <h1 align="center">TUMBAL</h1>
 
 <p align="center">
-  <i>Game RPG bertema dongeng Timun Mas versi seram, dengan gaya main ala Souls. Dibuat sendiri dari nol pakai C++ dan raylib.</i>
+  <i>RPG turn-based bertema dongeng Timun Mas versi gelap, dengan gameplay ala Souls.<br>Dibuat dari nol pakai C++17 dan raylib untuk Tugas Besar Struktur Data.</i>
 </p>
 
 <p align="center">
-  <a href="#-cara-main">Cara Main</a> •
-  <a href="#-isi-game">Isi Game</a> •
-  <a href="#-cuplikan-layar">Cuplikan Layar</a> •
-  <a href="#-struktur-data-yang-dipakai">Struktur Data</a> •
-  <a href="#-kelompok-12">Kelompok</a>
+  <a href="#-instalasi">Instalasi</a> •
+  <a href="#-fitur-utama">Fitur</a> •
+  <a href="#-pratinjau">Pratinjau</a> •
+  <a href="#-struktur-data">Struktur Data</a> •
+  <a href="#-anggota-tim">Anggota Tim</a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus&logoColor=white" alt="C++17">
   <img src="https://img.shields.io/badge/raylib-6.0-black?logo=raylib&logoColor=white" alt="raylib 6">
-  <img src="https://img.shields.io/badge/jalan%20di-Windows-0078D6?logo=windows&logoColor=white" alt="Windows">
-  <img src="https://img.shields.io/badge/unit%20test-377%20lulus-brightgreen" alt="377 unit test lulus">
-  <img src="https://img.shields.io/badge/status-bisa%20dimainkan%20sampai%20tamat-orange" alt="Bisa dimainkan sampai tamat">
-  <img src="https://img.shields.io/badge/bahasa%20game-Inggris%20%7C%20Indonesia-blueviolet" alt="Bahasa Inggris dan Indonesia">
-  <img src="https://img.shields.io/badge/tugas%20besar-Struktur%20Data-lightgrey" alt="Tugas Besar Struktur Data">
+  <img src="https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows&logoColor=white" alt="Windows">
+  <img src="https://img.shields.io/badge/Unit%20Test-377%20lulus-brightgreen" alt="377 unit test lulus">
+  <img src="https://img.shields.io/badge/Status-Playable%20Demo-orange" alt="Playable demo">
+  <img src="https://img.shields.io/badge/Bahasa-English%20%7C%20Indonesia-blueviolet" alt="English dan Indonesia">
+  <img src="https://img.shields.io/badge/Tugas%20Besar-Struktur%20Data-lightgrey" alt="Tugas Besar Struktur Data">
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/boss_buto.png" alt="Pertarungan melawan Buto Ijo" width="100%">
+  <img src="docs/screenshots/boss_buto.png" alt="Boss fight melawan Buto Ijo" width="100%">
 </p>
 
 <p align="center">
-  <b>⚔️ Pertarungan bergiliran</b> <i>(siapa yang lebih gesit, dia jalan duluan)</i>
+  <b>⚔️ Battle ATB</b> <i>(urutan giliran ditentukan kecepatan, ada rapal dan tunda giliran)</i>
   <br>
-  <b>🔥 Mati itu bagian dari permainan</b> <i>(sukma jatuh di tempat kamu mati, ambil lagi kalau berani)</i>
+  <b>🔥 Loop ala Souls</b> <i>(checkpoint Tungku, sukma jatuh saat mati, musuh respawn)</i>
   <br>
-  <b>🗺️ 8 wilayah yang saling nyambung</b> <i>(lumbung, desa, ladang, hutan bambu, laut, rawa, sarang Buto)</i>
+  <b>🗺️ 8 area yang saling terhubung</b> <i>(ada jalan pintas, jalan satu arah, dan fast travel)</i>
   <br>
-  <b>📜 Cerita lengkap dari awal sampai tamat</b> <i>(sekitar 45–60 menit main)</i>
+  <b>📜 Cerita lengkap sampai tamat</b> <i>(sekitar 45–60 menit)</i>
   <br>
-  <b>🧱 Semua struktur datanya bikin sendiri</b> <i>(sesuai aturan tugas: tanpa "jalan pintas" dari library C++)</i>
+  <b>🧱 Semua struktur data dibuat manual</b> <i>(tanpa container STL di core game)</i>
 </p>
 
 <details>
 <summary><b>Daftar Isi</b></summary>
 
-- [Cara Main](#-cara-main)
-- [Cuplikan Layar](#-cuplikan-layar)
-- [Ceritanya Tentang Apa?](#-ceritanya-tentang-apa)
-- [Isi Game](#-isi-game)
-- [Struktur Data yang Dipakai](#-struktur-data-yang-dipakai)
-- [Cara Kerja Programnya](#-cara-kerja-programnya)
-- [Isi Folder](#-isi-folder)
-- [Perintah Tambahan](#-perintah-tambahan)
-- [Alat Bantu](#-alat-bantu)
-- [Pertanyaan yang Sering Muncul](#-pertanyaan-yang-sering-muncul)
-- [Dokumen Lain](#-dokumen-lain)
-- [Kelompok 12](#-kelompok-12)
+- [Deskripsi](#-deskripsi)
+- [Instalasi](#-instalasi)
+- [Kontrol](#-kontrol)
+- [Pratinjau](#-pratinjau)
+- [Fitur Utama](#-fitur-utama)
+- [Struktur Data](#-struktur-data)
+- [Arsitektur](#-arsitektur)
+- [Struktur Folder](#-struktur-folder)
+- [Command Line](#-command-line)
+- [Tools](#-tools)
+- [FAQ](#-faq)
+- [Dokumentasi](#-dokumentasi)
+- [Anggota Tim](#-anggota-tim)
 - [Kredit & Lisensi](#-kredit--lisensi)
 
 </details>
 
 ---
 
-## 🚀 Cara Main
+## 📖 Deskripsi
+
+**TUMBAL** adalah game RPG turn-based yang mengangkat dongeng **Timun Mas dan Buto Ijo**, tapi dengan
+versi yang lebih gelap.
+
+Di dongeng aslinya, Timun Mas kabur dari Buto Ijo dengan melempar empat bekal: biji timun yang jadi ladang,
+jarum yang jadi hutan bambu, garam yang jadi laut, dan terasi yang jadi rawa. Di game ini, ceritanya
+berlanjut. Sihir dari bekal itu tidak pernah hilang, malah membusuk, dan Buto Ijo ternyata belum benar-benar
+mati. Supaya tetap aman, warga Desa Karangtumbal menyerahkan satu anak setiap musim panen sebagai tumbal.
+
+Kamu bermain sebagai salah satu tumbal itu, yang seharusnya sudah dimakan tapi malah terbangun di dalam
+lumbung.
+
+Game ini dibuat untuk **Tugas Besar mata kuliah Struktur Data**. Gameplay-nya terinspirasi dari
+*Black Souls 1*, tapi yang kami adaptasi hanya sistem permainannya. Cerita, karakter, peta, dialog, dan
+grafisnya kami buat sendiri atau memakai aset gratis yang lisensinya mengizinkan.
+
+---
+
+## 🚀 Instalasi
 
 > [!TIP]
-> Saat pertama dibuka, game pakai **bahasa Inggris**. Mau ganti ke **bahasa Indonesia**? Buka **Settings** di
-> layar judul (atau tekan X waktu main, lalu pilih **Settings**). Pilihannya tersimpan, jadi nggak perlu ganti lagi.
+> Bahasa bawaan game adalah **English**. Untuk ganti ke **Bahasa Indonesia**, buka **Settings** di layar judul
+> atau di menu dalam game (tombol X). Pilihan bahasa akan tersimpan otomatis.
 
-### Yang perlu disiapkan
+### Persyaratan
 
-Game ini dibuat di Windows. Sebelum bisa dijalankan, pasang dulu [MSYS2](https://www.msys2.org/) (program untuk
-meng-compile kode C++), lalu buka terminal **MSYS2 UCRT64** dan jalankan:
+Pastikan kamu sudah punya:
+
+- **Windows**
+- **[MSYS2](https://www.msys2.org/)** dengan toolchain **UCRT64**
+
+Setelah MSYS2 terinstall, buka terminal **MSYS2 UCRT64** lalu install compiler, raylib, dan make:
 
 ```bash
 pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-raylib mingw-w64-ucrt-x86_64-make
 ```
 
-Setelah itu, tambahkan `C:\msys64\ucrt64\bin` ke `PATH` Windows supaya perintahnya bisa dipanggil dari mana saja.
+Lalu tambahkan `C:\msys64\ucrt64\bin` ke `PATH` Windows.
 
-### Menjalankan game
-
-Buka terminal di folder proyek ini, lalu:
+### Clone & Jalankan
 
 ```bash
-mingw32-make run           # compile lalu langsung main
-mingw32-make test          # jalankan semua pengecekan otomatis (unit test)
-bin/tumbal.exe --console   # main versi teks di terminal, tanpa gambar
+git clone https://github.com/DaffMe/Cinderwake.git
+cd Cinderwake
+mingw32-make run
 ```
 
-### Tombol
+Perintah lain yang berguna:
 
-| Tombol | Fungsinya |
-|--------|-----------|
-| Panah / WASD | Jalan (bisa serong) |
-| Shift | Lari |
-| Z / Enter | Pilih, periksa sesuatu, ngobrol, istirahat di Tungku |
-| X / Esc | Batal, atau buka menu (Barang, Status, Simpan, Cheat, Settings, Keluar) |
-| Tahan Z waktu bertarung | Mempercepat animasi |
-| F1 | Lihat isi struktur data secara langsung |
-| F3 | Lihat batas tabrakan di peta |
-| F9 | Buka menu cheat |
-
-> [!NOTE]
-> Game **nggak pernah menyimpan otomatis waktu kamu mati**. Jadi rajin-rajin simpan lewat menu (ada 3 slot).
-> Kalau mati dan nyesel, tinggal muat ulang simpanan dari layar judul.
+```bash
+mingw32-make test          # jalankan semua unit test
+bin/tumbal.exe --console   # main versi console (teks), tanpa GUI
+```
 
 ---
 
-## 📸 Cuplikan Layar
+## 🎮 Kontrol
+
+| Tombol | Fungsi |
+|--------|--------|
+| Panah / WASD | Jalan (8 arah) |
+| Shift | Lari |
+| Z / Enter | Konfirmasi, periksa, bicara, istirahat di Tungku |
+| X / Esc | Batal / buka menu (Barang, Status, Simpan, Cheat, Settings, Keluar) |
+| Tahan Z saat battle | Percepat animasi |
+| F1 | Inspector struktur data |
+| F3 | Tampilkan collision |
+| F9 | Menu cheat |
+
+> [!NOTE]
+> Sama seperti Black Souls, game **tidak menyimpan otomatis saat kamu mati**. Simpan manual lewat menu
+> (ada 3 slot). Kalau mati, kamu bisa load lagi dari layar judul untuk mengulang.
+
+---
+
+## 📸 Pratinjau
+
+> Screenshot diambil dari versi English.
 
 <table>
 <tr>
@@ -118,7 +151,7 @@ bin/tumbal.exe --console   # main versi teks di terminal, tanpa gambar
 </td>
 <td width="50%">
 
-**Awal cerita**: kamu bangun di sel lumbung tempat anak-anak dikurung
+**Awal cerita**, terbangun di sel lumbung
 
 ![Awal cerita](docs/screenshots/intro_dialog.png)
 
@@ -127,14 +160,14 @@ bin/tumbal.exe --console   # main versi teks di terminal, tanpa gambar
 <tr>
 <td width="50%">
 
-**Desa Karangtumbal**: pusat permainan, ada Tungku, pandai besi, dan pedagang
+**Desa Karangtumbal**, hub utama dengan Tungku, pandai besi, dan pedagang
 
 ![Desa](docs/screenshots/village.png)
 
 </td>
 <td width="50%">
 
-**Laut Garam**: Timun Mas menunggu di ujung dermaga
+**Laut Garam**, tempat Timun Mas menunggu di ujung dermaga
 
 ![Laut Garam](docs/screenshots/salt_sea.png)
 
@@ -143,14 +176,14 @@ bin/tumbal.exe --console   # main versi teks di terminal, tanpa gambar
 <tr>
 <td width="50%">
 
-**Pertarungan**: urutan giliran kelihatan di bagian atas layar
+**Battle**, urutan giliran tampil di bagian atas
 
-![Pertarungan](docs/screenshots/battle.png)
+![Battle](docs/screenshots/battle.png)
 
 </td>
 <td width="50%">
 
-**Dialog**: wajah tokoh yang sedang bicara muncul di samping teks
+**Dialog** dengan potret karakter
 
 ![Dialog](docs/screenshots/dialog_portrait.png)
 
@@ -159,14 +192,14 @@ bin/tumbal.exe --console   # main versi teks di terminal, tanpa gambar
 <tr>
 <td width="50%">
 
-**Pedagang keliling**: beli barang pakai sukma, stoknya terbatas
+**Pedagang keliling**, stok barangnya terbatas
 
 ![Pedagang](docs/screenshots/merchant.png)
 
 </td>
 <td width="50%">
 
-**Empu Karta si pandai besi**: perkuat senjatamu sampai +3
+**Empu Karta**, upgrade senjata sampai +3
 
 ![Pandai besi](docs/screenshots/blacksmith.png)
 
@@ -175,14 +208,14 @@ bin/tumbal.exe --console   # main versi teks di terminal, tanpa gambar
 <tr>
 <td width="50%">
 
-**Rawa Terasi**: berkabut, dan jadi tempat istirahat terakhir sebelum ketemu Buto
+**Rawa Terasi**, area terakhir sebelum boss
 
 ![Rawa Terasi](docs/screenshots/terasi_mire.png)
 
 </td>
 <td width="50%">
 
-**Sarang Buto**: jalan menurun yang dijaga tiang-tiang tengkorak
+**Sarang Buto**, lokasi boss terakhir
 
 ![Sarang Buto](docs/screenshots/buto_lair.png)
 
@@ -190,270 +223,249 @@ bin/tumbal.exe --console   # main versi teks di terminal, tanpa gambar
 </tr>
 </table>
 
-Gambar di atas diambil dari versi bahasa Inggris. Gambar utuh tiap peta bisa dilihat di
-[`docs/map_preview/`](docs/map_preview/).
+Peta lengkap tiap area bisa dilihat di [`docs/map_preview/`](docs/map_preview/).
 
 ---
 
-## 🎯 Ceritanya Tentang Apa?
+## ✨ Fitur Utama
 
-Semua orang tahu dongeng Timun Mas: dikejar raksasa Buto Ijo, Timun Mas melempar empat bekal dari ibunya.
-Biji timun jadi ladang, jarum jadi hutan bambu, garam jadi laut, dan terasi jadi rawa. Buto Ijo tenggelam.
+### ⚔️ Battle
 
-Di game ini, ceritanya **nggak berhenti di situ**. Sihir dari bekal-bekal itu nggak pernah hilang, malah
-membusuk. Buto Ijo ternyata nggak benar-benar mati. Dan supaya desa tetap aman, warga desa Karangtumbal diam-diam
-menyerahkan satu anak setiap musim panen sebagai **tumbal**.
+- **Sistem ATB (Active Time Battle) mode wait.** Setiap karakter punya gauge yang terisi sesuai stat Gesit.
+  Saat kamu memilih perintah, waktu berhenti, jadi tidak perlu terburu-buru.
+- **Prediksi urutan giliran** tampil di bagian atas layar battle.
+- **Rapal dan tunda.** Skill yang kuat butuh waktu untuk dirapal. Skill tunda bisa memundurkan giliran musuh
+  sekaligus membatalkan rapalannya.
+- **Elak dan Tangkis** bisa dipakai semua class.
+- **Status effect**: racun, berdarah, terbakar, tidur, takut, cepat, lambat, dan lainnya.
+- **Boss multi-bagian.** Buto Ijo terdiri dari kepala dan dua tangan. Kalau kepalanya kalah, kedua tangannya
+  ikut tumbang. Sebelum serangan besarnya keluar, ada tanda target mana yang sedang diincar.
 
-Kamu adalah salah satu tumbal itu. Harusnya kamu sudah dimakan. Tapi kamu malah terbangun di dalam lumbung.
+### 🗺️ Eksplorasi
 
-Game ini dibuat untuk **Tugas Besar mata kuliah Struktur Data**. Cara mainnya terinspirasi dari game
-*Black Souls 1*, tapi yang kami ambil cuma **aturan mainnya** saja. Dunia, cerita, tokoh, peta, dialog, dan
-gambarnya semua buatan sendiri atau pakai aset gratis yang boleh dipakai ulang.
-
----
-
-## ✨ Isi Game
-
-### ⚔️ Pertarungan
-
-- **Bergiliran berdasarkan kecepatan.** Tiap tokoh punya bar yang terisi pelan-pelan; makin gesit, makin cepat
-  penuh dan makin sering dapat giliran. Waktu kamu sedang memilih perintah, semuanya berhenti dulu, jadi nggak
-  perlu buru-buru.
-- **Urutan giliran kelihatan.** Di atas layar ada daftar siapa yang jalan berikutnya, jadi kamu bisa mengatur
-  strategi.
-- **Jurus yang perlu "dirapal".** Jurus kuat butuh waktu sebelum keluar. Kalau musuh sedang merapal, kamu bisa
-  mengganggunya supaya jurusnya batal.
-- **Elak dan Tangkis.** Semua kelas bisa menghindar atau menangkis serangan sampai giliran berikutnya.
-- **Efek status**: racun, berdarah, terbakar, tidur, takut, makin cepat, makin lambat, dan lain-lain.
-- **Boss tiga bagian.** Buto Ijo punya kepala dan dua tangan. Kalahkan kepalanya, kedua tangannya ikut tumbang.
-  Sebelum serangan besarnya keluar, game kasih tanda dulu siapa yang diincar.
-
-### 🗺️ Dunia dan sistem "mati lalu bangkit"
-
-- **8 wilayah**: Sel Tumbal → Lorong Lumbung → Desa Karangtumbal → Ladang Timun Busuk → Hutan Bambu Jarum →
+- **8 area**: Sel Tumbal → Lorong Lumbung → Desa Karangtumbal → Ladang Timun Busuk → Hutan Bambu Jarum →
   Laut Garam → Rawa Terasi → Sarang Buto.
-- **Musuh kelihatan di peta** dan akan mengejarmu. Kalau kamu menyentuh musuh dari belakang, kamu dapat
-  serangan pertama.
-- **Tungku** adalah tempat istirahat. Di sini kamu bisa memulihkan darah, mengisi ulang ramuan, naik level, dan
-  pindah cepat ke Tungku lain yang sudah dinyalakan. Tapi hati-hati: setiap kamu istirahat, musuh-musuh ikut
-  hidup lagi.
-- **Sukma** adalah uang sekaligus poin pengalaman. Kalau kamu mati, semua sukma yang dibawa jatuh di tempat itu.
-  Kamu punya satu kesempatan untuk mengambilnya lagi. Kalau mati lagi sebelum sempat, sukma itu hilang selamanya.
-- **Jalan pintas.** Ada jalan yang baru terbuka setelah boss dikalahkan, rumpun bambu yang bisa ditebas jadi
-  jalan pintas ke desa, dan jalan turun ke sarang Buto yang nggak bisa dinaiki lagi.
+- **Musuh terlihat di peta** dan akan mengejar. Kalau kamu menyentuh musuh dari belakang, kamu dapat serangan
+  pertama.
+- **Tungku** berfungsi sebagai checkpoint. Di sini kamu bisa memulihkan HP, mengisi ulang Ramuan Jamu, naik
+  level, dan fast travel ke Tungku lain. Setiap kali istirahat, musuh di semua area akan respawn.
+- **Sukma** dipakai sebagai mata uang sekaligus EXP. Saat mati, sukma yang kamu bawa jatuh di lokasi tersebut
+  dan bisa diambil lagi satu kali. Kalau mati lagi sebelum mengambilnya, sukma itu hilang.
+- **Jalan pintas dan jalan satu arah**, misalnya jalan yang baru terbuka setelah boss dikalahkan dan rumpun
+  bambu yang bisa ditebas untuk kembali ke desa.
 
-### 📜 Cerita dan tokoh
+### 📜 Cerita & Karakter
 
-- **Tokoh yang ingat apa yang kamu lakukan.** Misalnya, Mbok Srini bakal ngomong beda setelah kamu mengalahkan
-  Memedi Sawah atau bertemu Timun Mas.
-- **Timun Mas bisa ikut bertarung** bersamamu setelah kamu menemukannya di Laut Garam.
-- **Empu Karta** si pandai besi bisa memperkuat senjatamu (pakai sukma dan Bijih Besi), dan **pedagang
-  keliling** menjual barang-barang berguna.
-- **Dua bahasa**: Inggris (bawaan) dan Indonesia.
+- **Dialog bercabang** dengan pilihan jawaban, dan beberapa NPC akan merespons progres kamu.
+- **Timun Mas** bisa bergabung ke party setelah kamu menemukannya di Laut Garam.
+- **Empu Karta** bisa meng-upgrade senjata (pakai sukma dan Bijih Besi), dan **pedagang keliling** menjual
+  barang dengan stok terbatas.
+- **Dua bahasa**: English (bawaan) dan Bahasa Indonesia.
 
-### 🎨 Tampilan dan suara
+### 🎨 Grafis & Audio
 
-- Gambar bergaya pixel art dengan suasana gelap: tiap wilayah punya warna, kabut, dan pencahayaan sendiri.
-- Musik desa bernuansa gamelan yang kami buat sendiri, musik yang berganti mulus tiap pindah peta, dan efek suara.
-- Layar judul, pembuatan tokoh (nama, kelas, barang bawaan), 3 slot simpanan, dan layar tamat.
+- Grafis pixel art bernuansa gelap, dengan warna, kabut, dan pencahayaan yang berbeda di tiap area.
+- Musik desa bernuansa gamelan yang kami buat sendiri, musik per area, dan sound effect.
+- Layar judul, pembuatan karakter (nama, class, barang awal), 3 slot save, dan layar tamat.
 
-### 🛠️ Buat yang suka ngoprek
+### 🛠️ Untuk Developer
 
-- **377 pengecekan otomatis (unit test)** untuk memastikan semua bagian berjalan benar.
-- Bisa dimainkan versi teks (`--console`), ambil screenshot otomatis (`--shots`), dan simulasi ribuan
-  pertarungan untuk mengukur tingkat kesulitan (`--balance`).
-- **Menu cheat** (F9) kalau mau cepat tamat atau sekadar coba-coba. Tapi layar tamat bakal mencatat kalau kamu
-  pakai cheat. 😉
+- **377 unit test** untuk struktur data, battle, dunia, event, save/load, dan terjemahan.
+- Mode **console** (`--console`), **screenshot otomatis** (`--shots`), dan **simulasi balancing** (`--balance`).
+- **Menu cheat** (F9) untuk testing atau kalau ingin cepat tamat. Layar tamat akan mencatat kalau cheat dipakai.
 
 ---
 
-## 🧱 Struktur Data yang Dipakai
+## 🧱 Struktur Data
 
-Ini bagian utama untuk tugas besarnya. Sesuai aturan dosen, **semua struktur data yang dinilai dibuat sendiri**
-dari node dan pointer, bukan memakai fitur siap pakai dari library C++ seperti `std::vector` atau `std::map`.
-Semuanya ada di folder [`src/core/adt/`](src/core/adt/).
+Sesuai ketentuan tugas, **semua struktur data yang dinilai dibuat manual** menggunakan node dan pointer, tanpa
+memakai container STL seperti `std::vector` atau `std::map`. Implementasinya ada di folder
+[`src/core/adt/`](src/core/adt/).
 
-| Bagian game | Struktur data | Jenis | Kegunaannya |
-|-------------|---------------|-------|-------------|
-| **M1** Pertarungan & urutan giliran | **Doubly linked list** terurut (`Timeline`) | Linear | Menyimpan antrean giliran. Yang paling depan = yang jalan berikutnya. Kalau ada jurus yang menunda giliran, posisi tokoh itu langsung dipindah di dalam list |
-| **M2** Dunia & Tungku | **Graph** (`Graph`) | Non-linear | Tiap peta = titik, tiap jalan antarpeta = garis penghubung. Garisnya bisa terkunci atau cuma satu arah. Dipakai untuk mencari Tungku yang bisa dituju dan menghidupkan lagi musuh di semua peta |
-| **M3** Dialog & cerita | **Stack** + **Queue** | Linear | Stack mengingat "posisi baca" dialog saat cerita bercabang (misalnya waktu kamu memilih jawaban). Queue menampilkan notifikasi satu per satu, misalnya "Dapat: Bijih Besi" |
-| Pendukung pertarungan | **Queue** | Linear | Kejadian di pertarungan (kena serangan, pulih, tumbang) diantrekan lalu dianimasikan satu per satu |
+| Mekanik | Struktur Data | Jenis | Penggunaan di Game |
+|---------|---------------|-------|--------------------|
+| **M1** Battle & antrean giliran | Doubly Linked List terurut (`Timeline`) | Linear | Menyimpan antrean giliran. Node paling depan adalah karakter yang jalan berikutnya. Saat ada rapal atau tunda, node dipindahkan ke posisi yang baru |
+| **M2** Dunia & Tungku | Graph (`Graph`) | Non-linear | Setiap peta jadi vertex dan setiap jalan jadi edge, yang bisa terkunci atau satu arah. BFS dipakai untuk mencari Tungku yang bisa dituju, dan traversal penuh untuk respawn musuh |
+| **M3** Event & dialog | Stack + Queue | Linear | Stack menyimpan posisi eksekusi saat dialog bercabang atau memanggil event lain. Queue menampilkan notifikasi satu per satu |
+| Pendukung battle | Queue | Linear | Event battle (damage, heal, tumbang) diantrekan lalu dianimasikan berurutan |
 
-Mau lihat struktur datanya bekerja? Tekan **F1** saat main. Akan muncul panel yang menunjukkan isi antrean
-giliran, graph peta (jalan mana yang terbuka atau terkunci), dan setiap operasi yang baru saja dijalankan.
+| File | ADT | Operasi |
+|------|-----|---------|
+| [`Timeline.hpp`](src/core/adt/Timeline.hpp) | Doubly Linked List terurut | `insertSorted`, `remove`, `popFront`, `search`, `updateAV`, `subtractAll`, traversal maju/mundur |
+| [`Graph.hpp`](src/core/adt/Graph.hpp) | Graph berarah berbobot | `addVertex`, `addEdge`, `addArc`, `setOpen`, `isOpen`, `removeEdge`, `bfs`, `dijkstra`, `isConnected` |
+| [`Stack.hpp`](src/core/adt/Stack.hpp) | Stack (linked list) | `push`, `pop`, `peek`, traversal |
+| [`Queue.hpp`](src/core/adt/Queue.hpp) | Queue (linked list) | `enqueue`, `dequeue`, `peek`, traversal |
 
-Penjelasan lebih lengkap (termasuk kompleksitas dan bahan presentasi) ada di
-[`docs/STRUKTUR_DATA.md`](docs/STRUKTUR_DATA.md).
+Tekan **F1** saat bermain untuk membuka Inspector. Di sana kamu bisa melihat isi antrean giliran, kondisi
+graph peta (jalan mana yang terbuka atau terkunci), dan log operasi struktur data yang baru dijalankan.
+Penjelasan lengkapnya ada di [`docs/STRUKTUR_DATA.md`](docs/STRUKTUR_DATA.md).
 
 ---
 
-## 🏗️ Cara Kerja Programnya
+## 🏗️ Arsitektur
 
-Programnya dibagi jadi beberapa bagian yang tugasnya jelas:
+Kode game dibagi menjadi tiga bagian:
 
-- **Otak game** (`src/core`) berisi semua aturan main: pertarungan, peta, cerita, simpanan, dan struktur data.
-  Bagian ini sama sekali nggak tahu soal gambar atau suara.
-- **Tampilan** (`src/gui`) cuma bertugas menggambar ke layar, memutar suara, dan meneruskan tombol yang ditekan
-  ke otak game.
-- **Versi teks** (`src/console`) memakai otak game yang sama tapi ditampilkan sebagai tulisan di terminal. Ini
-  bukti kalau logikanya benar-benar terpisah dari tampilan.
-- **Data** (`assets/`) berisi peta, naskah cerita, kamus bahasa, gambar, dan musik.
+- **`src/core`** berisi semua logika game: battle, peta, event, save/load, dan struktur data. Bagian ini tidak
+  bergantung pada raylib sama sekali.
+- **`src/gui`** bertugas menampilkan grafis, memutar audio, dan meneruskan input ke core.
+- **`src/console`** menjalankan core yang sama dalam bentuk teks, sebagai bukti logika game terpisah dari GUI.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                     TAMPILAN  (src/gui, raylib)                          │
-│  layar judul · peta · pertarungan · dialog · menu · Tungku · toko        │
-│  cuma menggambar dan meneruskan tombol, tidak mengatur aturan main       │
+│                     GUI  (src/gui, raylib)                               │
+│  Title · Map · Battle · Dialog · Menu · Tungku · Shop · Inspector        │
+│  hanya menampilkan state dan meneruskan input                            │
 └──────────────┬───────────────────────────────────────────┬───────────────┘
                │                                           │
                ▼                                           ▼
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                     OTAK GAME  (src/core)                                │
+│                     CORE  (src/core, tanpa raylib & container STL)       │
 │                                                                          │
-│  game/   pengatur utama, data pemain, simpan & muat                      │
-│  battle/ pertarungan ── antrean giliran (doubly linked list)             │
-│  world/  peta & Tungku ── graph peta                                     │
-│  event/  dialog & cerita ── stack + queue                                │
-│  data/   daftar jurus, barang, musuh, kelas, senjata                     │
-│  util/   pembaca JSON, kamus bahasa, angka acak, catatan operasi         │
+│  game/   Game, GameState (party, sukma, inventory, flag, save/load)      │
+│  battle/ BattleSystem ── Timeline / Doubly Linked List (M1)              │
+│  world/  World ── Graph peta (M2) · Field (pergerakan, musuh)            │
+│  event/  Interpreter ── Stack + Queue (M3)                               │
+│  data/   GameData (skill, item, musuh, class, senjata, toko)             │
+│  util/   Json parser · Lang (EN/ID) · Rng · DsTrace                      │
 └──────────────┬───────────────────────────────────────────┬───────────────┘
                │                                           │
                ▼                                           ▼
-     VERSI TEKS  (src/console)                    DATA  (assets/)
-     main lewat terminal                          peta, naskah cerita,
-                                                  kamus bahasa, gambar, musik
+     CONSOLE  (src/console)                       ASSETS  (assets/)
+     mode teks · simulasi --balance               peta Tiled, script event,
+                                                  kamus bahasa, grafis, audio
 ```
 
 ---
 
-## 📁 Isi Folder
+## 📁 Struktur Folder
 
 ```
 .
 ├── src/
-│   ├── core/            otak game (aturan main + struktur data)
-│   ├── gui/             tampilan, suara, menu
-│   ├── console/         versi teks + simulasi tingkat kesulitan
-│   └── main.cpp         titik awal program
-├── tests/               pengecekan otomatis (unit test)
+│   ├── core/            logika game dan struktur data
+│   ├── gui/             tampilan, audio, menu
+│   ├── console/         mode console dan simulasi balancing
+│   └── main.cpp         entry point
+├── tests/               unit test
 ├── assets/
 │   ├── maps/            peta (format Tiled)
-│   ├── events/          naskah cerita dan dialog
+│   ├── events/          script cerita dan dialog (JSON)
 │   ├── lang/            kamus bahasa Inggris
-│   └── ...              gambar, karakter, musik, font
-├── tools/               skrip Python untuk membuat aset, peta, musik, dan terjemahan
-├── docs/                dokumen tim, screenshot, gambar peta
-├── CREDITS.md           daftar semua aset yang dipakai beserta lisensinya
-└── Makefile             resep untuk meng-compile game
+│   └── ...              grafis, karakter, audio, font
+├── tools/               script Python untuk generate aset, peta, musik, dan terjemahan
+├── docs/                dokumentasi, screenshot, dan preview peta
+├── CREDITS.md           daftar aset beserta lisensinya
+└── Makefile
 ```
 
 ---
 
-## ⌨️ Perintah Tambahan
+## ⌨️ Command Line
 
-| Perintah | Gunanya |
-|----------|---------|
-| `bin/tumbal.exe` | Main seperti biasa |
-| `bin/tumbal.exe --console` | Main versi teks di terminal (perintahnya: `w/a/s/d` untuk jalan, `x` untuk periksa, `graph`, `tungku`, `simpan`, `muat`, `cheat`, dan lain-lain) |
-| `bin/tumbal.exe --shots` | Ambil screenshot otomatis semua peta dan layar penting |
-| `bin/tumbal.exe --balance` | Simulasi ribuan pertarungan untuk melihat seberapa susah tiap musuh di tiap level |
-| `bin/tumbal.exe --smoke` | Buka jendela sebentar lalu tutup (cek apakah build berhasil) |
-
----
-
-## 🧰 Alat Bantu
-
-Semua alat ini dijalankan pakai Python bawaan MSYS2 (`/c/msys64/ucrt64/bin/python.exe`) dari folder proyek.
-
-| Skrip | Gunanya |
-|-------|---------|
-| `tools/build_assets.py` | Menyusun gambar karakter, tile, properti peta, musuh, dan wajah tokoh |
-| `tools/make_maps.py` | Membuat semua peta dari rancangan berbentuk teks |
-| `tools/render_maps.py` | Menggambar ulang tiap peta secara utuh ke `docs/map_preview/` |
-| `tools/make_gamelan.py` | Membuat musik desa bernuansa gamelan |
-| `tools/lang_en.py` | Membuat kamus bahasa Inggris |
-| `tools/lang_keys.py` | Mengecek apakah masih ada teks yang belum diterjemahkan |
+| Perintah | Keterangan |
+|----------|------------|
+| `bin/tumbal.exe` | Jalankan game |
+| `bin/tumbal.exe --console` | Main di terminal (perintah: `w/a/s/d`, `x`, `graph`, `tungku`, `simpan`, `muat`, `cheat`, dll.) |
+| `bin/tumbal.exe --shots` | Ambil screenshot otomatis semua area dan layar penting |
+| `bin/tumbal.exe --balance` | Simulasi ribuan battle untuk mengecek tingkat kesulitan |
+| `bin/tumbal.exe --smoke` | Buka window sebentar lalu tutup (cek hasil build) |
 
 ---
 
-## ❓ Pertanyaan yang Sering Muncul
+## 🧰 Tools
+
+Semua script dijalankan dengan Python dari MSYS2 (`/c/msys64/ucrt64/bin/python.exe`) di root folder project.
+
+| Script | Fungsi |
+|--------|--------|
+| `tools/build_assets.py` | Generate sprite karakter, tile, props, battler, dan potret |
+| `tools/make_maps.py` | Generate semua peta dari layout ASCII ke format Tiled |
+| `tools/render_maps.py` | Render preview tiap peta ke `docs/map_preview/` |
+| `tools/make_gamelan.py` | Generate musik desa bernuansa gamelan |
+| `tools/lang_en.py` | Generate kamus bahasa Inggris |
+| `tools/lang_keys.py` | Cek teks yang belum diterjemahkan |
+
+---
+
+## ❓ FAQ
 
 <details>
-<summary><b>Ini jiplakan Black Souls, ya?</b></summary>
+<summary><b>Apakah ini copy dari Black Souls?</b></summary>
 
-Bukan. Yang kami ambil cuma aturan mainnya, seperti pertarungan berdasarkan kecepatan, sukma sebagai uang
-sekaligus poin pengalaman, tempat istirahat, dan sukma yang jatuh saat mati. Cerita, tokoh, peta, dialog, dan
-gambarnya semua buatan sendiri atau aset gratis yang daftarnya ada di `CREDITS.md`.
+Bukan. Yang kami adaptasi hanya sistem permainannya, seperti battle ATB, sukma sebagai mata uang dan EXP,
+checkpoint, dan sukma yang jatuh saat mati. Cerita, karakter, peta, dialog, dan grafisnya kami buat sendiri
+atau memakai aset gratis yang tercantum di `CREDITS.md`.
 
 </details>
 
 <details>
-<summary><b>Kenapa nggak pakai <code>std::vector</code> atau <code>std::map</code> saja biar gampang?</b></summary>
+<summary><b>Kenapa tidak pakai <code>std::vector</code> atau <code>std::map</code>?</b></summary>
 
-Karena aturan tugasnya memang begitu: struktur data yang dinilai harus dibuat sendiri. Supaya aman, aturan ini
-kami terapkan ke seluruh otak game (`src/core/`). Bagian tampilan masih boleh pakai fitur bawaan C++.
-
-</details>
-
-<details>
-<summary><b>Game-nya susah banget. Ada cara cepat?</b></summary>
-
-Ada. Tekan **F9** (atau buka menu lalu pilih **Cheat**). Di sana bisa dapat sukma dan level gratis, tambah
-stat, senjata langsung +3, kebal, sekali pukul langsung menang, sampai membuka semua jalan. Tapi layar tamat
-bakal mencatat kalau kamu pakai cheat.
+Karena ketentuan tugas mewajibkan struktur data yang dinilai dibuat manual. Aturan ini kami terapkan ke seluruh
+core game (`src/core/`). Bagian GUI tetap boleh memakai standard library.
 
 </details>
 
 <details>
-<summary><b>Bisa dimainkan di Linux atau Mac?</b></summary>
+<summary><b>Game-nya terlalu susah, ada cara cepat?</b></summary>
 
-Kodenya sebenarnya bisa, tapi cara compile dan petunjuk di sini dibuat khusus untuk Windows. Di sistem lain
-belum pernah dicoba.
+Ada. Tekan **F9** atau buka menu lalu pilih **Cheat**. Di sana ada sukma dan level gratis, tambah stat,
+senjata langsung +3, kebal, one-hit kill, sampai buka semua jalan. Layar tamat akan mencatat kalau cheat dipakai.
+
+</details>
+
+<details>
+<summary><b>Bisa jalan di Linux atau macOS?</b></summary>
+
+Secara kode bisa, tapi Makefile dan panduan instalasinya dibuat untuk Windows (MSYS2). Platform lain belum
+kami coba.
 
 </details>
 
 ---
 
-## 📚 Dokumen Lain
+## 📚 Dokumentasi
 
-| Dokumen | Isinya |
-|---------|--------|
-| [Panduan demo](docs/DEMO.md) | Rute main dari awal sampai tamat, dan di mana tiap struktur data bisa ditunjukkan saat presentasi |
-| [Struktur data](docs/STRUKTUR_DATA.md) | Penjelasan teknis tiap struktur data, kompleksitasnya, dan contoh tanya-jawab saat Pendampingan |
-| [Rencana & progres](docs/PLAN_V2.md) | Keputusan desain dan progres tiap tahap pengerjaan |
-| [Analisis Black Souls 1](docs/research/black-souls-1-analysis.md) | Catatan bedah sistem game yang jadi acuan |
-| [Kredit](CREDITS.md) | Daftar aset, pembuatnya, dan lisensinya |
-| [CLAUDE.md](CLAUDE.md) | Aturan dan kebiasaan penulisan kode di proyek ini |
+| Dokumen | Isi |
+|---------|-----|
+| [Panduan Demo](docs/DEMO.md) | Rute main dari awal sampai tamat dan titik presentasi tiap struktur data |
+| [Struktur Data](docs/STRUKTUR_DATA.md) | Penjelasan ADT, kompleksitas, subprogram, dan bahan Pendampingan |
+| [Rencana & Progres](docs/PLAN_V2.md) | Keputusan desain dan progres tiap fase |
+| [Analisis Black Souls 1](docs/research/black-souls-1-analysis.md) | Analisis sistem game yang jadi acuan |
+| [Kredit](CREDITS.md) | Daftar aset, pembuat, dan lisensinya |
+| [CLAUDE.md](CLAUDE.md) | Aturan dan konvensi project |
 
 ---
 
-## 👥 Kelompok 12
+## 👥 Anggota Tim
+
+**Kelompok 12**
 
 | Nama | NIM | Peran |
 |------|-----|-------|
-| Adi Tia Ragil Saputra | 109102500015 | Ketua Kelompok & Perancang Game (Game Designer) |
-| Daffa Asqalany | 109102500013 | Programmer Utama (Game Developer) |
-| Dina Aulia Rizky | 109102500011 | Penulis Laporan & Dokumentasi |
+| Adi Tia Ragil Saputra | 109102500015 | Ketua Kelompok & Game Designer |
+| Daffa Asqalany | 109102500013 | Game Programmer |
+| Dina Aulia Rizky | 109102500011 | Penulis Laporan |
 
 Dibuat untuk mata kuliah **Struktur Data**, semester ganjil 2026/2027.
 
 ### Penggunaan AI
 
-Pembuatan kode dan dokumentasi dibantu AI (Claude Code). Beberapa gambar yang tidak ada versi gratisnya dibuat
-dengan bantuan Codex, dan semuanya dicatat di bagian "Aset buatan AI" di [`CREDITS.md`](CREDITS.md). Rincian
-penggunaan AI dijelaskan di laporan tugas besar sesuai ketentuan.
+Dalam pengerjaan kode dan dokumentasi, kami dibantu AI (Claude Code). Beberapa aset grafis yang tidak tersedia
+versi gratisnya dibuat dengan bantuan Codex, dan semuanya tercatat di bagian "Aset buatan AI" pada
+[`CREDITS.md`](CREDITS.md). Rincian penggunaan AI dijelaskan di laporan tugas besar.
 
 ---
 
 ## 📄 Kredit & Lisensi
 
-Gambar, suara, dan font dari pihak lain dipakai sesuai lisensinya (CC-BY 4.0, CC0, dan SIL OFL). Daftar
-lengkapnya, termasuk nama pembuat dan sumbernya, ada di [`CREDITS.md`](CREDITS.md). Terima kasih khususnya
-untuk Sevarihk / Aurora (tile dan karakter), Redshrike (gambar musuh), Nidhoggn (latar pertarungan), Kenney dan
-para kreator di OpenGameArt (suara), serta pembuat font Jersey 10.
+Aset dari pihak lain (grafis, audio, dan font) dipakai sesuai lisensinya masing-masing (CC-BY 4.0, CC0, dan
+SIL OFL). Daftar lengkapnya ada di [`CREDITS.md`](CREDITS.md). Terima kasih untuk Sevarihk / Aurora (tileset
+dan karakter), Redshrike (sprite musuh), Nidhoggn (background battle), Kenney dan kreator di OpenGameArt
+(audio), serta pembuat font Jersey 10.
 
-Kode game ini belum diberi lisensi. Aset dari pihak lain tetap mengikuti lisensi aslinya.
+Kode game ini belum memakai lisensi tertentu. Aset dari pihak lain tetap mengikuti lisensi aslinya.
 
 ---
 
