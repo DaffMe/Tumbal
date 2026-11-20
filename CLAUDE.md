@@ -93,7 +93,7 @@ X = batal/menu (Barang, Status, Simpan, Cheat, Keluar). Console: perintah `cheat
 
 ## Dokumentasi
 
-- `README.md` = halaman publik (English, format ala template open source); `docs/*.md` = dokumen tim (Indonesia).
+- `README.md` = halaman publik (Bahasa Indonesia, format ala template open source); `docs/*.md` = dokumen tim (Indonesia).
 - Setelah fitur/fase selesai, perbarui `docs/PLAN_V2.md` (status fase), `docs/DEMO.md` (rute & cek), README
   (angka test, fitur), dan screenshot `docs/screenshots/` bila tampilan berubah.
 

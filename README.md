@@ -1,306 +1,305 @@
 <h1 align="center">TUMBAL</h1>
 
 <p align="center">
-  <i>A dark Javanese folk-tale JRPG with Souls-like mechanics, built from scratch in C++17 and raylib.</i>
+  <i>JRPG cerita rakyat Jawa versi kelam dengan mekanik ala Souls, dibuat dari nol dengan C++17 dan raylib.</i>
 </p>
 
 <p align="center">
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-features">Features</a> •
-  <a href="#-screenshots">Screenshots</a> •
-  <a href="#-data-structures">Data Structures</a> •
-  <a href="#-documentation">Documentation</a>
+  <a href="#-mulai-cepat">Mulai Cepat</a> •
+  <a href="#-fitur">Fitur</a> •
+  <a href="#-screenshot">Screenshot</a> •
+  <a href="#-struktur-data">Struktur Data</a> •
+  <a href="#-dokumentasi">Dokumentasi</a>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus&logoColor=white" alt="C++17">
   <img src="https://img.shields.io/badge/raylib-6.0-black?logo=raylib&logoColor=white" alt="raylib 6">
   <img src="https://img.shields.io/badge/platform-Windows%20(MSYS2%20UCRT64)-0078D6?logo=windows&logoColor=white" alt="Windows">
-  <img src="https://img.shields.io/badge/tests-377%20passing-brightgreen" alt="377 tests passing">
-  <img src="https://img.shields.io/badge/status-playable%20demo-orange" alt="Playable demo">
-  <img src="https://img.shields.io/badge/language-English%20%7C%20Bahasa%20Indonesia-blueviolet" alt="English | Bahasa Indonesia">
-  <img src="https://img.shields.io/badge/course-Data%20Structures-lightgrey" alt="Data Structures coursework">
+  <img src="https://img.shields.io/badge/unit%20test-377%20lulus-brightgreen" alt="377 unit test lulus">
+  <img src="https://img.shields.io/badge/status-demo%20bisa%20dimainkan-orange" alt="Demo bisa dimainkan">
+  <img src="https://img.shields.io/badge/bahasa-English%20%7C%20Indonesia-blueviolet" alt="English | Bahasa Indonesia">
+  <img src="https://img.shields.io/badge/mata%20kuliah-Struktur%20Data-lightgrey" alt="Tugas Besar Struktur Data">
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/boss_buto.png" alt="Battle against Buto Ijo, a three-part boss, with the turn-order strip and a telegraphed attack" width="100%">
+  <img src="docs/screenshots/boss_buto.png" alt="Battle melawan Buto Ijo, boss tiga bagian, dengan strip urutan giliran dan serangan yang ditelegrafkan" width="100%">
 </p>
 
 <p align="center">
-  <b>⚔️ Wait-mode ATB battles</b> <i>(AP gauges, chanting, delays, a predicted turn-order strip)</i>
+  <b>⚔️ Battle ATB mode wait</b> <i>(gauge AP, rapal, tunda giliran, strip prediksi urutan giliran)</i>
   <br>
-  <b>🔥 A Souls loop</b> <i>(Hearths, lost souls you can recover once, enemies that rise again)</i>
+  <b>🔥 Loop Souls</b> <i>(Tungku, sukma tercecer yang bisa diambil sekali, musuh yang bangkit lagi)</i>
   <br>
-  <b>🗺️ An interconnected world</b> <i>(8 maps, locked shortcuts, one-way drops, warping between lit Hearths)</i>
+  <b>🗺️ Dunia yang saling terhubung</b> <i>(8 peta, jalan pintas terkunci, jalan satu arah, warp antar-Tungku)</i>
   <br>
-  <b>📜 A full story</b> <i>(Timun Mas and Buto Ijo, retold darkly, from the first cell to the ending)</i>
+  <b>📜 Cerita utuh</b> <i>(Timun Mas dan Buto Ijo versi kelam, dari sel pertama sampai tamat)</i>
   <br>
-  <b>🧱 Hand-made data structures</b> <i>(doubly linked list, graph, stack, queue: no STL containers in the game core)</i>
+  <b>🧱 Struktur data buatan sendiri</b> <i>(doubly linked list, graph, stack, queue: tanpa container STL di core)</i>
 </p>
 
 <details>
-<summary><b>Table of Contents</b></summary>
+<summary><b>Daftar Isi</b></summary>
 
-- [Quick Start](#-quick-start)
-- [Screenshots](#-screenshots)
-- [About the Game](#-about-the-game)
-- [Features](#-features)
-- [Data Structures](#-data-structures)
-- [Architecture](#-architecture)
-- [Project Structure](#-project-structure)
-- [Command-line Options](#-command-line-options)
-- [Asset & Map Tools](#-asset--map-tools)
+- [Mulai Cepat](#-mulai-cepat)
+- [Screenshot](#-screenshot)
+- [Tentang Game](#-tentang-game)
+- [Fitur](#-fitur)
+- [Struktur Data](#-struktur-data)
+- [Arsitektur](#-arsitektur)
+- [Struktur Proyek](#-struktur-proyek)
+- [Opsi Baris Perintah](#-opsi-baris-perintah)
+- [Alat Aset & Peta](#-alat-aset--peta)
 - [FAQ](#-faq)
-- [Documentation](#-documentation)
-- [Team](#-team)
-- [Credits & License](#-credits--license)
+- [Dokumentasi](#-dokumentasi)
+- [Tim](#-tim)
+- [Kredit & Lisensi](#-kredit--lisensi)
 
 </details>
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Mulai Cepat
 
 > [!TIP]
-> The game starts in **English**. Switch to **Bahasa Indonesia** any time under **Settings** (title screen or the in-game X menu); the choice is remembered.
+> Game dimulai dalam **English**. Bahasa bisa diganti ke **Bahasa Indonesia** kapan saja lewat **Settings** (layar judul atau menu X di dalam game); pilihan ini tersimpan.
 
-### Requirements
+### Kebutuhan
 
-- Windows with [MSYS2](https://www.msys2.org/) and the **UCRT64** toolchain
-- `C:\msys64\ucrt64\bin` on your `PATH`
+- Windows dengan [MSYS2](https://www.msys2.org/) dan toolchain **UCRT64**
+- `C:\msys64\ucrt64\bin` ada di `PATH`
 
 ```bash
 pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-raylib mingw-w64-ucrt-x86_64-make
 ```
 
-### Build & play
+### Build & main
 
 ```bash
-mingw32-make run           # build and start the game
-mingw32-make test          # build and run all unit tests
-bin/tumbal.exe --console   # the same game logic, as a text adventure in the terminal
+mingw32-make run           # build lalu jalankan game
+mingw32-make test          # build lalu jalankan semua unit test
+bin/tumbal.exe --console   # logika game yang sama, dimainkan sebagai teks di terminal
 ```
 
-### Controls
+### Kontrol
 
-| Key | Action |
-|-----|--------|
-| Arrows / WASD | Move (8 directions) |
-| Shift | Run |
-| Z / Enter | Confirm, examine, talk, rest at a Hearth |
-| X / Esc | Cancel, open the menu (Item, Status, Save, Cheats, Settings, Quit) |
-| Hold Z in battle | Speed up animations |
-| F1 | Data structure Inspector |
-| F3 | Show collision |
-| F9 | Cheat menu |
+| Tombol | Fungsi |
+|--------|--------|
+| Panah / WASD | Jalan (8 arah) |
+| Shift | Lari |
+| Z / Enter | Konfirmasi, periksa, bicara, istirahat di Tungku |
+| X / Esc | Batal, buka menu (Barang, Status, Simpan, Cheat, Pengaturan, Keluar) |
+| Tahan Z saat battle | Mempercepat animasi |
+| F1 | Inspector struktur data |
+| F3 | Tampilkan collision |
+| F9 | Menu cheat |
 
 > [!NOTE]
-> Like Black Souls, the game **never saves on death**. Save anywhere from the menu (3 slots) and reload from the title screen to undo a death.
+> Seperti Black Souls, game **tidak pernah menyimpan saat kamu mati**. Simpan di mana saja lewat menu (3 slot), lalu muat ulang dari layar judul untuk membatalkan kematian.
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshot
 
 <table>
 <tr>
 <td width="50%">
 
-**Title screen**
+**Layar judul**
 
-![Title screen](docs/screenshots/title.png)
-
-</td>
-<td width="50%">
-
-**The first cell** — the story opens in a granary where children are kept
-
-![Intro dialog](docs/screenshots/intro_dialog.png)
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-**Karangtumbal Village** — the hub, with a Hearth, a blacksmith and a merchant
-
-![Village](docs/screenshots/village.png)
+![Layar judul](docs/screenshots/title.png)
 
 </td>
 <td width="50%">
 
-**The Salt Sea** — Timun Mas waits at the end of a rotting pier
+**Sel pertama**: cerita dibuka di lumbung tempat anak-anak disimpan
 
-![Salt Sea](docs/screenshots/salt_sea.png)
+![Dialog pembuka](docs/screenshots/intro_dialog.png)
 
 </td>
 </tr>
 <tr>
 <td width="50%">
 
-**Battle** — wait-mode ATB with a predicted turn-order strip
+**Desa Karangtumbal**: hub dengan Tungku, pandai besi, dan pedagang
+
+![Desa](docs/screenshots/village.png)
+
+</td>
+<td width="50%">
+
+**Laut Garam**: Timun Mas menunggu di ujung dermaga yang membusuk
+
+![Laut Garam](docs/screenshots/salt_sea.png)
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Battle**: ATB mode wait dengan strip prediksi urutan giliran
 
 ![Battle](docs/screenshots/battle.png)
 
 </td>
 <td width="50%">
 
-**Dialog** — speaker portraits drawn from each character's map sprite
+**Dialog**: potret pembicara diambil dari sprite peta tiap karakter
 
-![Dialog with portrait](docs/screenshots/dialog_portrait.png)
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-**Wandering merchant** — limited stock, paid in souls
-
-![Merchant](docs/screenshots/merchant.png)
-
-</td>
-<td width="50%">
-
-**Empu Karta's forge** — temper your weapon from +0 to +3
-
-![Blacksmith](docs/screenshots/blacksmith.png)
+![Dialog dengan potret](docs/screenshots/dialog_portrait.png)
 
 </td>
 </tr>
 <tr>
 <td width="50%">
 
-**Terasi Mire** — fog, reeds and the last Hearth before the lair
+**Pedagang keliling**: stok terbatas, dibayar dengan sukma
 
-![Terasi Mire](docs/screenshots/terasi_mire.png)
+![Pedagang](docs/screenshots/merchant.png)
 
 </td>
 <td width="50%">
 
-**Buto's Lair** — a slope lined with skull totems leads to the final boss
+**Tungku tempa Empu Karta**: tempa senjata dari +0 sampai +3
 
-![Buto's Lair](docs/screenshots/buto_lair.png)
+![Pandai besi](docs/screenshots/blacksmith.png)
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**Rawa Terasi**: kabut, gelagah, dan Tungku terakhir sebelum sarang
+
+![Rawa Terasi](docs/screenshots/terasi_mire.png)
+
+</td>
+<td width="50%">
+
+**Sarang Buto**: lereng bertiang tengkorak menuju boss terakhir
+
+![Sarang Buto](docs/screenshots/buto_lair.png)
 
 </td>
 </tr>
 </table>
 
-Full-map previews of every area are in [`docs/map_preview/`](docs/map_preview/).
+Screenshot diambil dari versi English (bahasa bawaan). Pratinjau penuh setiap wilayah ada di
+[`docs/map_preview/`](docs/map_preview/).
 
 ---
 
-## 🎯 About the Game
+## 🎯 Tentang Game
 
-In the folk tale, Timun Mas escapes the giant Buto Ijo by throwing four magic provisions behind her: a cucumber
-seed that becomes a field, a needle that becomes a bamboo forest, salt that becomes a sea, and shrimp paste
-(*terasi*) that becomes a swamp. **TUMBAL** (Javanese/Indonesian for *sacrificial offering*) asks what happened
-next: the magic never faded, it rotted, and the village of Karangtumbal has been feeding its children to the
-giant ever since.
+Dalam dongeng, Timun Mas lolos dari raksasa Buto Ijo dengan melempar empat bekal ajaib ke belakangnya: biji timun
+yang menjadi ladang, jarum yang menjadi hutan bambu, garam yang menjadi laut, dan terasi yang menjadi rawa.
+**TUMBAL** bertanya apa yang terjadi sesudahnya: sihir itu tidak pernah hilang, melainkan membusuk, dan desa
+Karangtumbal terus memberi makan sang raksasa dengan anak-anaknya sejak saat itu.
 
-You are an **Offering** who was supposed to be eaten, and woke up instead.
+Kamu adalah seorang **tumbal** yang seharusnya sudah dimakan, tetapi justru terbangun.
 
-The game was made for a university **Data Structures** course. Its mechanics are adapted from *Black Souls 1*
-(an RPG Maker VX Ace game): only the **systems** are reproduced. The world, story, characters, maps, text and
-art are original.
+Game ini dibuat untuk **Tugas Besar Struktur Data**. Mekaniknya diadaptasi dari *Black Souls 1* (game RPG Maker
+VX Ace): yang ditiru hanya **sistemnya**. Dunia, cerita, tokoh, peta, teks, dan art semuanya orisinal.
 
-### Built for
+### Dibuat untuk
 
-- 🎓 **Data Structures coursework** — every graded structure is hand-written with nodes and pointers and is used by a running mechanic
-- 🕹️ **A real play session** — about 45–60 minutes from the first cell to the ending
-- 🖥️ **GUI and console** — the game logic has no dependency on the renderer, proven by a full text mode
+- 🎓 **Tugas Struktur Data**: setiap struktur data yang dinilai ditulis manual dengan node dan pointer, dan benar-benar dipakai mekanik yang berjalan
+- 🕹️ **Sesi bermain sungguhan**: sekitar 45–60 menit dari sel pertama sampai tamat
+- 🖥️ **GUI dan console**: logika game tidak bergantung pada renderer, dibuktikan dengan mode teks yang lengkap
 
 ---
 
-## ✨ Features
+## ✨ Fitur
 
 ### ⚔️ Battle (M1)
 
-- **Wait-mode ATB** like Black Souls: AP gauges fill by Agility and freeze completely while you choose
-- **Turn-order strip** predicted by simulating a copy of the turn timeline
-- **Chanting & delays** — strong skills take time to chant; delay skills push enemies back and break their chants
-- **Evade & Parry** for every class, status effects (poison, bleed, burn, sleep, fear, haste, slow, ...), elements
-- **Telegraphed boss attacks** — Buto Ijo's big moves are chanted first: the skill name floats over the enemy and the targeted ally flashes
-- **Multi-part boss** — Buto Ijo's head and two hands; fell the head and the hands collapse
+- **ATB mode wait** seperti Black Souls: gauge AP terisi sesuai Gesit dan berhenti total saat kamu memilih perintah
+- **Strip urutan giliran** yang diprediksi dengan menyimulasikan salinan antrean giliran
+- **Rapal & tunda**: jurus kuat butuh waktu merapal; jurus tunda mendorong giliran musuh mundur dan membuyarkan rapalnya
+- **Elak & Tangkis** untuk semua kelas, efek status (racun, berdarah, terbakar, tidur, takut, cepat, lambat, ...), elemen
+- **Serangan boss yang ditelegrafkan**: jurus besar Buto Ijo dirapal dulu; namanya muncul di atas musuh dan anggota party yang diincar berkedip
+- **Boss multi-bagian**: kepala dan dua tangan Buto Ijo; tumbangkan kepalanya dan kedua tangan ikut runtuh
 
-### 🗺️ World & Souls loop (M2)
+### 🗺️ Dunia & loop Souls (M2)
 
-- **8 interconnected maps**: Offering Cell → Granary Corridor → Karangtumbal Village → Rotten Cucumber Fields → Needle Bamboo Forest → The Salt Sea → Terasi Mire → Buto's Lair
-- **Visible enemies** that chase you; touching them from behind gives you the first strike
-- **Hearths**: rest to heal and refill Jamu Draughts, level up with souls, warp to any lit Hearth you can reach
-- **Lost souls**: die and your souls stay where you fell; recover them once, or lose them forever
-- **Shortcuts & gates**: a boss-locked path, a bamboo shortcut back to the village, a one-way drop into the lair
+- **8 peta yang saling terhubung**: Sel Tumbal → Lorong Lumbung → Desa Karangtumbal → Ladang Timun Busuk → Hutan Bambu Jarum → Laut Garam → Rawa Terasi → Sarang Buto
+- **Musuh terlihat di peta** yang mengejarmu; menyentuh mereka dari belakang memberimu serangan pertama
+- **Tungku**: istirahat untuk pulih dan mengisi ulang Ramuan Jamu, naik level dengan sukma, warp ke Tungku menyala yang terjangkau
+- **Sukma tercecer**: mati, dan sukmamu tertinggal di tempat kamu jatuh; ambil kembali sekali, atau hilang selamanya
+- **Jalan pintas & gerbang**: jalan yang terkunci sampai boss kalah, jalan pintas bambu kembali ke desa, jalan satu arah turun ke sarang
 
-### 📜 Story & events (M3)
+### 📜 Cerita & event (M3)
 
-- **Event interpreter** for dialog, choices, nested conditions, items, battles, map transfers and shops
-- **Reactive NPCs** — Mbok Srini responds to what you have done; a companion, **Timun Mas**, joins your party
-- **Empu Karta's forge** (+0 to +3 weapons with souls and Iron Ore) and a **wandering merchant**
-- **Two languages** — English (default) and Bahasa Indonesia, switchable in Settings
+- **Interpreter event** untuk dialog, pilihan, kondisi bersarang, barang, battle, pindah peta, dan toko
+- **NPC yang bereaksi**: Mbok Srini menanggapi apa yang sudah kamu lakukan; pendamping **Timun Mas** bergabung ke party
+- **Tungku tempa Empu Karta** (senjata +0 sampai +3 dengan sukma dan Bijih Besi) dan **pedagang keliling**
+- **Dua bahasa**: English (bawaan) dan Bahasa Indonesia, bisa diganti di Pengaturan
 
-### 🎨 Presentation
+### 🎨 Tampilan & suara
 
-- Pixel-art maps with per-region palettes, scattered decoration, drifting fog and torch-like lighting
-- Front-view battlers, original gamelan-style village music, per-map music with crossfades, sound effects
-- Title screen, character creation (name, class, starting gift), 3 save slots, ending screen
+- Peta pixel art dengan palet per wilayah, hiasan tersebar, kabut bergerak, dan cahaya obor
+- Battler front-view, musik desa bergaya gamelan buatan sendiri, musik per peta dengan crossfade, efek suara
+- Layar judul, pembuatan karakter (nama, kelas, hadiah awal), 3 slot simpan, layar tamat
 
-### 🛠️ Tooling
+### 🛠️ Perkakas
 
-- **377 unit tests** for the data structures, battle, world, events, saves and translations
-- `--console` text mode, `--shots` automatic screenshots, `--balance` battle simulator
-- Python generators for assets, maps, map previews, music and translations
-- Built-in **cheat menu** (F9) for testing or a quick finish; the ending remembers if you used it
-
----
-
-## 🧱 Data Structures
-
-All graded data structures live in [`src/core/adt/`](src/core/adt/), written by hand with nodes and pointers.
-The game core (`src/core/`) uses **no STL containers** (`std::vector`, `std::list`, `std::map`, ...) and never
-includes raylib.
-
-| Mechanic | Main structure | Type | What it does in the game |
-|----------|----------------|------|--------------------------|
-| **M1** Battle ATB + turn order | `Timeline<Battler>` — sorted **doubly linked list** | Linear | Head = next to act. Chants and delays move a node to its new place; the turn strip comes from a copied list |
-| **M2** World & Hearths | `Graph<MapInfo>` — **adjacency multi linked list** | Non-linear | Maps are vertices, paths are edges that can be locked or one-way. BFS finds reachable Hearths; a full traversal revives enemies |
-| **M3** Event interpreter | `Stack<Frame>` + `Queue<std::string>` | Linear | Branches and called scripts push frames and return in LIFO order; notifications are shown one at a time |
-| Support | `Queue<BattleEvent>` | Linear | Battle logic queues events; the GUI and console play them back in order |
-
-| File | ADT | Operations |
-|------|-----|------------|
-| [`Timeline.hpp`](src/core/adt/Timeline.hpp) | Sorted doubly linked list | `insertSorted`, `remove`, `popFront`, `search`, `updateAV` (relink), `subtractAll`, forward/backward traversal |
-| [`Graph.hpp`](src/core/adt/Graph.hpp) | Weighted directed graph, lockable edges | `addVertex`, `addEdge`, `addArc`, `setOpen`, `isOpen`, `removeEdge`, `bfs`, `dijkstra`, `isConnected` |
-| [`Stack.hpp`](src/core/adt/Stack.hpp) | Linked stack | `push`, `pop`, `peek`, traversal |
-| [`Queue.hpp`](src/core/adt/Queue.hpp) | Linked queue | `enqueue`, `dequeue`, `peek`, traversal |
-
-Every data structure operation used by a mechanic is logged (`dsOp`) and shown live in the **F1 Inspector**
-and as `[DS]` lines in console mode. A full write-up with complexity, subprograms and presentation notes is in
-[`docs/STRUKTUR_DATA.md`](docs/STRUKTUR_DATA.md) (Indonesian).
+- **377 unit test** untuk struktur data, battle, dunia, event, simpan/muat, dan terjemahan
+- Mode teks `--console`, screenshot otomatis `--shots`, simulator battle `--balance`
+- Generator Python untuk aset, peta, pratinjau peta, musik, dan terjemahan
+- **Menu cheat** bawaan (F9) untuk uji coba atau cepat tamat; layar tamat mencatat bila cheat dipakai
 
 ---
 
-## 🏗️ Architecture
+## 🧱 Struktur Data
+
+Semua struktur data yang dinilai ada di [`src/core/adt/`](src/core/adt/), ditulis manual dengan node dan pointer.
+Core game (`src/core/`) **tidak memakai container STL** (`std::vector`, `std::list`, `std::map`, ...) dan tidak
+pernah meng-include raylib.
+
+| Mekanik | Struktur utama | Jenis | Perannya di game |
+|---------|----------------|-------|------------------|
+| **M1** Battle ATB + antrean giliran | `Timeline<Battler>`: **doubly linked list** terurut | Linear | Head = yang bertindak berikutnya. Rapal dan tunda memindahkan node ke posisi barunya; strip giliran berasal dari salinan list |
+| **M2** Dunia & Tungku | `Graph<MapInfo>`: **adjacency multi linked list** | Non-linear | Peta = vertex, jalan = edge yang bisa terkunci atau satu arah. BFS mencari Tungku yang terjangkau; traversal penuh menghidupkan musuh lagi |
+| **M3** Interpreter event | `Stack<Frame>` + `Queue<std::string>` | Linear | Cabang dan skrip yang dipanggil mem-push frame lalu kembali secara LIFO; notifikasi tampil satu per satu |
+| Pendukung | `Queue<BattleEvent>` | Linear | Logika battle mengantrekan kejadian; GUI dan console memutarnya berurutan |
+
+| Berkas | ADT | Operasi |
+|--------|-----|---------|
+| [`Timeline.hpp`](src/core/adt/Timeline.hpp) | Doubly linked list terurut | `insertSorted`, `remove`, `popFront`, `search`, `updateAV` (relink), `subtractAll`, traversal maju/mundur |
+| [`Graph.hpp`](src/core/adt/Graph.hpp) | Graph berarah berbobot, edge bisa dikunci | `addVertex`, `addEdge`, `addArc`, `setOpen`, `isOpen`, `removeEdge`, `bfs`, `dijkstra`, `isConnected` |
+| [`Stack.hpp`](src/core/adt/Stack.hpp) | Stack berbasis linked list | `push`, `pop`, `peek`, traversal |
+| [`Queue.hpp`](src/core/adt/Queue.hpp) | Queue berbasis linked list | `enqueue`, `dequeue`, `peek`, traversal |
+
+Setiap operasi struktur data yang dipakai mekanik dicatat (`dsOp`) dan tampil langsung di **Inspector F1** serta
+sebagai baris `[DS]` di mode console. Penjelasan lengkap (kompleksitas, subprogram, catatan presentasi) ada di
+[`docs/STRUKTUR_DATA.md`](docs/STRUKTUR_DATA.md).
+
+---
+
+## 🏗️ Arsitektur
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
 │                     GUI  (src/gui, raylib)                               │
-│  Title · Map · Battle · Dialog · Menus · Hearth · Shop · Inspector       │
-│  reads core state, forwards input — no game rules here                   │
+│  Judul · Peta · Battle · Dialog · Menu · Tungku · Toko · Inspector       │
+│  membaca state core, meneruskan input — tidak ada aturan game di sini    │
 └──────────────┬───────────────────────────────────────────┬───────────────┘
                │                                           │
                ▼                                           ▼
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                     GAME CORE  (src/core, no raylib, no STL containers)  │
+│                     CORE GAME  (src/core, tanpa raylib & container STL)  │
 │                                                                          │
-│  game/   Game (glue), GameState (party, souls, items, flags, saves)      │
+│  game/   Game (perangkai), GameState (party, sukma, barang, flag, simpan)│
 │  battle/ BattleSystem ── Timeline DLL (M1) · Queue<BattleEvent>          │
-│  world/  World ── Graph of maps (M2) · Field (movement, enemies)         │
-│  event/  Interpreter ── Stack<Frame> · Queue<notice> (M3) · Scripts      │
-│  data/   GameData (skills, items, enemies, classes, weapons, shop)       │
-│  util/   Json parser · Lang (EN/ID dictionary) · Rng · DsTrace           │
+│  world/  World ── Graph peta (M2) · Field (gerak, musuh)                 │
+│  event/  Interpreter ── Stack<Frame> · Queue<notifikasi> (M3) · Skrip    │
+│  data/   GameData (jurus, barang, musuh, kelas, senjata, dagangan)       │
+│  util/   parser Json · Lang (kamus EN/ID) · Rng · DsTrace                │
 └──────────────┬───────────────────────────────────────────┬───────────────┘
                │                                           │
                ▼                                           ▼
-     CONSOLE  (src/console)                       DATA FILES  (assets/)
-     text mode · --balance simulator              Tiled maps · event JSON
+     CONSOLE  (src/console)                       BERKAS DATA  (assets/)
+     mode teks · simulator --balance              peta Tiled · skrip event JSON
                                                   lang/en.json · art · audio
 ```
 
@@ -316,139 +315,139 @@ graph LR
     BattleSystem --> BQ[(Queue)]
     Interpreter --> Stack[(Stack)]
     Interpreter --> NQ[(Queue)]
-    App -->|draw| Views[Map / Battle / Dialog / Menus]
-    Views -->|read only| Game
+    App -->|draw| Views[Peta / Battle / Dialog / Menu]
+    Views -->|hanya membaca| Game
 ```
 
 ---
 
-## 📁 Project Structure
+## 📁 Struktur Proyek
 
 ```
 .
 ├── src/
-│   ├── core/            game logic (no raylib): adt/, battle/, data/, event/, game/, util/, world/
-│   ├── gui/             raylib front end: views, audio, UI helpers, settings
-│   ├── console/         text mode and the --balance simulator
-│   └── main.cpp         entry point and command-line options
-├── tests/               unit tests (ADTs, battle, world, events, translations)
+│   ├── core/            logika game (tanpa raylib): adt/, battle/, data/, event/, game/, util/, world/
+│   ├── gui/             tampilan raylib: layar-layar, audio, helper UI, pengaturan
+│   ├── console/         mode teks dan simulator --balance
+│   └── main.cpp         titik masuk dan opsi baris perintah
+├── tests/               unit test (ADT, battle, dunia, event, terjemahan)
 ├── assets/
-│   ├── maps/            Tiled maps (.tmj) + world.json, generated by tools/make_maps.py
-│   ├── events/          story & NPC scripts (JSON)
-│   ├── lang/            en.json, generated by tools/lang_en.py
-│   ├── src/ raw/        source art & Codex originals used by tools/build_assets.py
+│   ├── maps/            peta Tiled (.tmj) + world.json, dibuat tools/make_maps.py
+│   ├── events/          skrip cerita & NPC (JSON)
+│   ├── lang/            en.json, dibuat tools/lang_en.py
+│   ├── src/ raw/        art sumber & gambar asli Codex untuk tools/build_assets.py
 │   └── tiles/ props/ chars/ battlers/ battlebacks/ faces/ audio/ fonts/
-├── tools/               Python generators and checkers
-├── docs/                design, demo guide, data structures, screenshots, map previews
-├── CREDITS.md           every third-party and AI-made asset, with licenses
+├── tools/               generator dan pemeriksa berbasis Python
+├── docs/                rencana, panduan demo, struktur data, screenshot, pratinjau peta
+├── CREDITS.md           setiap aset pihak ketiga dan buatan AI, beserta lisensinya
 └── Makefile
 ```
 
 ---
 
-## ⌨️ Command-line Options
+## ⌨️ Opsi Baris Perintah
 
-| Option | Description |
-|--------|-------------|
-| *(none)* | Start the game |
-| `--console` | Play in the terminal with the same core logic (commands: `w/a/s/d`, `x`, `graph`, `tungku`, `simpan`, `muat`, `cheat`, ...) |
-| `--shots` | Take automatic screenshots of every map, dialog, battle, menus and the boss (`shot_*.png`) |
-| `--balance` | Simulate thousands of battles per class × enemy group × level and print the difficulty curve |
-| `--smoke` | Open the window briefly and exit (build check) |
+| Opsi | Keterangan |
+|------|------------|
+| *(tanpa opsi)* | Jalankan game |
+| `--console` | Main di terminal dengan logika core yang sama (perintah: `w/a/s/d`, `x`, `graph`, `tungku`, `simpan`, `muat`, `cheat`, ...) |
+| `--shots` | Ambil screenshot otomatis semua peta, dialog, battle, menu, dan boss (`shot_*.png`) |
+| `--balance` | Simulasikan ribuan battle per kelas × kelompok musuh × level lalu cetak kurva kesulitannya |
+| `--smoke` | Buka jendela sebentar lalu keluar (cek build) |
 
 ---
 
-## 🧰 Asset & Map Tools
+## 🧰 Alat Aset & Peta
 
-All tools run with the MSYS2 Python (`/c/msys64/ucrt64/bin/python.exe`) from the repository root.
+Semua alat dijalankan dengan Python MSYS2 (`/c/msys64/ucrt64/bin/python.exe`) dari root repositori.
 
-| Script | What it does |
-|--------|--------------|
-| `tools/build_assets.py` | Builds characters, tiles, props, battlers, portraits and Codex art from `assets/src` and `assets/raw` |
-| `tools/make_maps.py` | Generates every map from ASCII layouts into Tiled `.tmj` files + `world.json` |
-| `tools/render_maps.py` | Renders full previews of every map into `docs/map_preview/` |
-| `tools/make_gamelan.py` | Synthesizes the original gamelan village theme (`assets/audio/music/desa.ogg`) |
-| `tools/lang_en.py` | Writes the English dictionary `assets/lang/en.json` |
-| `tools/lang_keys.py` | Collects every player-facing string and reports anything still untranslated |
+| Skrip | Fungsi |
+|-------|--------|
+| `tools/build_assets.py` | Membangun karakter, tile, props, battler, potret, dan art Codex dari `assets/src` dan `assets/raw` |
+| `tools/make_maps.py` | Membuat semua peta dari tata letak ASCII menjadi berkas Tiled `.tmj` + `world.json` |
+| `tools/render_maps.py` | Menggambar pratinjau penuh setiap peta ke `docs/map_preview/` |
+| `tools/make_gamelan.py` | Menyintesis musik desa bergaya gamelan (`assets/audio/music/desa.ogg`) |
+| `tools/lang_en.py` | Menulis kamus Inggris `assets/lang/en.json` |
+| `tools/lang_keys.py` | Mengumpulkan semua teks yang tampil ke pemain dan melaporkan yang belum diterjemahkan |
 
 ---
 
 ## ❓ FAQ
 
 <details>
-<summary><b>Is this a copy of Black Souls?</b></summary>
+<summary><b>Apakah ini tiruan Black Souls?</b></summary>
 
-No. Only the game **systems** are adapted (wait-mode ATB, souls as currency and EXP, bonfire-style checkpoints,
-dropped souls, save-anywhere). The world, story, characters, maps, dialog and art are original or come from the
-openly licensed packs listed in `CREDITS.md`.
-
-</details>
-
-<details>
-<summary><b>Why no <code>std::vector</code> or <code>std::map</code>?</b></summary>
-
-The course requires the graded data structures to be implemented by hand. The rule is applied to the whole
-game core (`src/core/`), so every list, queue, stack and graph there is built from nodes and pointers or raw
-arrays. The GUI may use the standard library.
+Bukan. Yang diadaptasi hanya **sistem** game-nya (ATB mode wait, sukma sebagai mata uang dan EXP, checkpoint ala
+api unggun, sukma tercecer, simpan di mana saja). Dunia, cerita, tokoh, peta, dialog, dan art adalah karya orisinal
+atau berasal dari paket berlisensi terbuka yang tercantum di `CREDITS.md`.
 
 </details>
 
 <details>
-<summary><b>The game is too hard. Can I skip the grind?</b></summary>
+<summary><b>Kenapa tidak memakai <code>std::vector</code> atau <code>std::map</code>?</b></summary>
 
-Yes. Press **F9** (or open the menu → **Cheats**) for free souls and levels, stat boosts, a +3 weapon,
-invincibility, one-hit kills or opening every path. The ending screen notes that cheats were used.
+Ketentuan tugas mewajibkan struktur data yang dinilai dibuat manual. Aturan ini diterapkan ke seluruh core game
+(`src/core/`), jadi setiap list, queue, stack, dan graph di sana dibangun dari node dan pointer atau array mentah.
+GUI boleh memakai standard library.
 
 </details>
 
 <details>
-<summary><b>Does it run on Linux or macOS?</b></summary>
+<summary><b>Game-nya terlalu susah. Bisa lewati grinding?</b></summary>
 
-The code is portable C++17 and raylib, but the Makefile and instructions target Windows with MSYS2 UCRT64. Other
-platforms have not been tested.
+Bisa. Tekan **F9** (atau buka menu → **Cheat**) untuk sukma dan level gratis, tambahan stat, senjata +3, kebal,
+sekali pukul tumbang, atau membuka semua jalan. Layar tamat mencatat bila cheat dipakai.
+
+</details>
+
+<details>
+<summary><b>Apakah bisa jalan di Linux atau macOS?</b></summary>
+
+Kodenya C++17 dan raylib yang portabel, tetapi Makefile dan petunjuknya ditujukan untuk Windows dengan MSYS2 UCRT64.
+Platform lain belum diuji.
 
 </details>
 
 ---
 
-## 📚 Documentation
+## 📚 Dokumentasi
 
-| Document | Description |
-|----------|-------------|
-| [Demo guide](docs/DEMO.md) | Full route, where each data structure shows up, quick checks (ID) |
-| [Data structures](docs/STRUKTUR_DATA.md) | ADTs, complexity, subprograms, presentation Q&A (ID) |
-| [Plan & phases](docs/PLAN_V2.md) | Design decisions and the phase-by-phase status (ID) |
-| [Black Souls 1 analysis](docs/research/black-souls-1-analysis.md) | Study of the reference game's systems (ID) |
-| [Credits](CREDITS.md) | Every asset, its author and license |
-| [CLAUDE.md](CLAUDE.md) | Project rules and conventions for contributors and AI agents (ID) |
-
----
-
-## 👥 Team
-
-| Name | Student ID | Role |
-|------|------------|------|
-| _(to be filled)_ | _(to be filled)_ | Game programmer |
-| _(to be filled)_ | _(to be filled)_ | Planning |
-| _(to be filled)_ | _(to be filled)_ | Report |
-
-Made for the **Data Structures** course, odd semester 2026/2027.
-
-### Use of AI
-
-Code and documentation were developed with the help of AI (Claude Code). A few art assets with no free
-equivalent were generated with Codex; they are listed under "AI-made assets" in [`CREDITS.md`](CREDITS.md).
-Details of AI use are reported in the course report, as the assignment requires.
+| Dokumen | Isi |
+|---------|-----|
+| [Panduan demo](docs/DEMO.md) | Rute lengkap, tempat tiap struktur data terlihat, cek cepat |
+| [Struktur data](docs/STRUKTUR_DATA.md) | ADT, kompleksitas, subprogram, tanya-jawab Pendampingan |
+| [Rencana & fase](docs/PLAN_V2.md) | Keputusan desain dan status tiap fase pengerjaan |
+| [Analisis Black Souls 1](docs/research/black-souls-1-analysis.md) | Bedah sistem game acuan |
+| [Kredit](CREDITS.md) | Setiap aset, pembuat, dan lisensinya |
+| [CLAUDE.md](CLAUDE.md) | Aturan dan konvensi proyek untuk kontributor dan AI agent |
 
 ---
 
-## 📄 Credits & License
+## 👥 Tim
 
-Third-party assets (CC-BY 4.0 / CC0 / SIL OFL) are listed with their authors and sources in
-[`CREDITS.md`](CREDITS.md). Notable sources: Sevarihk / Aurora (tiles and characters), Redshrike (battlers),
-Nidhoggn (battle backgrounds), Kenney and OpenGameArt artists (audio), and the Jersey 10 font.
+| Nama | NIM | Peran |
+|------|-----|-------|
+| _(isi)_ | _(isi)_ | Programmer game |
+| _(isi)_ | _(isi)_ | Perencanaan |
+| _(isi)_ | _(isi)_ | Laporan |
 
-No license file has been added for the game's own code yet. Third-party assets keep their original licenses.
+Dibuat untuk mata kuliah **Struktur Data**, semester ganjil 2026/2027.
+
+### Penggunaan AI
+
+Kode dan dokumentasi dikembangkan dengan bantuan AI (Claude Code). Beberapa aset gambar yang tidak ada padanan
+gratisnya dibuat dengan Codex; semuanya tercantum di bagian "Aset buatan AI" di [`CREDITS.md`](CREDITS.md).
+Rincian penggunaan AI dilaporkan di laporan tugas sesuai ketentuan.
+
+---
+
+## 📄 Kredit & Lisensi
+
+Aset pihak ketiga (CC-BY 4.0 / CC0 / SIL OFL) tercantum lengkap dengan pembuat dan sumbernya di
+[`CREDITS.md`](CREDITS.md). Sumber utama: Sevarihk / Aurora (tile dan karakter), Redshrike (battler), Nidhoggn
+(latar battle), Kenney dan para seniman OpenGameArt (audio), serta font Jersey 10.
+
+Belum ada berkas lisensi untuk kode game ini. Aset pihak ketiga tetap memakai lisensi aslinya.
 
 ---
 
@@ -456,6 +455,6 @@ No license file has been added for the game's own code yet. Third-party assets k
 
 ### “Tok... tok... tok...”
 
-<sub>The rice mortar never stops. If it falls silent, he knows someone has run.</sub>
+<sub>Lesung tidak boleh berhenti. Kalau sepi, ia tahu ada yang lari.</sub>
 
 </div>
