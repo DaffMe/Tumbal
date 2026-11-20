@@ -5,6 +5,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/DaffMe/Tumbal/releases/latest"><b>Download</b></a> •
   <a href="#-instalasi">Instalasi</a> •
   <a href="#-fitur-utama">Fitur</a> •
   <a href="#-pratinjau">Pratinjau</a> •
@@ -81,6 +82,20 @@ grafisnya kami buat sendiri atau memakai aset gratis yang lisensinya mengizinkan
 
 ## 🚀 Instalasi
 
+### Cara paling mudah: download versi siap main
+
+1. Buka halaman **[Releases](https://github.com/DaffMe/Tumbal/releases/latest)** lalu download
+   `TUMBAL-v1.0.0-windows.zip`.
+2. Ekstrak seluruh isi zip ke satu folder.
+3. Klik dua kali **`TUMBAL.exe`**. Tidak perlu install apa-apa lagi.
+
+Kalau muncul peringatan **Windows SmartScreen**, klik **More info** lalu **Run anyway**. Peringatan ini muncul
+karena exe-nya belum ditandatangani secara digital, bukan karena ada virus.
+
+Di dalam zip juga ada `TUMBAL-console.exe` untuk main versi teks di terminal.
+
+### Build dari source code
+
 > [!TIP]
 > Bahasa bawaan game adalah **English**. Untuk ganti ke **Bahasa Indonesia**, buka **Settings** di layar judul
 > atau di menu dalam game (tombol X). Pilihan bahasa akan tersimpan otomatis.
@@ -113,6 +128,7 @@ Perintah lain yang berguna:
 ```bash
 mingw32-make test          # jalankan semua unit test
 bin/tumbal.exe --console   # main versi console (teks), tanpa GUI
+mingw32-make dist          # buat zip rilis di folder release/
 ```
 
 ---
