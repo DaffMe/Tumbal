@@ -85,7 +85,7 @@ grafisnya kami buat sendiri atau memakai aset gratis yang lisensinya mengizinkan
 ### Cara paling mudah: download versi siap main
 
 1. Buka halaman **[Releases](https://github.com/DaffMe/Tumbal/releases/latest)** lalu download
-   `TUMBAL-v1.0.0-windows.zip`.
+   `TUMBAL-v1.0.1-windows.zip`.
 2. Ekstrak seluruh isi zip ke satu folder.
 3. Klik dua kali **`TUMBAL.exe`**. Tidak perlu install apa-apa lagi.
 
