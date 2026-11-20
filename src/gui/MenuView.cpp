@@ -1,14 +1,16 @@
 #include "MenuView.hpp"
 
 #include <cstdio>
+#include "Settings.hpp"
 #include "TitleView.hpp"
 #include "Ui.hpp"
+#include "core/util/Lang.hpp"
 #include "raylib.h"
 
 static bool confirm() { return IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE); }
 static bool cancel() { return IsKeyPressed(KEY_X) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE); }
-static const char* ROOT[] = {"Barang", "Status", "Simpan", "Cheat", "Keluar", "Tutup"};
-static constexpr int ROOT_N = 6;
+static const char* ROOT[] = {"Barang", "Status", "Simpan", "Cheat", "Pengaturan", "Keluar", "Tutup"};
+static constexpr int ROOT_N = 7;
 static const char* EXIT_OPT[] = {"Kembali ke layar judul", "Keluar dari game", "Batal"};
 static const char* STAT_NAMES[] = {"HP", "MP", "Serang", "Tahan", "Ilmu", "Tolak", "Gesit", "Untung"};
 
@@ -34,9 +36,16 @@ std::string MenuView::update(Game& game) {
                 page_ = Save;
                 for (int i = 0; i < 3; ++i) slotInfo_[i] = Game::describeSave(TitleView::slotPath(i + 1));
             } else if (index_ == 3) { page_ = Cheat; }
-            else if (index_ == 4) { page_ = Exit; exitIndex_ = 0; }
+            else if (index_ == 4) { page_ = Options; }
+            else if (index_ == 5) { page_ = Exit; exitIndex_ = 0; }
             else open_ = false;
         }
+        return "";
+    }
+    if (page_ == Options) {
+        bool l = IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A), r = IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D);
+        if (l || r || confirm()) settings::toggleLanguage();
+        if (cancel()) page_ = Root;
         return "";
     }
     if (page_ == Exit) {
@@ -75,7 +84,7 @@ std::string MenuView::update(Game& game) {
             std::string err;
             bool ok = game.saveTo(TitleView::slotPath(slotIndex_ + 1), &err);
             for (int i = 0; i < 3; ++i) slotInfo_[i] = Game::describeSave(TitleView::slotPath(i + 1));
-            return ok ? "Tersimpan di slot " + std::to_string(slotIndex_ + 1) + "." : "Gagal menyimpan: " + err;
+            return ok ? trf("Tersimpan di slot %d.", slotIndex_ + 1) : trf("Gagal menyimpan: %s", err.c_str());
         }
         return "";
     }
@@ -102,7 +111,7 @@ std::string MenuView::update(Game& game) {
 void MenuView::draw(const Game& game, double time) {
     if (!open_) return;
     DrawRectangle(0, 0, 640, 360, Fade(BLACK, 0.45f));
-    Rectangle rw{16, 16, 130, 148};
+    Rectangle rw{16, 16, 130, 170};
     ui::window(rw, 0.95f);
     for (int i = 0; i < ROOT_N; ++i) {
         float y = rw.y + 8 + i * 22;
@@ -113,7 +122,7 @@ void MenuView::draw(const Game& game, double time) {
     // ringkasan selalu tampil: sukma & HP
     const GameState& gs = game.state();
     const Battler& h = gs.hero();
-    Rectangle sw{16, 170, 130, 72};
+    Rectangle sw{16, 192, 130, 72};
     ui::window(sw, 0.95f);
     ui::text("Sukma", sw.x + 10, sw.y + 6, ui::DIM);
     ui::textRight(std::to_string(gs.sukma()), sw.x + sw.width - 10, sw.y + 6, ui::AMBER);
@@ -149,10 +158,17 @@ void MenuView::draw(const Game& game, double time) {
         for (int i = 0; i < 3; ++i) {
             float y = w.y + 26 + i * 26;
             bool sel = i == slotIndex_;
-            std::string label = "Slot " + std::to_string(i + 1) + "   " + (slotInfo_[i].empty() ? "(kosong)" : slotInfo_[i]);
+            std::string label = trf("Slot %d", i + 1) + "   " + (slotInfo_[i].empty() ? tr("(kosong)") : slotInfo_[i]);
             ui::text(label, w.x + 30, y, sel ? ui::AMBER : ui::BONE);
             if (sel) ui::cursor(w.x + 14, y + 8, time);
         }
+    }
+    if (page_ == Options) {
+        Rectangle w{156, 16, 468, 80};
+        ui::window(w, 0.95f);
+        ui::text("Bahasa", w.x + 20, w.y + 14, ui::DIM);
+        ui::textRight(std::string("<  ") + lang::languageName(lang::language()) + "  >", w.x + w.width - 20, w.y + 14, ui::AMBER);
+        ui::text("kiri/kanan ganti    X kembali", w.x + 20, w.y + 48, ui::DIM, 10);
     }
     if (page_ == Exit) {
         Rectangle w{156, 16, 468, 118};
@@ -172,8 +188,8 @@ void MenuView::draw(const Game& game, double time) {
         for (int i = 0; i < Game::CH_COUNT; ++i) {
             float y = w.y + 26 + i * 22;
             bool sel = i == cheatIndex_;
-            std::string label = Game::cheatName(i);
-            if (i == Game::CH_STAT) label += std::string(":  < ") + STAT_NAMES[statIndex_] + " >";
+            std::string label = tr(Game::cheatName(i));
+            if (i == Game::CH_STAT) label += ":  < " + tr(STAT_NAMES[statIndex_]) + " >";
             ui::text(label, w.x + 30, y, sel ? ui::AMBER : ui::BONE);
             if (i == Game::CH_GOD || i == Game::CH_ONEHIT) {
                 bool on = i == Game::CH_GOD ? gs.cheatGod() : gs.cheatOneHit();
@@ -188,7 +204,7 @@ void MenuView::draw(const Game& game, double time) {
         Rectangle stw{156, 16, 468, 248};
         ui::window(stw, 0.95f);
         ui::text(h.name, stw.x + 16, stw.y + 10, ui::AMBER, 30);
-        ui::text(std::string(classDef(gs.classId()).name) + "  -  Level " + std::to_string(gs.level()), stw.x + 16, stw.y + 44, ui::BONE);
+        ui::text(tr(classDef(gs.classId()).name) + trf("  -  Level %d", gs.level()), stw.x + 16, stw.y + 44, ui::BONE);
         const char* names[] = {"HP", "MP", "Serang", "Tahan", "Ilmu", "Tolak", "Gesit", "Untung"};
         int vals[] = {h.stats.mhp, h.stats.mmp, h.stats.atk, h.stats.def, h.stats.mag, h.stats.res, h.stats.agi, h.stats.luk};
         for (int i = 0; i < 8; ++i) {
@@ -196,10 +212,10 @@ void MenuView::draw(const Game& game, double time) {
             ui::text(names[i], x, y, ui::DIM);
             ui::textRight(std::to_string(vals[i]), x + 180, y, ui::BONE);
         }
-        ui::text(std::string("Senjata: ") + weaponDef(gs.classId()).name + " +" + std::to_string(gs.weaponLevel()) +
-                     "    Wadah jamu: " + std::to_string(gs.jamuMax()), stw.x + 16, stw.y + 174, ui::BONE);
-        ui::text("Mati: " + std::to_string(gs.deaths()) + " kali", stw.x + 16, stw.y + 196, ui::DIM);
+        ui::text(trf("Senjata: %s +%d    Wadah jamu: %d", tr(weaponDef(gs.classId()).name).c_str(), gs.weaponLevel(),
+                     gs.jamuMax()), stw.x + 16, stw.y + 174, ui::BONE);
+        ui::text(trf("Mati: %d kali", gs.deaths()), stw.x + 16, stw.y + 196, ui::DIM);
         if (gs.bloodstain().active)
-            ui::text("Sukma tercecer: " + std::to_string(gs.bloodstain().sukma), stw.x + 16, stw.y + 218, ui::BLOOD);
+            ui::text(trf("Sukma tercecer: %d", gs.bloodstain().sukma), stw.x + 16, stw.y + 218, ui::BLOOD);
     }
 }

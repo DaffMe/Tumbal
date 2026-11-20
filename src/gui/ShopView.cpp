@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdio>
 #include "Ui.hpp"
+#include "core/util/Lang.hpp"
 #include "core/data/GameData.hpp"
 #include "raylib.h"
 
@@ -49,10 +50,10 @@ void ShopView::draw(Game& game, double time) {
             Color c = stock == 0 ? Fade(ui::DIM, 0.5f) : (sel ? ui::AMBER : (ok ? ui::BONE : ui::DIM));
             ui::text(d ? d->name : "?", lw.x + 26, y, c);
             if (stock >= 0) {
-                std::snprintf(buf, sizeof buf, stock == 0 ? "habis" : "sisa %d", stock);
+                std::snprintf(buf, sizeof buf, "%s", stock == 0 ? tr("habis").c_str() : trf("sisa %d", stock).c_str());
                 ui::text(buf, lw.x + 210, y + 4, ui::DIM, 10);
             }
-            std::snprintf(buf, sizeof buf, "%d sukma", e.price);
+            std::snprintf(buf, sizeof buf, tr("%d sukma").c_str(), e.price);
             ui::textRight(buf, lw.x + lw.width - 12, y, gs.sukma() >= e.price ? ui::AMBER : ui::BLOOD);
             if (sel) ui::cursor(lw.x + 12, y + 8, time);
         }
@@ -71,12 +72,12 @@ void ShopView::draw(Game& game, double time) {
     int lv = gs.weaponLevel();
     Rectangle tw{24, 70, 400, 196};
     ui::window(tw, 0.95f);
-    std::snprintf(buf, sizeof buf, "%s +%d", w.name, lv);
+    std::snprintf(buf, sizeof buf, "%s +%d", tr(w.name).c_str(), lv);
     ui::text(buf, tw.x + 16, tw.y + 10, ui::BONE, 20);
     if (lv >= WEAPON_MAX) {
         ui::text("Senjata ini sudah ditempa sampai batasnya.", tw.x + 16, tw.y + 50, ui::DIM);
     } else {
-        std::snprintf(buf, sizeof buf, "Tempa ke +%d", lv + 1);
+        std::snprintf(buf, sizeof buf, tr("Tempa ke +%d").c_str(), lv + 1);
         ui::text(buf, tw.x + 16, tw.y + 44, ui::DIM);
         const char* names[] = {"Serang", "Ilmu"};
         int now[] = {gs.hero().stats.atk, gs.hero().stats.mag};
@@ -90,10 +91,10 @@ void ShopView::draw(Game& game, double time) {
             ui::text(buf, tw.x + 160, y, Color{150, 220, 150, 255});
             y += 22;
         }
-        std::snprintf(buf, sizeof buf, "%d sukma", w.costSukma[lv]);
+        std::snprintf(buf, sizeof buf, tr("%d sukma").c_str(), w.costSukma[lv]);
         ui::text("Biaya", tw.x + 16, tw.y + 124, ui::DIM);
         ui::textRight(buf, tw.x + 250, tw.y + 124, gs.sukma() >= w.costSukma[lv] ? ui::AMBER : ui::BLOOD);
-        std::snprintf(buf, sizeof buf, "%d Bijih Besi", w.costOre[lv]);
+        std::snprintf(buf, sizeof buf, tr("%d Bijih Besi").c_str(), w.costOre[lv]);
         ui::textRight(buf, tw.x + 384, tw.y + 124, gs.count(IT_BIJIH_BESI) >= w.costOre[lv] ? ui::AMBER : ui::BLOOD);
         float blink = 0.5f + 0.5f * static_cast<float>(std::sin(time * 5));
         ui::textCentered(gs.canForge() == GameState::FORGE_OK ? "[Z] tempa    [X] pergi" : "Bahan belum cukup.    [X] pergi",

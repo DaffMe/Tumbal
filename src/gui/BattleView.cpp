@@ -5,6 +5,7 @@
 #include "Assets.hpp"
 #include "Audio.hpp"
 #include "Ui.hpp"
+#include "core/util/Lang.hpp"
 
 static constexpr float VIEW_W = 640, VIEW_H = 360;
 static constexpr float BOTTOM_Y = 262;
@@ -473,7 +474,7 @@ void BattleView::drawStatus(double time) {
             DrawRectangle(static_cast<int>(r.x + 4), static_cast<int>(y - 2), static_cast<int>(r.width - 8), 20,
                           Fade(ui::BLOOD, on ? 0.22f : 0.1f));
             const SkillDef* ts = skillDef(th);
-            ui::textRight(std::string("! ") + (ts ? ts->name : ""), r.x + r.width - 10, y + 2, on ? Color{255, 120, 100, 255} : ui::BLOOD, 10);
+            ui::textRight("! " + tr(ts ? ts->name : ""), r.x + r.width - 10, y + 2, on ? Color{255, 120, 100, 255} : ui::BLOOD, 10);
         }
         // HP
         ui::text("HP", r.x + 120, y + 4, ui::DIM, 10);
@@ -598,7 +599,7 @@ void BattleView::drawResult(double time) {
         Rectangle r{190, 110, 260, 70};
         ui::window(r, 0.92f * a);
         ui::textCentered("MENANG", 320, r.y + 10, Fade(ui::AMBER, a), 32);
-        ui::textCentered("Sukma +" + std::to_string(bs_->sukmaReward()), 320, r.y + 46, Fade(ui::BONE, a));
+        ui::textCentered(trf("Sukma +%d", bs_->sukmaReward()), 320, r.y + 46, Fade(ui::BONE, a));
     }
     if (resultTime_ > 0.6f && static_cast<int>(time * 2) % 2 == 0) ui::textCentered("[Z]", 320, 210, ui::DIM);
 }

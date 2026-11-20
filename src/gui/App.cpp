@@ -5,13 +5,16 @@
 #include <cstdio>
 #include "Assets.hpp"
 #include "Audio.hpp"
+#include "Settings.hpp"
 #include "Ui.hpp"
+#include "core/util/Lang.hpp"
 #include "core/util/DsTrace.hpp"
 
 bool App::boot(std::string& error) {
     std::string worldPath = Assets::get().path("assets/maps/world.json");
     std::string events[] = {Assets::get().path("assets/events/lumbung.json"), Assets::get().path("assets/events/desa.json"),
                             Assets::get().path("assets/events/ladang.json"), Assets::get().path("assets/events/akhir.json")};
+    settings::load();   // bahasa (bawaan English) + kamus terjemahan, sebelum teks apa pun tampil
     if (!game_.load(worldPath, events, 4, &error)) return false;
     mapView_.setState(&game_.state());
     title_.open();
@@ -54,7 +57,7 @@ void App::update(float dt) {
                 fade_ = 1.0f;
                 fadeDir_ = -1;
                 mode_ = ModeField;
-                toast_ = "Dimuat dari slot " + std::to_string(title_.slot()) + ".";
+                toast_ = trf("Dimuat dari slot %d.", title_.slot());
                 toastTime_ = 2.0f;
             }
         }
@@ -265,7 +268,7 @@ void App::drawInspector() {
         y += 12;
         int k = 0;
         battle_.timeline().forEach([&](const Timeline<Battler>::Node& n) {
-            std::snprintf(buf, sizeof buf, "%s%s  sisa %d tick%s", k == 0 ? "HEAD " : "  <-> ", n.item->name.c_str(),
+            std::snprintf(buf, sizeof buf, tr("%s%s  sisa %d tick%s").c_str(), k == 0 ? "HEAD " : "  <-> ", n.item->name.c_str(),
                           static_cast<int>(n.av), n.item->chanting ? "  [rapal]" : "");
             ui::text(buf, x + 8, y, k == 0 ? YELLOW : RAYWHITE, 10);
             y += 11;
@@ -273,18 +276,18 @@ void App::drawInspector() {
         });
     } else {
         Interpreter& it = game_.interpreter();
-        std::snprintf(buf, sizeof buf, "Interpreter event: Stack kedalaman %d %s", it.depth(), it.busy() ? "(berjalan)" : "(diam)");
+        std::snprintf(buf, sizeof buf, tr("Interpreter event: Stack kedalaman %d %s").c_str(), it.depth(), tr(it.busy() ? "(berjalan)" : "(diam)").c_str());
         ui::text(buf, x + 8, y, it.busy() ? YELLOW : LIGHTGRAY, 10);
         y += 14;
         ui::text("Graph dunia (vertex = peta, edge = jalan):", x + 8, y, LIGHTGRAY, 10);
         y += 12;
         game_.world().graph().forEachVertex([&](World::MapGraph::Vertex* v) {
             std::snprintf(buf, sizeof buf, "%s[%d] %s%s%s", v->id == game_.field().mapId() ? "> " : "  ", v->id,
-                          v->data.name.c_str(), v->data.visited ? "" : " (?)", v->data.hasTungku ? "  *Tungku" : "");
+                          tr(v->data.name).c_str(), v->data.visited ? "" : " (?)", v->data.hasTungku ? "  *Tungku" : "");
             ui::text(buf, x + 8, y, v->id == game_.field().mapId() ? YELLOW : RAYWHITE, 10);
             y += 11;
             for (auto* e = v->edges; e != nullptr; e = e->next) {
-                std::snprintf(buf, sizeof buf, "      -> [%d] %s", e->to->id, e->open ? "terbuka" : "TERKUNCI");
+                std::snprintf(buf, sizeof buf, "      -> [%d] %s", e->to->id, tr(e->open ? "terbuka" : "TERKUNCI").c_str());
                 ui::text(buf, x + 8, y, e->open ? Color{150, 220, 150, 255} : Color{230, 120, 120, 255}, 10);
                 y += 11;
             }
@@ -312,9 +315,9 @@ void App::drawEnding() {
     line("TUMBAL", 140, 3.5f, Color{196, 52, 44, 255}, 40);
     line("akhir dari versi demo", 186, 4.0f, ui::DIM);
     const GameState& gs = game_.state();
-    line("Level " + std::to_string(gs.level()) + "   -   Mati " + std::to_string(gs.deaths()) + " kali   -   Bekal " +
-             std::to_string(gs.count(IT_BIJI_TIMUN) + gs.count(IT_JARUM) + gs.count(IT_GARAM) + gs.count(IT_TERASI)) + "/4" +
-             (gs.cheated() ? "   -   memakai cheat" : ""),
+    line(trf("Level %d   -   Mati %d kali   -   Bekal %d/4", gs.level(), gs.deaths(),
+             gs.count(IT_BIJI_TIMUN) + gs.count(IT_JARUM) + gs.count(IT_GARAM) + gs.count(IT_TERASI)) +
+             (gs.cheated() ? tr("   -   memakai cheat") : std::string()),
          222, 5.0f, ui::AMBER);
     line("Aset: Sevarihk, Redshrike, Nidhoggn, Kenney & lainnya (lihat CREDITS.md)", 280, 6.0f, ui::DIM, 10);
     line("Terima kasih sudah bermain.   [Z] kembali ke judul", 320, 6.5f, ui::BONE);

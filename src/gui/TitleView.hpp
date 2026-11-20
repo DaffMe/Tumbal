@@ -24,7 +24,7 @@ public:
     static std::string slotPath(int slot);   // assets root /saves/slotN.json
 
 private:
-    enum Page { Root, Name, Class, Gift, Slots };
+    enum Page { Root, Name, Class, Gift, Slots, Options };
     Page  page_ = Root;
     int   index_ = 0;
     std::string name_ = "Tumbal";

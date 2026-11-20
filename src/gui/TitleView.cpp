@@ -2,7 +2,9 @@
 
 #include <cmath>
 #include "Assets.hpp"
+#include "Settings.hpp"
 #include "Ui.hpp"
+#include "core/util/Lang.hpp"
 #include "core/data/GameData.hpp"
 #include "core/game/Game.hpp"
 #include "raylib.h"
@@ -14,7 +16,7 @@ static bool down() { return IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S); }
 static bool left() { return IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A); }
 static bool right() { return IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D); }
 
-static const char* ROOT[] = {"Mulai Baru", "Lanjutkan", "Keluar"};
+static const char* ROOT[] = {"Mulai Baru", "Lanjutkan", "Pengaturan", "Keluar"};
 static const char* GIFTS[] = {"Dua Ramuan Jamu", "Sukma Penjaga", "Tiga Bom Minyak Jarak", "Tiga Abu Tungku"};
 static const char* GIFT_DESC[] = {
     "Dua ramuan tambahan. Ramuan bawaan tetap terisi ulang di Tungku.",
@@ -47,13 +49,19 @@ TitleView::Result TitleView::update(float dt) {
     if (fadeIn_ > 0) fadeIn_ -= dt * 0.8f;
     switch (page_) {
         case Root:
-            if (up()) index_ = (index_ + 2) % 3;
-            if (down()) index_ = (index_ + 1) % 3;
+            if (up()) index_ = (index_ + 3) % 4;
+            if (down()) index_ = (index_ + 1) % 4;
             if (confirm()) {
                 if (index_ == 0) { page_ = Name; }
                 else if (index_ == 1) { refreshSlots(); page_ = Slots; slotIndex_ = 0; }
+                else if (index_ == 2) { page_ = Options; }
                 else return Quit;
             }
+            break;
+        case Options:
+            // satu-satunya pengaturan: bahasa; kiri/kanan/Z mengganti, langsung tersimpan
+            if (left() || right() || confirm()) { settings::toggleLanguage(); refreshSlots(); }
+            if (cancel()) page_ = Root;
             break;
         case Name: {
             int c = GetCharPressed();
@@ -105,7 +113,7 @@ void TitleView::draw(double time) {
         DrawCircleV({x, y}, 1.2f + (i % 3) * 0.5f, Fade(Color{255, 140, 60, 255}, (1 - t) * 0.8f));
     }
 
-    if (page_ == Root || page_ == Slots) {
+    if (page_ == Root || page_ == Slots || page_ == Options) {
         // judul besar: font 40 px digambar dua kali lipat (kelipatan bulat, tetap tajam)
         const char* title = "TUMBAL";
         float tw = MeasureTextEx(ui::font(), title, 20, 0).x * 4.0f;
@@ -116,9 +124,18 @@ void TitleView::draw(double time) {
         ui::textCentered("sebuah dongeng tumbal dari tanah Jawa", 320, 140, ui::DIM);
     }
 
+    if (page_ == Options) {
+        Rectangle w{150, 180, 340, 90};
+        ui::window(w, 0.94f);
+        ui::textCentered("Pengaturan", 320, w.y + 8, ui::AMBER);
+        ui::text("Bahasa", w.x + 20, w.y + 40, ui::DIM);
+        std::string cur = std::string("<  ") + lang::languageName(lang::language()) + "  >";
+        ui::textRight(cur, w.x + w.width - 20, w.y + 40, ui::BONE);
+        ui::textCentered("kiri/kanan ganti    X kembali", 320, w.y + w.height + 8, ui::DIM);
+    }
     if (page_ == Root) {
-        for (int i = 0; i < 3; ++i) {
-            float y = 196 + i * 28;
+        for (int i = 0; i < 4; ++i) {
+            float y = 190 + i * 26;
             bool sel = i == index_;
             ui::textCentered(ROOT[i], 320, y, sel ? ui::AMBER : ui::BONE);
             if (sel) ui::cursor(320 - ui::measure(ROOT[i]) / 2 - 18, y + 8, time);
@@ -131,7 +148,7 @@ void TitleView::draw(double time) {
         for (int i = 0; i < 3; ++i) {
             float y = w.y + 10 + i * 30;
             bool sel = i == slotIndex_;
-            std::string label = "Slot " + std::to_string(i + 1) + "   " + (slotInfo_[i].empty() ? "(kosong)" : slotInfo_[i]);
+            std::string label = trf("Slot %d", i + 1) + "   " + (slotInfo_[i].empty() ? tr("(kosong)") : slotInfo_[i]);
             ui::text(label, w.x + 30, y, slotInfo_[i].empty() ? ui::DIM : (sel ? ui::AMBER : ui::BONE));
             if (sel) ui::cursor(w.x + 14, y + 8, time);
         }

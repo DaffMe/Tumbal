@@ -43,7 +43,12 @@ X = batal/menu (Barang, Status, Simpan, Cheat, Keluar). Console: perintah `cheat
 
 ## Konvensi kode
 
-- Identifier bahasa Inggris, **komentar & teks UI bahasa Indonesia**.
+- Identifier bahasa Inggris, **komentar & teks UI sumber bahasa Indonesia**.
+- **Bahasa game**: English bawaan, Bahasa Indonesia di Pengaturan (`saves/settings.json`). Teks Indonesia di
+  kode/data/skrip = kunci kamus `assets/lang/en.json` (`tr("...")`, `trf("format %d", n)` di `src/core/util/Lang`;
+  `ui::text` dkk. menerjemahkan otomatis). Setiap teks baru yang tampil ke pemain: tambahkan padanannya di
+  `tools/lang_en.py` (gaya muram ala Black Souls; sukma=Souls, Tungku=Hearth, tumbal=Offering), jalankan
+  `tools/lang_en.py` lalu `tools/lang_keys.py` (harus 0 belum). Unit test `test_lang.cpp` memeriksa cakupannya.
 - Header file diawali blok komentar yang menjelaskan peran file dan struktur data yang dipakai.
 - Operasi struktur data di mekanik dicatat dengan `dsOp("Graph.setOpen(...)")` (`src/core/util/DsTrace.hpp`) agar
   terlihat di trace console & Inspector GUI. Tambahkan `dsOp` setiap kali menambah operasi ADT baru di mekanik.

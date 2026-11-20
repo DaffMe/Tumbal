@@ -63,7 +63,7 @@ void DialogView::draw(const Interpreter& it, double time) {
     }
     // potret di kiri kotak (seperti faceset RPG Maker); teks bergeser ke kanan
     float textX = box.x + 18;
-    if (const char* face = portraitFor(it.speaker())) {
+    if (const char* face = portraitFor(it.speakerKey())) {
         Texture2D t = Assets::get().texture(std::string("assets/faces/") + face + ".png");
         if (t.id != 0) {
             DrawTexture(t, static_cast<int>(box.x + 4), static_cast<int>(box.y + 4), WHITE);

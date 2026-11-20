@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdio>
 #include "Ui.hpp"
+#include "core/util/Lang.hpp"
 #include "raylib.h"
 
 static bool confirm() { return IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE); }
@@ -88,9 +89,9 @@ void TungkuView::draw(Game& game, double time) {
         ui::window(lw, 0.95f);
         int cost = gs.levelUpCost();
         char buf[96];
-        std::snprintf(buf, sizeof buf, "Level %d  ->  %d", gs.level(), gs.level() + 1);
+        std::snprintf(buf, sizeof buf, tr("Level %d  ->  %d").c_str(), gs.level(), gs.level() + 1);
         ui::text(buf, lw.x + 16, lw.y + 10, ui::BONE);
-        std::snprintf(buf, sizeof buf, "Butuh %d sukma", cost);
+        std::snprintf(buf, sizeof buf, tr("Butuh %d sukma").c_str(), cost);
         ui::textRight(buf, lw.x + lw.width - 16, lw.y + 10, gs.canLevelUp() ? ui::AMBER : ui::BLOOD);
         Stats now = gs.hero().stats;
         Stats next = gs.heroStats(gs.level() + 1);   // termasuk bonus senjata tempaan
@@ -115,9 +116,9 @@ void TungkuView::draw(Game& game, double time) {
         ui::window(cw, 0.95f);
         const Battler& c = gs.companion();
         char buf[96];
-        std::snprintf(buf, sizeof buf, "Timun Mas  -  Level %d  ->  %d", gs.companionLevel(), gs.companionLevel() + 1);
+        std::snprintf(buf, sizeof buf, tr("Timun Mas  -  Level %d  ->  %d").c_str(), gs.companionLevel(), gs.companionLevel() + 1);
         ui::text(buf, cw.x + 16, cw.y + 10, ui::BONE);
-        std::snprintf(buf, sizeof buf, "Butuh %d sukma", gs.companionLevelUpCost());
+        std::snprintf(buf, sizeof buf, tr("Butuh %d sukma").c_str(), gs.companionLevelUpCost());
         ui::textRight(buf, cw.x + cw.width - 16, cw.y + 10, gs.sukma() >= gs.companionLevelUpCost() ? ui::AMBER : ui::BLOOD);
         Stats next = statsAtLevel(KL_TIMUN_MAS, gs.companionLevel() + 1);
         const char* names[] = {"HP", "MP", "Serang", "Ilmu"};
@@ -145,7 +146,7 @@ void TungkuView::draw(Game& game, double time) {
             float y = ww.y + 30 + i * 22;
             bool sel = i == warpIndex_;
             ui::text(mi ? mi->name : "?", ww.x + 30, y, sel ? ui::AMBER : ui::BONE);
-            std::string d = warpDepth_[i] == 0 ? "di sini" : std::to_string(warpDepth_[i]) + " jalan";
+            std::string d = warpDepth_[i] == 0 ? tr("di sini") : trf("%d jalan", warpDepth_[i]);
             ui::textRight(d, ww.x + ww.width - 16, y, ui::DIM);
             if (sel) ui::cursor(ww.x + 16, y + 8, time);
         }

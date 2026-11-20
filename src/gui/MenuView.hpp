@@ -21,7 +21,7 @@ public:
     void draw(const Game& game, double time);
 
 private:
-    enum Page { Root, Items, Status, Save, Cheat, Exit };
+    enum Page { Root, Items, Status, Save, Cheat, Options, Exit };
     bool open_ = false;
     Page page_ = Root;
     int  index_ = 0;

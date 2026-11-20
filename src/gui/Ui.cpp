@@ -1,5 +1,7 @@
 #include "Ui.hpp"
 
+#include "core/util/Lang.hpp"
+
 #include <cmath>
 #include "Assets.hpp"
 
@@ -41,12 +43,14 @@ static const Font& fontFor(float size) {
     return g_ready ? g_fonts[pick(size)] : def;
 }
 
-float measure(const std::string& s, float size) {
+// Semua teks layar lewat fungsi-fungsi ini, jadi terjemahan dilakukan di sini (tr: kunci = teks
+// Indonesia; teks lain, mis. nama pemain atau angka, dikembalikan apa adanya).
+static float rawMeasure(const std::string& s, float size) {
     int k = pick(size);
     return MeasureTextEx(fontFor(size), s.c_str(), static_cast<float>(SIZES[k]), 0).x;
 }
 
-void text(const std::string& s, float x, float y, Color c, float size, bool shadow) {
+static void rawText(const std::string& s, float x, float y, Color c, float size, bool shadow) {
     int k = pick(size);
     float sz = static_cast<float>(SIZES[k]);
     const Font& f = fontFor(size);
@@ -55,21 +59,28 @@ void text(const std::string& s, float x, float y, Color c, float size, bool shad
     DrawTextEx(f, s.c_str(), p, sz, 0, c);
 }
 
+float measure(const std::string& s, float size) { return rawMeasure(tr(s), size); }
+
+void text(const std::string& s, float x, float y, Color c, float size, bool shadow) { rawText(tr(s), x, y, c, size, shadow); }
+
 void textCentered(const std::string& s, float cx, float y, Color c, float size) {
-    text(s, cx - measure(s, size) / 2.0f, y, c, size);
+    std::string t = tr(s);
+    rawText(t, cx - rawMeasure(t, size) / 2.0f, y, c, size, true);
 }
 
 void textRight(const std::string& s, float rx, float y, Color c, float size) {
-    text(s, rx - measure(s, size), y, c, size);
+    std::string t = tr(s);
+    rawText(t, rx - rawMeasure(t, size), y, c, size, true);
 }
 
-std::vector<std::string> wrap(const std::string& s, float width, float size) {
+std::vector<std::string> wrap(const std::string& src, float width, float size) {
+    std::string s = tr(src);
     std::vector<std::string> lines;
     std::string line, word;
     auto flushWord = [&]() {
         if (word.empty()) return;
         std::string trial = line.empty() ? word : line + " " + word;
-        if (!line.empty() && measure(trial, size) > width) {
+        if (!line.empty() && rawMeasure(trial, size) > width) {
             lines.push_back(line);
             line = word;
         } else {
