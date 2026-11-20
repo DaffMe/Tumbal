@@ -446,6 +446,7 @@ void BattleView::drawQueue() {
         std::size_t sp = nm.find(' ');
         if (b.enemy && sp != std::string::npos && nm.size() > 10) nm = nm.substr(0, sp) + nm.substr(nm.rfind(' '));
         float w = ui::measure(nm, 10) + 10;
+        if (x + w > 632) break;                     // strip giliran tidak keluar layar
         Color base = b.enemy ? Color{80, 26, 26, 220} : Color{80, 62, 26, 220};
         if (k == 0) base = b.enemy ? Color{150, 40, 36, 240} : Color{160, 118, 40, 240};
         DrawRectangle(static_cast<int>(x), static_cast<int>(y), static_cast<int>(w), 13, base);
@@ -460,6 +461,7 @@ void BattleView::drawQueue() {
 void BattleView::drawStatus(double time) {
     Rectangle r{132, BOTTOM_Y, 500, 92};
     ui::window(r);
+    int threatLine = 0;
     for (int i = 0; i < bs_->partyCount(); ++i) {
         const Battler& b = bs_->battler(i);
         float y = r.y + 10 + i * 22;
@@ -473,8 +475,11 @@ void BattleView::drawStatus(double time) {
             bool on = static_cast<int>(time * 4) % 2 == 0;
             DrawRectangle(static_cast<int>(r.x + 4), static_cast<int>(y - 2), static_cast<int>(r.width - 8), 20,
                           Fade(ui::BLOOD, on ? 0.22f : 0.1f));
+            // nama jurus ditulis di baris kosong di bawah anggota party (tidak menimpa bar)
             const SkillDef* ts = skillDef(th);
-            ui::textRight("! " + tr(ts ? ts->name : ""), r.x + r.width - 10, y + 2, on ? Color{255, 120, 100, 255} : ui::BLOOD, 10);
+            float wy = r.y + 10 + bs_->partyCount() * 22 + 4 + threatLine * 14;
+            ui::text("! " + tr(ts ? ts->name : "") + "  ->  " + b.name, r.x + 12, wy, on ? Color{255, 120, 100, 255} : ui::BLOOD, 10);
+            ++threatLine;
         }
         // HP
         ui::text("HP", r.x + 120, y + 4, ui::DIM, 10);

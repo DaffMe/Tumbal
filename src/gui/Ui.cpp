@@ -19,20 +19,39 @@ static int pick(float size) {
     return 3;
 }
 
+// Ambang alpha atlas font: TTF dirasterisasi dengan anti-alias (tepi abu-abu) yang terlihat buram
+// setelah layar diperbesar; atlas dijadikan biner agar setiap piksel huruf tegas.
+static void crispen(Font& f) {
+    Image img = LoadImageFromTexture(f.texture);
+    ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    Color* px = static_cast<Color*>(img.data);
+    for (int i = 0; i < img.width * img.height; ++i) {
+        unsigned char a = px[i].a >= 110 ? 255 : 0;
+        px[i] = Color{255, 255, 255, a};
+    }
+    UnloadTexture(f.texture);
+    f.texture = LoadTextureFromImage(img);
+    UnloadImage(img);
+    SetTextureFilter(f.texture, TEXTURE_FILTER_POINT);
+}
+
 void init() {
     std::string p = Assets::get().path("assets/fonts/Jersey10-Regular.ttf");
-    for (int i = 0; i < 4; ++i) {
+    // ukuran 10 px: Jersey 10 terlalu kecil untuk dirasterisasi (huruf jadi gumpalan), jadi teks
+    // kecil memakai font bitmap bawaan raylib (piksel 1-bit, tajam, mudah dibaca)
+    g_fonts[0] = GetFontDefault();
+    for (int i = 1; i < 4; ++i) {
         g_fonts[i] = LoadFontEx(p.c_str(), SIZES[i], nullptr, 0);
-        if (g_fonts[i].texture.id == 0) g_fonts[i] = GetFontDefault();
-        SetTextureFilter(g_fonts[i].texture, TEXTURE_FILTER_POINT);
+        if (g_fonts[i].texture.id == 0) { g_fonts[i] = GetFontDefault(); continue; }
+        crispen(g_fonts[i]);
     }
     g_ready = true;
 }
 
 void shutdown() {
     if (!g_ready) return;
-    for (auto& f : g_fonts)
-        if (f.texture.id != GetFontDefault().texture.id) UnloadFont(f);
+    for (int i = 1; i < 4; ++i)
+        if (g_fonts[i].texture.id != GetFontDefault().texture.id) UnloadFont(g_fonts[i]);
     g_ready = false;
 }
 
@@ -47,7 +66,7 @@ static const Font& fontFor(float size) {
 // Indonesia; teks lain, mis. nama pemain atau angka, dikembalikan apa adanya).
 static float rawMeasure(const std::string& s, float size) {
     int k = pick(size);
-    return MeasureTextEx(fontFor(size), s.c_str(), static_cast<float>(SIZES[k]), 0).x;
+    return MeasureTextEx(fontFor(size), s.c_str(), static_cast<float>(SIZES[k]), k == 0 ? 1.0f : 0.0f).x;
 }
 
 static void rawText(const std::string& s, float x, float y, Color c, float size, bool shadow) {
@@ -55,8 +74,9 @@ static void rawText(const std::string& s, float x, float y, Color c, float size,
     float sz = static_cast<float>(SIZES[k]);
     const Font& f = fontFor(size);
     Vector2 p{std::floor(x), std::floor(y) - (k == 1 ? 3.0f : 0.0f)};
-    if (shadow) DrawTextEx(f, s.c_str(), {p.x + 1, p.y + 1}, sz, 0, Color{0, 0, 0, static_cast<unsigned char>(c.a * 0.85f)});
-    DrawTextEx(f, s.c_str(), p, sz, 0, c);
+    float spacing = k == 0 ? 1.0f : 0.0f;          // font bitmap kecil butuh jarak 1 px antarhuruf
+    if (shadow) DrawTextEx(f, s.c_str(), {p.x + 1, p.y + 1}, sz, spacing, Color{0, 0, 0, static_cast<unsigned char>(c.a * 0.85f)});
+    DrawTextEx(f, s.c_str(), p, sz, spacing, c);
 }
 
 float measure(const std::string& s, float size) { return rawMeasure(tr(s), size); }
