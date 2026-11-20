@@ -428,7 +428,27 @@ static void testCheats() {
     CHECK(bs.phase() == BattleSystem::Victory);
 }
 
+static void testNewGameResetsWorld() {
+    SECTION("Mulai Baru setelah bermain (judul / tamat) mengembalikan dunia ke keadaan awal");
+    Game g;
+    std::string err;
+    std::string root = std::string(worldPath()).substr(0, std::string(worldPath()).find("maps/world.json"));
+    std::string ev[] = {root + "events/lumbung.json"};
+    CHECK(g.load(worldPath(), ev, 1, &err));
+    g.newGame("Tumbal", KL_PENDEKAR);
+    g.cheat(Game::CH_OPEN);
+    g.world().markDefeated(2, 0);
+    g.world().markCollected(3, 1);
+    CHECK(g.world().graph().isOpen(4, 5) && g.world().isDefeated(2, 0));
+    g.newGame("Tumbal", KL_MALING);
+    CHECK(!g.world().graph().isOpen(4, 5) && !g.world().graph().isOpen(3, 5));
+    CHECK(!g.world().isDefeated(2, 0) && !g.world().isCollected(3, 1));
+    CHECK(!g.world().info(3)->tungkuLit);
+    CHECK(!g.state().cheated() && g.shopMenu() == Game::SHOP_NONE && !g.tungkuMenuOpen());
+}
+
 void runWorldTests() {
+    testNewGameResetsWorld();
     testCheats();
     testForgeAndShop();
     testShopEvent();

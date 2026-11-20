@@ -8,12 +8,25 @@ Game::Game() : field_(world_), interp_(state_, events_, *this) {}
 
 bool Game::load(const std::string& worldJson, const std::string* eventFiles, int eventFileCount, std::string* error) {
     if (!world_.load(worldJson, error)) return false;
+    worldInitial_ = world_.toJson();
     for (int i = 0; i < eventFileCount; ++i)
         if (!events_.loadFile(eventFiles[i], error)) return false;
     return true;
 }
 
 void Game::newGame(const std::string& heroName, int classId) {
+    // dunia kembali segar: jalan terkunci lagi, musuh hidup, barang belum diambil, Tungku padam
+    // (penting bila Mulai Baru dipilih setelah kembali ke judul atau setelah tamat)
+    if (JsonValue* w = JsonValue::parse(worldInitial_, nullptr)) {
+        world_.fromJson(w);
+        delete w;
+    }
+    interp_.abort();
+    battlePending_ = transferPending_ = tungkuMenu_ = false;
+    shopMenu_ = SHOP_NONE;
+    std::string n;
+    while (notices_.dequeue(n)) {}
+    while (interp_.notices().dequeue(n)) {}
     state_.newGame(heroName, classId);
     field_.enterAtSpawn(world_.startMap(), world_.startSpawn());
     state_.setLastTungku(field_.mapId(), field_.player().x, field_.player().y);

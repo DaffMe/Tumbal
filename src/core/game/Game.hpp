@@ -147,6 +147,7 @@ private:
     bool respawnAfterTransfer_ = false;
     bool enteredMap_ = false;
     bool tungkuMenu_ = false;
+    std::string worldInitial_;   // status dunia segar (dipulihkan setiap Mulai Baru)
     int  shopMenu_ = SHOP_NONE;
 
     void notice(const std::string& s);
