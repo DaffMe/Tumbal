@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include "Assets.hpp"
 #include "Audio.hpp"
 #include "Settings.hpp"
@@ -25,6 +26,12 @@ bool App::boot(std::string& error) {
 
 void App::update(float dt) {
     time_ += dt;
+    // Alt+Enter / F11: jendela <-> layar penuh (mode layar penuh terakhir di Pengaturan)
+    bool alt = IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
+    if (IsKeyPressed(KEY_F11) || (alt && IsKeyPressed(KEY_ENTER))) {
+        settings::toggleFullscreen();
+        return;
+    }
     if (bannerTime_ > 0) bannerTime_ -= dt;
     if (toastTime_ > 0) toastTime_ -= dt;
     if (IsKeyPressed(KEY_F1)) showInspector_ = !showInspector_;
@@ -364,21 +371,42 @@ void App::drawFrame() {
 }
 
 void App::present() {
-    BeginDrawing();
-    ClearBackground(BLACK);
     int sw = GetScreenWidth(), sh = GetScreenHeight();
-    // skala bilangan bulat saja (sisanya bingkai hitam): skala pecahan dengan sampling piksel
-    // membuat sebagian baris piksel dobel dan "berkedip" sebagai garis saat layar bergulir
+    Rectangle src{0, 0, static_cast<float>(VIEW_W), -static_cast<float>(VIEW_H)};
+    float fs = std::fmin(static_cast<float>(sw) / VIEW_W, static_cast<float>(sh) / VIEW_H);
+    bool fill = settings::get().scaling == settings::FILL && fs >= 1.0f;
     int scale = std::max(1, std::min(sw / VIEW_W, sh / VIEW_H));
     float fw = static_cast<float>(VIEW_W * scale), fh = static_cast<float>(VIEW_H * scale);
-    if (sw < VIEW_W || sh < VIEW_H) {   // jendela lebih kecil dari resolusi logis: perkecil halus
-        float fs = std::fmin(static_cast<float>(sw) / VIEW_W, static_cast<float>(sh) / VIEW_H);
-        fw = VIEW_W * fs;
-        fh = VIEW_H * fs;
-    }
-    Rectangle src{0, 0, static_cast<float>(VIEW_W), -static_cast<float>(VIEW_H)};
+    if (fill || sw < VIEW_W || sh < VIEW_H) { fw = VIEW_W * fs; fh = VIEW_H * fs; }
     Rectangle dst{std::floor((sw - fw) / 2.0f), std::floor((sh - fh) / 2.0f), fw, fh};
-    DrawTexturePro(screen_.texture, src, dst, {0, 0}, 0, WHITE);
+
+    if (fill) {
+        // "sharp bilinear": perbesar dengan kelipatan bulat (piksel tetap kotak), lalu turunkan sedikit ke
+        // ukuran layar dengan filter halus -> mengisi layar tanpa baris piksel dobel yang berkedip
+        int k = static_cast<int>(std::ceil(fs));
+        if (k != upscaleK_) {
+            if (upscaleK_ > 0) UnloadRenderTexture(upscale_);
+            upscale_ = LoadRenderTexture(VIEW_W * k, VIEW_H * k);
+            SetTextureFilter(upscale_.texture, TEXTURE_FILTER_BILINEAR);
+            upscaleK_ = k;
+        }
+        BeginTextureMode(upscale_);
+        DrawTexturePro(screen_.texture, src, {0, 0, static_cast<float>(VIEW_W * k), static_cast<float>(VIEW_H * k)},
+                       {0, 0}, 0, WHITE);
+        EndTextureMode();
+    }
+
+    BeginDrawing();
+    ClearBackground(BLACK);
+    if (fill) {
+        Rectangle usrc{0, 0, static_cast<float>(VIEW_W * upscaleK_), -static_cast<float>(VIEW_H * upscaleK_)};
+        DrawTexturePro(upscale_.texture, usrc, dst, {0, 0}, 0, WHITE);
+    } else {
+        // skala bilangan bulat (sisanya bingkai hitam): skala pecahan dengan sampling piksel
+        // membuat sebagian baris piksel dobel dan "berkedip" sebagai garis saat layar bergulir
+        DrawTexturePro(screen_.texture, src, dst, {0, 0}, 0, WHITE);
+    }
+    if (settings::get().showFps) DrawFPS(10, 10);
     EndDrawing();
 }
 
@@ -390,8 +418,7 @@ int App::run(bool smoke, bool shots) {
         Image icon = LoadImage(Assets::get().path("assets/icon/tumbal.png").c_str());
         if (icon.data != nullptr) { SetWindowIcon(icon); UnloadImage(icon); }
     }
-    // ikuti refresh rate monitor (laptop 120/144 Hz): batas 60 FPS + VSync di layar 144 Hz
-    // membuat frame tampil tidak merata (gerak tersendat) dan memicu sobekan layar
+    // batas FPS bawaan = refresh rate monitor; nilai akhirnya diterapkan settings::load() di boot()
     int hz = GetMonitorRefreshRate(GetCurrentMonitor());
     SetTargetFPS(hz >= 30 && hz <= 240 ? hz : 60);
     ui::init();
@@ -471,8 +498,9 @@ int App::run(bool smoke, bool shots) {
             if (frame == 645) { mode_ = ModeField; go(3, 22, 18, FACE_UP); menu_.show(); }
             if (frame == 680) TakeScreenshot("shot_menu.png");
             if (frame == 681) menu_.showCheats();
-            if (frame == 684) TakeScreenshot("shot_cheat.png");
-            if (frame == 685) { menu_.hide(); game_.state().addSukma(300); game_.hostOpenShop("dagang"); }
+            if (frame == 684) { TakeScreenshot("shot_cheat.png"); menu_.showSettings(); }
+            if (frame == 687) TakeScreenshot("shot_settings.png");
+            if (frame == 688) { menu_.hide(); game_.state().addSukma(300); game_.hostOpenShop("dagang"); }
             if (frame == 700) TakeScreenshot("shot_toko.png");
             if (frame == 705) { game_.closeShopMenu(); game_.state().addItem(IT_BIJIH_BESI, 1); game_.hostOpenShop("tempa"); }
             if (frame == 720) TakeScreenshot("shot_tempa.png");
@@ -492,6 +520,7 @@ int App::run(bool smoke, bool shots) {
         if (smoke && frame > 30) break;
     }
     mapView_.shutdown();
+    if (upscaleK_ > 0) UnloadRenderTexture(upscale_);
     UnloadRenderTexture(screen_);
     ui::shutdown();
     Assets::get().unloadAll();

@@ -20,6 +20,8 @@ static std::string g_curName, g_nextName;
 static float g_fade = 1.0f;       // volume lagu saat ini
 static float g_nextVol = 0.0f;
 static constexpr float MUSIC_VOL = 0.55f;
+static float g_musicUser = 0.7f;   // volume musik pilihan pemain (0..1)
+static float g_sfxUser = 0.8f;     // volume efek pilihan pemain (0..1)
 
 static std::string musicPath(const std::string& name) {
     std::string ogg = Assets::get().path("assets/audio/music/" + name + ".ogg");
@@ -67,7 +69,7 @@ void playMusic(const std::string& name) {
 
 void update(float dt) {
     if (!g_ready) return;
-    float master = g_muted ? 0.0f : MUSIC_VOL;
+    float master = g_muted ? 0.0f : MUSIC_VOL * g_musicUser / 0.7f;   // 7/10 = volume rancangan
     bool fadingOut = g_hasNext || g_nextName != g_curName;
     if (g_hasCur) {
         if (fadingOut) g_fade -= dt * 1.2f;
@@ -101,11 +103,14 @@ void update(float dt) {
 
 void play(Sfx s, float volume) {
     if (!g_ready || g_muted || s < 0 || s >= SFX_COUNT) return;
-    SetSoundVolume(g_sfx[s], volume * 0.8f);
+    if (g_sfxUser <= 0.0f) return;
+    SetSoundVolume(g_sfx[s], volume * g_sfxUser);
     PlaySound(g_sfx[s]);
 }
 
 void setMuted(bool m) { g_muted = m; }
+void setMusicVolume(float v) { g_musicUser = v < 0 ? 0 : (v > 1 ? 1 : v); }
+void setSfxVolume(float v) { g_sfxUser = v < 0 ? 0 : (v > 1 ? 1 : v); }
 bool muted() { return g_muted; }
 
 }  // namespace audio

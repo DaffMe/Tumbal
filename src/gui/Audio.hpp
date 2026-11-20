@@ -20,6 +20,8 @@ void update(float dt);                  // panggil tiap frame (stream + crossfad
 void playMusic(const std::string& name); // "" = senyap; nama sama = tidak diulang
 void play(Sfx s, float volume = 1.0f);
 void setMuted(bool m);
+void setMusicVolume(float v);           // 0..1 (pengaturan pemain)
+void setSfxVolume(float v);             // 0..1
 bool muted();
 
 }  // namespace audio

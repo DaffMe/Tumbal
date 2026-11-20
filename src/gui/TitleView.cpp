@@ -49,14 +49,12 @@ TitleView::Result TitleView::update(float dt) {
             if (confirm()) {
                 if (index_ == 0) { page_ = Name; }
                 else if (index_ == 1) { refreshSlots(); page_ = Slots; slotIndex_ = 0; }
-                else if (index_ == 2) { page_ = Options; }
+                else if (index_ == 2) { page_ = Options; settingsView_.open(); }
                 else return Quit;
             }
             break;
         case Options:
-            // satu-satunya pengaturan: bahasa; kiri/kanan/Z mengganti, langsung tersimpan
-            if (left() || right() || confirm()) { settings::toggleLanguage(); refreshSlots(); }
-            if (cancel()) page_ = Root;
+            if (settingsView_.update()) { page_ = Root; refreshSlots(); }
             break;
         case Name: {
             int c = GetCharPressed();
@@ -108,7 +106,7 @@ void TitleView::draw(double time) {
         DrawCircleV({x, y}, 1.2f + (i % 3) * 0.5f, Fade(Color{255, 140, 60, 255}, (1 - t) * 0.8f));
     }
 
-    if (page_ == Root || page_ == Slots || page_ == Options) {
+    if (page_ == Root || page_ == Slots) {
         // judul besar: font 40 px digambar dua kali lipat (kelipatan bulat, tetap tajam)
         const char* title = "TUMBAL";
         float tw = MeasureTextEx(ui::font(), title, 20, 0).x * 4.0f;
@@ -120,13 +118,8 @@ void TitleView::draw(double time) {
     }
 
     if (page_ == Options) {
-        Rectangle w{150, 180, 340, 90};
-        ui::window(w, 0.94f);
-        ui::textCentered("Pengaturan", 320, w.y + 8, ui::AMBER);
-        ui::text("Bahasa", w.x + 20, w.y + 40, ui::DIM);
-        std::string cur = std::string("<  ") + lang::languageName(lang::language()) + "  >";
-        ui::textRight(cur, w.x + w.width - 20, w.y + 40, ui::BONE);
-        ui::textCentered("kiri/kanan ganti    X kembali", 320, w.y + w.height + 8, ui::DIM);
+        settingsView_.draw(Rectangle{90, 34, 460, 292}, time);
+        ui::textCentered("atas/bawah pilih    kiri/kanan ganti    X kembali", 320, 334, ui::DIM, 10);
     }
     if (page_ == Root) {
         for (int i = 0; i < 4; ++i) {

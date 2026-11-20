@@ -7,6 +7,7 @@
 // ============================================================================
 
 #include <string>
+#include "SettingsView.hpp"
 
 class TitleView {
 public:
@@ -33,6 +34,7 @@ private:
     int   slotIndex_ = 0;
     std::string slotInfo_[3];
     float fadeIn_ = 1.0f;
+    SettingsView settingsView_;
 
     void refreshSlots();
 };

@@ -36,16 +36,14 @@ std::string MenuView::update(Game& game) {
                 page_ = Save;
                 for (int i = 0; i < 3; ++i) slotInfo_[i] = Game::describeSave(TitleView::slotPath(i + 1));
             } else if (index_ == 3) { page_ = Cheat; }
-            else if (index_ == 4) { page_ = Options; }
+            else if (index_ == 4) { page_ = Options; settingsView_.open(); }
             else if (index_ == 5) { page_ = Exit; exitIndex_ = 0; }
             else open_ = false;
         }
         return "";
     }
     if (page_ == Options) {
-        bool l = IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A), r = IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D);
-        if (l || r || confirm()) settings::toggleLanguage();
-        if (cancel()) page_ = Root;
+        if (settingsView_.update()) page_ = Root;
         return "";
     }
     if (page_ == Exit) {
@@ -164,11 +162,7 @@ void MenuView::draw(const Game& game, double time) {
         }
     }
     if (page_ == Options) {
-        Rectangle w{156, 16, 468, 80};
-        ui::window(w, 0.95f);
-        ui::text("Bahasa", w.x + 20, w.y + 14, ui::DIM);
-        ui::textRight(std::string("<  ") + lang::languageName(lang::language()) + "  >", w.x + w.width - 20, w.y + 14, ui::AMBER);
-        ui::text("kiri/kanan ganti    X kembali", w.x + 20, w.y + 48, ui::DIM, 10);
+        settingsView_.draw(Rectangle{156, 16, 468, 292}, time);
     }
     if (page_ == Exit) {
         Rectangle w{156, 16, 468, 118};

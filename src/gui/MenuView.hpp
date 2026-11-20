@@ -6,6 +6,7 @@
 // ============================================================================
 
 #include <string>
+#include "SettingsView.hpp"
 #include "core/game/Game.hpp"
 
 class MenuView {
@@ -14,6 +15,7 @@ public:
     void show() { open_ = true; page_ = Root; index_ = 0; }
     void hide() { open_ = false; }
     void showCheats() { open_ = true; page_ = Cheat; }
+    void showSettings() { open_ = true; page_ = Options; settingsView_.open(); }
     // Permintaan dari halaman Keluar: 0 tidak ada, 1 ke layar judul, 2 keluar dari game. Diambil sekali.
     int takeExitRequest() { int r = exitRequest_; exitRequest_ = 0; return r; }
     // Mengembalikan pesan hasil (untuk notifikasi), kosong bila tidak ada.
@@ -34,6 +36,7 @@ private:
     int  statIndex_ = 2;
     int  exitIndex_ = 0;
     int  exitRequest_ = 0;
+    SettingsView settingsView_;
 
     void refreshItems(const Game& game);
 };

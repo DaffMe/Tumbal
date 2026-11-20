@@ -39,6 +39,8 @@ private:
     void drawEnding();
     BattleSystem battle_;
     BattleView battleView_;
+    RenderTexture2D upscale_{};   // mode "Penuhi layar": perbesar bulat dulu, lalu diperhalus ke ukuran layar
+    int upscaleK_ = 0;
     RenderTexture2D screen_{};
     double     time_ = 0.0;
     Mode       mode_ = ModeTitle;
