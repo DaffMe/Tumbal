@@ -1,6 +1,7 @@
 #include "GameState.hpp"
 
 #include "../util/Json.hpp"
+#include "../util/Lang.hpp"
 
 void GameState::newGame(const std::string& name, int classId) {
     *this = GameState();
@@ -39,7 +40,7 @@ std::string GameState::useItemInField(int itemId) {
             h.hp += amt;
             if (h.hp > h.stats.mhp) h.hp = h.stats.mhp;
             removeItem(itemId);
-            return "HP pulih " + std::to_string(amt) + ".";
+            return trf("HP pulih %d.", amt);
         }
         case IK_OBAT: {
             bool any = h.status[ST_RACUN] > 0 || h.status[ST_BERDARAH] > 0;
@@ -47,12 +48,12 @@ std::string GameState::useItemInField(int itemId) {
             h.status[ST_RACUN] = 0;
             h.status[ST_BERDARAH] = 0;
             removeItem(itemId);
-            return "Racun dan luka mereda.";
+            return tr("Racun dan luka mereda.");
         }
         case IK_SUKMA:
             removeItem(itemId);
             addSukma(d->value);
-            return "Sukma +" + std::to_string(d->value) + ".";
+            return trf("Sukma +%d.", d->value);
         default:
             return "";
     }

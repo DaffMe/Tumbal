@@ -18,3 +18,4 @@ void runAdtTests();
 void runWorldTests();
 void runBattleTests();
 void runEventTests();
+void runLangTests();

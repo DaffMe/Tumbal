@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdio>
 #include "../util/DsTrace.hpp"
+#include "../util/Lang.hpp"
 
 // ------------------------------------------------------------- pembuat battler
 
@@ -22,7 +23,7 @@ Battler makeEnemyBattler(int enemyId) {
     Battler b;
     const EnemyDef* d = enemyDef(enemyId);
     if (d == nullptr) return b;
-    b.name = d->name;
+    b.name = tr(d->name);       // nama musuh dalam bahasa aktif
     b.enemy = true;
     b.def = d;
     b.stats = d->stats;
@@ -34,12 +35,6 @@ Battler makeEnemyBattler(int enemyId) {
 }
 
 // ------------------------------------------------------------- util
-
-static std::string fmt(const char* f, const std::string& a, int v = 0) {
-    char buf[200];
-    std::snprintf(buf, sizeof buf, f, a.c_str(), v);
-    return buf;
-}
 
 void BattleSystem::emit(BattleEvent::Kind k, int src, int dst, int value, const std::string& text, int skill, int status) {
     BattleEvent e;
@@ -106,8 +101,8 @@ void BattleSystem::setup(const Battler* party, int partyCount, int troopId, Init
         timeline_.insertSorted(&b, MAX_AP * (1.0f - pct) / b.rate());
         ds("Timeline.insertSorted(" + b.name + ")");
     }
-    if (init == INIT_PREEMPTIVE) emit(BattleEvent::Message, -1, -1, 0, "Kamu menyerang lebih dulu!");
-    if (init == INIT_SURPRISE) emit(BattleEvent::Message, -1, -1, 0, "Kamu disergap!");
+    if (init == INIT_PREEMPTIVE) emit(BattleEvent::Message, -1, -1, 0, tr("Kamu menyerang lebih dulu!"));
+    if (init == INIT_SURPRISE) emit(BattleEvent::Message, -1, -1, 0, tr("Kamu disergap!"));
 }
 
 // ------------------------------------------------------------- waktu
@@ -207,12 +202,12 @@ bool BattleSystem::startOfTurn(Battler& b) {
             if (dmg < 1) dmg = 1;
             if (cheatGod_ && !b.enemy) dmg = 0;
             b.hp -= dmg;
-            emit(BattleEvent::Damage, -1, b.slot, dmg, b.name + " menderita karena " + d.name + ".", 0, s);
+            emit(BattleEvent::Damage, -1, b.slot, dmg, trf("%s menderita karena %s.", b.name.c_str(), tr(d.name).c_str()), 0, s);
             if (b.hp <= 0) { kill(b); return false; }
         }
         if (d.skipTurn) skip = true;
     }
-    if (skip) emit(BattleEvent::Message, b.slot, b.slot, 0, fmt("%s tidak bisa bergerak!", b.name));
+    if (skip) emit(BattleEvent::Message, b.slot, b.slot, 0, trf("%s tidak bisa bergerak!", b.name.c_str()));
     // kurangi durasi
     for (int s = 1; s < ST_COUNT; ++s) {
         if (b.status[s] <= 0) continue;
@@ -293,7 +288,7 @@ void BattleSystem::useItem(Battler& user, const BattleAction& a) {
     const ItemDef* d = itemDef(a.item);
     if (d == nullptr || bag_ == nullptr || !bag_->removeItem(a.item)) return;
     Battler& t = b_[a.target];
-    emit(BattleEvent::UseSkill, user.slot, t.slot, 0, user.name + " memakai " + d->name);
+    emit(BattleEvent::UseSkill, user.slot, t.slot, 0, trf("%s memakai %s", user.name.c_str(), tr(d->name).c_str()));
     ds("ItemBag.removeItem(" + std::string(d->name) + ")");
     switch (d->kind) {
         case IK_PULIH_PERSEN: {
@@ -306,7 +301,7 @@ void BattleSystem::useItem(Battler& user, const BattleAction& a) {
         case IK_OBAT:
             if (t.has(ST_RACUN)) removeStatus(t, ST_RACUN);
             if (t.has(ST_BERDARAH)) removeStatus(t, ST_BERDARAH);
-            emit(BattleEvent::Message, user.slot, t.slot, 0, t.name + " merasa lebih baik.");
+            emit(BattleEvent::Message, user.slot, t.slot, 0, trf("%s merasa lebih baik.", t.name.c_str()));
             break;
         case IK_SERANG: {
             float raw = d->value * t.elementRate[d->element >= 0 && d->element < EL_COUNT ? d->element : 0];
@@ -347,7 +342,8 @@ void BattleSystem::startChant(Battler& user, const BattleAction& a) {
     timeline_.updateAV(&user, user.chantTicks);
     ds("Timeline.updateAV(" + user.name + ", rapal " + std::to_string(static_cast<int>(user.chantTicks)) + ")");
     emit(BattleEvent::ChantStart, user.slot, a.target, 0,
-         user.name + (user.enemy ? " bersiap: " : " merapal ") + s->name + "...", a.skill);
+         (user.enemy ? trf("%s bersiap: %s...", user.name.c_str(), tr(s->name).c_str())
+                     : trf("%s merapal %s...", user.name.c_str(), tr(s->name).c_str())), a.skill);
 }
 
 int BattleSystem::threatOn(int partyIndex) const {
@@ -371,20 +367,20 @@ void BattleSystem::applyDelay(Battler& t, int pct) {
     float add = MAX_AP * pct / 100.0f / t.rate();
     if (t.chanting) {
         t.chanting = false;
-        emit(BattleEvent::ChantBroken, -1, t.slot, 0, t.name + ": rapal buyar!");
+        emit(BattleEvent::ChantBroken, -1, t.slot, 0, trf("%s: rapal buyar!", t.name.c_str()));
         timeline_.updateAV(&t, MAX_AP / t.rate() * 0.5f + add);
     } else {
         timeline_.updateAV(&t, n->av + add);
     }
     ds("Timeline.updateAV(" + t.name + ", +" + std::to_string(pct) + "% giliran) -> node digeser ke belakang");
-    emit(BattleEvent::Delay, -1, t.slot, pct, t.name + " terhuyung!");
+    emit(BattleEvent::Delay, -1, t.slot, pct, trf("%s terhuyung!", t.name.c_str()));
 }
 
 // M1 subprogram: jalankan efek jurus ke semua target sesuai scope.
 void BattleSystem::resolveAction(Battler& user, const BattleAction& a) {
     const SkillDef* s = skillDef(a.skill);
     if (s == nullptr || !user.alive()) return;
-    emit(BattleEvent::UseSkill, user.slot, a.target, 0, user.name + ": " + s->name, a.skill);
+    emit(BattleEvent::UseSkill, user.slot, a.target, 0, user.name + ": " + tr(s->name), a.skill);
 
     if (s->scope == SC_DIRI) {
         if (s->status != ST_NONE) addStatus(user, s->status);
@@ -453,7 +449,7 @@ void BattleSystem::hit(Battler& user, Battler& target, const SkillDef& s) {
         return;
     }
     if (offensive && target.has(ST_ELAK)) {
-        emit(BattleEvent::Miss, user.slot, target.slot, 0, target.name + " mengelak!");
+        emit(BattleEvent::Miss, user.slot, target.slot, 0, trf("%s mengelak!", target.name.c_str()));
         return;
     }
     if (offensive && s.formula == FM_FISIK && target.has(ST_TANGKIS)) {
@@ -461,7 +457,7 @@ void BattleSystem::hit(Battler& user, Battler& target, const SkillDef& s) {
         const SkillDef* atk = skillDef(SKL_SERANG);
         bool crit = false;
         int dmg = cheatDamage(target, user, static_cast<int>(computeDamage(target, user, *atk, crit) * 1.5f));
-        emit(BattleEvent::Counter, user.slot, target.slot, 0, target.name + " menangkis dan membalas!");
+        emit(BattleEvent::Counter, user.slot, target.slot, 0, trf("%s menangkis dan membalas!", target.name.c_str()));
         user.hp -= dmg;
         emit(BattleEvent::Damage, target.slot, user.slot, dmg);
         if (user.hp <= 0) kill(user);
@@ -492,7 +488,7 @@ void BattleSystem::addStatus(Battler& t, int st) {
     float before = t.rate();
     bool fresh = t.status[st] == 0;
     t.status[st] = statusDef(st).turns;
-    if (fresh) emit(BattleEvent::StatusAdd, -1, t.slot, 0, t.name + " terkena " + statusDef(st).name + ".", 0, st);
+    if (fresh) emit(BattleEvent::StatusAdd, -1, t.slot, 0, trf("%s terkena %s.", t.name.c_str(), tr(statusDef(st).name).c_str()), 0, st);
     float after = t.rate();
     if (after != before && !t.chanting) {
         // ubah laju gauge: sisa waktu diskalakan ulang (node pindah posisi)
@@ -520,7 +516,7 @@ void BattleSystem::kill(Battler& t) {
     for (int s = 1; s < ST_COUNT; ++s) t.status[s] = 0;
     timeline_.remove(&t);
     ds("Timeline.remove(" + t.name + ")");
-    emit(BattleEvent::Death, -1, t.slot, 0, t.name + (t.enemy ? " tumbang." : " roboh!"));
+    emit(BattleEvent::Death, -1, t.slot, 0, (t.enemy ? trf("%s tumbang.", t.name.c_str()) : trf("%s roboh!", t.name.c_str())));
     if (t.enemy && t.def != nullptr && t.def->core) {
         for (int i = 0; i < count_; ++i)
             if (b_[i].enemy && b_[i].alive()) kill(b_[i]);
@@ -537,21 +533,21 @@ void BattleSystem::checkEnd() {
     if (!partyAlive) {
         phase_ = Defeat;
         inputActor_ = -1;
-        emit(BattleEvent::Defeat, -1, -1, 0, "Kamu mati.");
+        emit(BattleEvent::Defeat, -1, -1, 0, tr("Kamu mati."));
     } else if (!enemyAlive) {
         sukma_ = 0;
         for (int i = partyCount_; i < count_; ++i)
             if (b_[i].def != nullptr) sukma_ += b_[i].def->sukma;
         phase_ = Victory;
         inputActor_ = -1;
-        emit(BattleEvent::Victory, -1, -1, sukma_, "Menang! Sukma +" + std::to_string(sukma_));
+        emit(BattleEvent::Victory, -1, -1, sukma_, trf("Menang! Sukma +%d", sukma_));
     }
 }
 
 bool BattleSystem::tryEscape() {
     if (phase_ != Input) return false;
     if (!canEscape_) {
-        emit(BattleEvent::Message, -1, -1, 0, "Tidak ada jalan untuk kabur!");
+        emit(BattleEvent::Message, -1, -1, 0, tr("Tidak ada jalan untuk kabur!"));
         return false;
     }
     float pAgi = 0, eAgi = 0;
@@ -566,11 +562,11 @@ bool BattleSystem::tryEscape() {
     if (rng_.chance(chance)) {
         phase_ = Escaped;
         inputActor_ = -1;
-        emit(BattleEvent::Escaped, -1, -1, 0, "Kamu berhasil kabur.");
+        emit(BattleEvent::Escaped, -1, -1, 0, tr("Kamu berhasil kabur."));
         return true;
     }
     ++escapeFails_;
-    emit(BattleEvent::EscapeFail, -1, -1, 0, "Gagal kabur!");
+    emit(BattleEvent::EscapeFail, -1, -1, 0, tr("Gagal kabur!"));
     // seperti BS1: gauge party direset ke 0-10%
     for (int i = 0; i < partyCount_; ++i) {
         Battler& b = b_[i];

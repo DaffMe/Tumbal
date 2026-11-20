@@ -2,6 +2,7 @@
 
 #include "../game/GameState.hpp"
 #include "../util/DsTrace.hpp"
+#include "../util/Lang.hpp"
 
 bool Interpreter::runEvent(const std::string& name) {
     if (busy()) return false;
@@ -66,8 +67,9 @@ void Interpreter::choose(int i) {
 void Interpreter::execute(const Command* c) {
     switch (c->op) {
         case CMD_TEXT:
-            who_ = c->s1;
-            text_ = c->s2;
+            whoKey_ = c->s1;
+            who_ = tr(c->s1);      // teks cerita diterjemahkan saat ditampilkan (kunci = teks Indonesia)
+            text_ = tr(c->s2);
             state_ = WaitMessage;
             break;
         case CMD_CHOICE:
@@ -79,18 +81,19 @@ void Interpreter::execute(const Command* c) {
             if (d == nullptr) break;
             if (c->n2 >= 0) {
                 gs_.addItem(c->n1, c->n2);
-                std::string msg = std::string("Didapat: ") + d->name + (c->n2 > 1 ? " x" + std::to_string(c->n2) : "");
+                std::string msg = c->n2 > 1 ? trf("Didapat: %s x%d", tr(d->name).c_str(), c->n2)
+                                            : trf("Didapat: %s", tr(d->name).c_str());
                 notices_.enqueue(msg);
                 dsOp("Queue.enqueue(\"" + msg + "\")");
             } else {
                 gs_.removeItem(c->n1, -c->n2);
-                notices_.enqueue(std::string("Diserahkan: ") + d->name);
+                notices_.enqueue(trf("Diserahkan: %s", tr(d->name).c_str()));
             }
             break;
         }
         case CMD_SUKMA:
             gs_.addSukma(c->n1);
-            notices_.enqueue((c->n1 >= 0 ? "Sukma +" : "Sukma ") + std::to_string(c->n1));
+            notices_.enqueue(c->n1 >= 0 ? trf("Sukma +%d", c->n1) : trf("Sukma %d", c->n1));
             break;
         case CMD_FLAG: gs_.setFlag(c->s1, c->n1); break;
         case CMD_IF_FLAG:
@@ -113,7 +116,7 @@ void Interpreter::execute(const Command* c) {
             state_ = WaitTransfer;
             host_.hostTransfer(c->n1, c->s1);
             break;
-        case CMD_NOTICE: notices_.enqueue(c->s1); break;
+        case CMD_NOTICE: notices_.enqueue(tr(c->s1)); break;
         case CMD_SHOP:
             host_.hostOpenShop(c->s1);
             dsOp("Interpreter: buka menu " + c->s1);
@@ -129,3 +132,5 @@ void Interpreter::execute(const Command* c) {
         default: break;
     }
 }
+
+std::string Interpreter::option(int i) const { return tr(choice_->opt[i]); }

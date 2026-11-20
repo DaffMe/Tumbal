@@ -55,9 +55,10 @@ public:
     State state() const { return state_; }
     bool  busy() const { return state_ != Idle; }
     const std::string& speaker() const { return who_; }
+    const std::string& speakerKey() const { return whoKey_; }   // nama sumber (tak diterjemahkan), untuk potret
     const std::string& message() const { return text_; }
     int   optionCount() const { return choice_ ? choice_->childCount : 0; }
-    const std::string& option(int i) const { return choice_->opt[i]; }
+    std::string option(int i) const;   // teks opsi dalam bahasa aktif
     int   battleTroop() const { return battleTroop_; }
     int   depth() const { return static_cast<int>(stack_.size()); }
 
@@ -74,7 +75,7 @@ private:
     Stack<Frame>        stack_;
     Queue<std::string>  notices_;
     State               state_ = Idle;
-    std::string         who_, text_;
+    std::string         who_, text_, whoKey_;
     const Command*      choice_ = nullptr;
     int                 battleTroop_ = 0;
     int                 steps_ = 0;

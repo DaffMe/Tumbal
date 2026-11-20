@@ -3,6 +3,7 @@
 #include <cstdio>
 #include "../util/DsTrace.hpp"
 #include "../util/Json.hpp"
+#include "../util/Lang.hpp"
 
 Game::Game() : field_(world_), interp_(state_, events_, *this) {}
 
@@ -70,7 +71,7 @@ void Game::update(float dt, const GameInput& in) {
             break;
         case FieldEvent::LockedDoor: {
             std::string msg = ev.object ? ev.object->props.getString("pesan", "") : "";
-            notice(msg.empty() ? "Terkunci dari sisi lain." : msg);
+            notice(msg.empty() ? tr("Terkunci dari sisi lain.") : tr(msg));
             break;
         }
         case FieldEvent::Encounter:
@@ -137,7 +138,7 @@ bool Game::tryLoot(const MapObject* o) {
     int n = o->props.getInt("n", 1);
     if (const ItemDef* d = itemDef(item)) {
         state_.addItem(item, n);
-        notice(std::string("Didapat: ") + d->name + (n > 1 ? " x" + std::to_string(n) : ""));
+        notice(n > 1 ? trf("Didapat: %s x%d", tr(d->name).c_str(), n) : trf("Didapat: %s", tr(d->name).c_str()));
     }
     return true;
 }
@@ -154,8 +155,8 @@ void Game::restAt(const MapObject& t) {
     state_.setLastTungku(field_.mapId(), bx, by);
     world_.lightTungku(field_.mapId());
     tungkuMenu_ = true;
-    notice("Kamu beristirahat di Tungku. HP pulih, Ramuan Jamu terisi.");
-    if (revived > 0) notice("...musuh-musuh bangkit kembali.");
+    notice(tr("Kamu beristirahat di Tungku. HP pulih, Ramuan Jamu terisi."));
+    if (revived > 0) notice(tr("...musuh-musuh bangkit kembali."));
 }
 
 void Game::runAutoEvents() {
@@ -170,7 +171,7 @@ void Game::runAutoEvents() {
 void Game::checkBloodstain() {
     const Actor& p = field_.player();
     int got = state_.retrieveBloodstain(field_.mapId(), p.x, p.y);
-    if (got > 0) notice("Sukma yang tercecer kembali: +" + std::to_string(got));
+    if (got > 0) notice(trf("Sukma yang tercecer kembali: +%d", got));
 }
 
 // ------------------------------------------------------------------ battle
@@ -195,7 +196,7 @@ void Game::endBattle(const BattleSystem& bs) {
     bool fromEvent = battleEnemyIndex_ < 0;
     if (r == BattleSystem::Victory) {
         state_.addSukma(bs.sukmaReward());
-        notice("Sukma +" + std::to_string(bs.sukmaReward()) + "   (dibawa: " + std::to_string(state_.sukma()) + ")");
+        notice(trf("Sukma +%d   (dibawa: %d)", bs.sukmaReward(), state_.sukma()));
         if (!fromEvent) field_.resolveEncounter(battleEnemyIndex_, true);
     } else if (r == BattleSystem::Escaped) {
         if (!fromEvent) field_.resolveEncounter(battleEnemyIndex_, false);
@@ -204,7 +205,7 @@ void Game::endBattle(const BattleSystem& bs) {
         const Actor& p = field_.player();
         int lost = state_.die(field_.mapId(), p.x, p.y);
         dsOp("GameState.die() -> sukma tercecer di peta " + std::to_string(field_.mapId()));
-        if (lost > 0) notice(std::to_string(lost) + " sukma lama hilang selamanya.");
+        if (lost > 0) notice(trf("%d sukma lama hilang selamanya.", lost));
         world_.restAtTungku();
         if (interp_.busy()) interp_.abort();   // batalkan cutscene
         requestTransfer(state_.tungkuMap(), state_.tungkuX(), state_.tungkuY(), FACE_DOWN, true);
@@ -246,7 +247,7 @@ std::string Game::useItem(int itemId) {
     if (d->kind == IK_PULANG) {
         state_.removeItem(itemId);
         requestTransfer(state_.tungkuMap(), state_.tungkuX(), state_.tungkuY(), FACE_DOWN, false);
-        return "Abu Tungku membawamu pulang.";
+        return tr("Abu Tungku membawamu pulang.");
     }
     return state_.useItemInField(itemId);
 }
@@ -266,7 +267,7 @@ void Game::hostTransfer(int mapId, const std::string& spawn) {
 }
 
 void Game::hostUnlock(int a, int b) {
-    if (world_.unlockShortcut(a, b)) notice("Jalan pintas terbuka.");
+    if (world_.unlockShortcut(a, b)) notice(tr("Jalan pintas terbuka."));
 }
 
 void Game::hostHeal() { state_.rest(); }
@@ -286,41 +287,41 @@ std::string Game::cheat(int id, int arg) {
     switch (id) {
         case CH_SUKMA:
             state_.addSukma(1000);
-            return "Sukma +1000 (" + std::to_string(state_.sukma()) + ").";
+            return trf("Sukma +1000 (%d).", state_.sukma());
         case CH_LEVEL:
             state_.grantLevel();
-            return "Naik ke level " + std::to_string(state_.level()) + ".";
+            return trf("Naik ke level %d.", state_.level());
         case CH_STAT: {
             if (arg < 0 || arg >= GameState::STAT_COUNT) return "";
             int amount = arg == 0 ? 50 : (arg == 1 ? 20 : 5);
             state_.addStatBonus(arg, amount);
-            return std::string(statNames[arg]) + " +" + std::to_string(amount) + ".";
+            return trf("%s +%d.", tr(statNames[arg]).c_str(), amount);
         }
         case CH_HEAL:
             state_.rest();
-            return "Tubuhmu pulih sepenuhnya.";
+            return tr("Tubuhmu pulih sepenuhnya.");
         case CH_ITEMS:
             for (int it : {IT_PENAWAR, IT_BOM_MINYAK, IT_ABU_PULANG, IT_SUKMA_KECIL}) state_.addItem(it, 5);
             state_.addItem(IT_BIJIH_BESI, 6);
-            return "Bekal barang ditambahkan.";
+            return tr("Bekal barang ditambahkan.");
         case CH_WEAPON:
             state_.setWeaponLevel(WEAPON_MAX);
-            return std::string(weaponDef(state_.classId()).name) + " menjadi +" + std::to_string(WEAPON_MAX) + ".";
+            return trf("%s menjadi +%d.", tr(weaponDef(state_.classId()).name).c_str(), WEAPON_MAX);
         case CH_GOD:
             state_.setCheatGod(!state_.cheatGod());
-            return state_.cheatGod() ? "Kebal: NYALA." : "Kebal: MATI.";
+            return tr(state_.cheatGod() ? "Kebal: NYALA." : "Kebal: MATI.");
         case CH_ONEHIT:
             state_.setCheatOneHit(!state_.cheatOneHit());
-            return state_.cheatOneHit() ? "Sekali pukul: NYALA." : "Sekali pukul: MATI.";
+            return tr(state_.cheatOneHit() ? "Sekali pukul: NYALA." : "Sekali pukul: MATI.");
         case CH_OPEN: {
             int n = world_.openEverything();
-            return "Semua jalan terbuka (" + std::to_string(n) + ") dan semua Tungku menyala.";
+            return trf("Semua jalan terbuka (%d) dan semua Tungku menyala.", n);
         }
         case CH_COMPANION:
-            if (state_.companionJoined()) return "Timun Mas sudah bersamamu.";
+            if (state_.companionJoined()) return tr("Timun Mas sudah bersamamu.");
             state_.joinCompanion();
             state_.setFlag("timun_bergabung", 1);
-            return "Timun Mas bergabung.";
+            return tr("Timun Mas bergabung.");
         default:
             return "";
     }
@@ -335,11 +336,11 @@ std::string Game::buy(int entry) {
     const ItemDef* d = itemDef(e.item);
     switch (state_.buy(entry)) {
         case GameState::BUY_OK:
-            return e.item == IT_KENDI_JAMU ? "Wadah Ramuan Jamu bertambah (" + std::to_string(state_.jamuMax()) + ")."
-                                          : std::string("Dibeli: ") + (d ? d->name : "?") + ".";
-        case GameState::BUY_SOLD_OUT: return "Barang itu sudah habis.";
-        case GameState::BUY_NO_SUKMA: return "Sukma tidak cukup (butuh " + std::to_string(e.price) + ").";
-        default: return "Tidak bisa membawa lebih banyak.";
+            return e.item == IT_KENDI_JAMU ? trf("Wadah Ramuan Jamu bertambah (%d).", state_.jamuMax())
+                                          : trf("Dibeli: %s.", d ? tr(d->name).c_str() : "?");
+        case GameState::BUY_SOLD_OUT: return tr("Barang itu sudah habis.");
+        case GameState::BUY_NO_SUKMA: return trf("Sukma tidak cukup (butuh %d).", e.price);
+        default: return tr("Tidak bisa membawa lebih banyak.");
     }
 }
 
@@ -347,10 +348,10 @@ std::string Game::forge() {
     const WeaponDef& w = weaponDef(state_.classId());
     int lv = state_.weaponLevel();
     switch (state_.forge()) {
-        case GameState::FORGE_OK: return std::string(w.name) + " ditempa menjadi +" + std::to_string(state_.weaponLevel()) + ".";
-        case GameState::FORGE_MAX: return "Senjatamu sudah tidak bisa ditempa lagi.";
-        case GameState::FORGE_NO_SUKMA: return "Sukma tidak cukup (butuh " + std::to_string(w.costSukma[lv]) + ").";
-        default: return "Bijih Besi kurang (butuh " + std::to_string(w.costOre[lv]) + ").";
+        case GameState::FORGE_OK: return trf("%s ditempa menjadi +%d.", tr(w.name).c_str(), state_.weaponLevel());
+        case GameState::FORGE_MAX: return tr("Senjatamu sudah tidak bisa ditempa lagi.");
+        case GameState::FORGE_NO_SUKMA: return trf("Sukma tidak cukup (butuh %d).", w.costSukma[lv]);
+        default: return trf("Bijih Besi kurang (butuh %d).", w.costOre[lv]);
     }
 }
 
@@ -358,8 +359,8 @@ std::string Game::forge() {
 
 std::string Game::levelUp() {
     int cost = state_.levelUpCost();
-    if (!state_.levelUp()) return "Sukma tidak cukup (butuh " + std::to_string(cost) + ").";
-    return "Naik ke level " + std::to_string(state_.level()) + ".";
+    if (!state_.levelUp()) return trf("Sukma tidak cukup (butuh %d).", cost);
+    return trf("Naik ke level %d.", state_.level());
 }
 
 int Game::warpTargets(int* outMap, int* outDepth, int max) {
@@ -402,7 +403,7 @@ bool Game::saveTo(const std::string& path, std::string* error) const {
                     state_.toJson() + ",\"world\":" + world_.toJson() + "}";
     std::FILE* f = std::fopen(path.c_str(), "wb");
     if (f == nullptr) {
-        if (error) *error = "tidak bisa menulis " + path;
+        if (error) *error = trf("tidak bisa menulis %s", path.c_str());
         return false;
     }
     std::fwrite(o.data(), 1, o.size(), f);
@@ -418,7 +419,7 @@ bool Game::loadFrom(const std::string& path, std::string* error) {
     int map = root->getInt("map"), x = root->getInt("x"), y = root->getInt("y"), dir = root->getInt("dir");
     delete root;
     if (!ok || world_.info(map) == nullptr) {
-        if (error) *error = "berkas simpan rusak";
+        if (error) *error = tr("berkas simpan rusak");
         return false;
     }
     interp_.abort();
@@ -440,18 +441,18 @@ std::string Game::describeSave(const std::string& path) {
     int sukma = st ? st->getInt("sukma") : 0;
     int map = root->getInt("map");
     delete root;
-    return "Level " + std::to_string(level) + "  -  Sukma " + std::to_string(sukma) + "  -  peta " + std::to_string(map);
+    return trf("Level %d  -  Sukma %d  -  peta %d", level, sukma, map);
 }
 
 std::string Game::companionLevelUp() {
     if (!state_.companionJoined()) return "";
     int cost = state_.companionLevelUpCost();
-    if (!state_.companionLevelUp()) return "Sukma tidak cukup (butuh " + std::to_string(cost) + ").";
-    return "Timun Mas naik ke level " + std::to_string(state_.companionLevel()) + ".";
+    if (!state_.companionLevelUp()) return trf("Sukma tidak cukup (butuh %d).", cost);
+    return trf("Timun Mas naik ke level %d.", state_.companionLevel());
 }
 
 std::string Game::toggleCompanion() {
     if (!state_.companionJoined()) return "";
     state_.setCompanionActive(!state_.companionActive());
-    return state_.companionActive() ? "Timun Mas berjalan bersamamu." : "Timun Mas menunggu di Tungku.";
+    return tr(state_.companionActive() ? "Timun Mas berjalan bersamamu." : "Timun Mas menunggu di Tungku.");
 }
