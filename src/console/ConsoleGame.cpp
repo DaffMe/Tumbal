@@ -288,7 +288,7 @@ int runConsole() {
     game.newGame("Tumbal", KL_PENDEKAR);
     std::printf("\nTUMBAL - mode console\n"
                 "Perintah: w/a/s/d (+angka langkah, mis. 'd 5'), q/e/z/c = diagonal, x = periksa/bicara,\n"
-                "          jamu, graph, tungku, buka <a> <b>, lihat, simpan <1-3>, muat <1-3>, keluar\n"
+                "          jamu, graph, tungku, buka <a> <b>, lihat, simpan <1-3>, muat <1-3>, cheat, keluar\n"
                 "Peta: @ kamu, M musuh, N orang, ? periksa, * barang, T Tungku, D pintu, ~ sukma tercecer\n");
     settle(game);
     printView(game.field(), &game.state().bloodstain());
@@ -312,6 +312,17 @@ int runConsole() {
             if (ok) std::printf("  %s slot %d.\n", cmd == "simpan" ? "Tersimpan di" : "Dimuat dari", slot);
             else std::printf("  Gagal: %s\n", e.c_str());
             if (ok && cmd == "muat") printView(game.field(), &game.state().bloodstain());
+            continue;
+        }
+        if (cmd == "cheat") {
+            int id = -1, arg = 2;
+            int got = std::sscanf(line.c_str() + cmd.size(), "%d %d", &id, &arg);
+            if (got < 1 || id < 0 || id >= Game::CH_COUNT) {
+                std::printf("  cheat <nomor> [stat]   (stat: 0 HP, 1 MP, 2 Serang, 3 Tahan, 4 Ilmu, 5 Tolak, 6 Gesit, 7 Untung)\n");
+                for (int i = 0; i < Game::CH_COUNT; ++i) std::printf("   %d) %s\n", i, Game::cheatName(i));
+            } else {
+                std::printf("  %s\n", game.cheat(id, arg).c_str());
+            }
             continue;
         }
         if (cmd == "graph") { printGraph(game.world(), game.field().mapId()); continue; }

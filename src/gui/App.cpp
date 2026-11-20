@@ -129,6 +129,16 @@ void App::updateField(float dt) {
         std::string r = menu_.update(game_);
         if (!r.empty()) { toast_ = r; toastTime_ = 2.2f; }
         if (game_.transferPending()) fadeDir_ = 1;
+        int exit = menu_.takeExitRequest();
+        if (exit == 1) {             // kembali ke layar judul (tanpa menyimpan)
+            game_.interpreter().abort();
+            title_.open();
+            mode_ = ModeTitle;
+            fade_ = 0.0f;
+            fadeDir_ = 0;
+        } else if (exit == 2) {
+            quit_ = true;
+        }
         return;
     }
     if (game_.inDialog()) {
@@ -145,6 +155,7 @@ void App::updateField(float dt) {
         bool openMenu = (IsKeyPressed(KEY_X) || IsKeyPressed(KEY_ESCAPE)) && !game_.interpreter().busy() &&
                         !game_.field().player().moving;
         if (openMenu) { menu_.show(); return; }
+        if (IsKeyPressed(KEY_F9) && !game_.interpreter().busy()) { menu_.showCheats(); return; }   // pintasan cheat
         game_.update(dt, in);
     }
     if (game_.state().flag("tamat") != 0 && !game_.interpreter().busy() && mode_ == ModeField) {
@@ -302,7 +313,8 @@ void App::drawEnding() {
     line("akhir dari versi demo", 186, 4.0f, ui::DIM);
     const GameState& gs = game_.state();
     line("Level " + std::to_string(gs.level()) + "   -   Mati " + std::to_string(gs.deaths()) + " kali   -   Bekal " +
-             std::to_string(gs.count(IT_BIJI_TIMUN) + gs.count(IT_JARUM) + gs.count(IT_GARAM) + gs.count(IT_TERASI)) + "/4",
+             std::to_string(gs.count(IT_BIJI_TIMUN) + gs.count(IT_JARUM) + gs.count(IT_GARAM) + gs.count(IT_TERASI)) + "/4" +
+             (gs.cheated() ? "   -   memakai cheat" : ""),
          222, 5.0f, ui::AMBER);
     line("Aset: Sevarihk, Redshrike, Nidhoggn, Kenney & lainnya (lihat CREDITS.md)", 280, 6.0f, ui::DIM, 10);
     line("Terima kasih sudah bermain.   [Z] kembali ke judul", 320, 6.5f, ui::BONE);
@@ -451,6 +463,8 @@ int App::run(bool smoke, bool shots) {
             if (frame == 640) TakeScreenshot("shot_battle.png");
             if (frame == 645) { mode_ = ModeField; go(3, 22, 18, FACE_UP); menu_.show(); }
             if (frame == 680) TakeScreenshot("shot_menu.png");
+            if (frame == 681) menu_.showCheats();
+            if (frame == 684) TakeScreenshot("shot_cheat.png");
             if (frame == 685) { menu_.hide(); game_.state().addSukma(300); game_.hostOpenShop("dagang"); }
             if (frame == 700) TakeScreenshot("shot_toko.png");
             if (frame == 705) { game_.closeShopMenu(); game_.state().addItem(IT_BIJIH_BESI, 1); game_.hostOpenShop("tempa"); }

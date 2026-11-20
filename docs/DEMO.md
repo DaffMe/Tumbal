@@ -49,6 +49,9 @@ lewat playtest** sebelum Buto dilemahkan; Pendekar paling terdampak.
 
 Panah/WASD jalan (8 arah), Shift lari, Z/Enter aksi/konfirmasi, X/Esc menu/batal, tahan Z di battle untuk
 mempercepat. Di menu Tungku halaman Timun Mas: C = panggil/lepas pendamping. F1 Inspector, F3 collision.
+Menu X → **Keluar** (ke layar judul / keluar game) dan **Cheat** (juga F9; console: `cheat`): sukma +1000, naik level
+gratis, tambah stat, pulih penuh, bekal barang, senjata +3, kebal, sekali pukul, buka semua jalan & Tungku, panggil
+Timun Mas. Pemakaian cheat tersimpan di berkas simpan dan disebut di layar tamat.
 
 ## Cek cepat
 

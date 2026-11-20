@@ -75,6 +75,8 @@ public:
     // Barang: tas pemain (boleh nullptr = tanpa barang).
     void setInventory(ItemBag* bag) { bag_ = bag; }
     void setCanEscape(bool can) { canEscape_ = can; }
+    // Mode curang (menu cheat): party kebal damage/status, dan/atau serangan party langsung menumbangkan.
+    void setCheats(bool god, bool oneHit) { cheatGod_ = god; cheatOneHit_ = oneHit; }
     bool canEscape() const { return canEscape_; }
     const ItemBag* inventory() const { return bag_; }
     bool canUseItem(int battler, int itemId) const;
@@ -122,6 +124,9 @@ private:
     int     escapeFails_ = 0;
     ItemBag* bag_ = nullptr;
     bool    canEscape_ = true;
+    bool    cheatGod_ = false;
+    bool    cheatOneHit_ = false;
+    int     cheatDamage(const Battler& user, const Battler& target, int dmg) const;
 
     void useItem(Battler& user, const BattleAction& a);
 

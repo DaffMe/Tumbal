@@ -175,6 +175,17 @@ bool World::isCollected(int mapId, int lootIndex) const {
     return (i->collected >> lootIndex) & 1ULL;
 }
 
+int World::openEverything() {
+    int opened = 0;
+    graph_.forEachVertex([&](MapGraph::Vertex* v) {
+        for (MapGraph::Edge* e = v->edges; e != nullptr; e = e->next)
+            if (!e->open) { e->open = true; ++opened; }
+        if (v->data.hasTungku) { v->data.visited = true; lightTungku(v->id); }
+    });
+    dsOp("Graph: semua edge dibuka (" + std::to_string(opened) + " edge berarah) & semua Tungku menyala [cheat]");
+    return opened;
+}
+
 void World::lightTungku(int mapId) {
     MapInfo* i = info(mapId);
     if (i != nullptr && i->hasTungku && !i->tungkuLit) {

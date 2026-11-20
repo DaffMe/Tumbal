@@ -99,6 +99,19 @@ public:
     // Stat tokoh utama = stat level + bonus senjata.
     Stats heroStats(int level) const;
 
+    // ---- mode curang (menu cheat): untuk uji coba atau pemain yang ingin cepat tamat
+    static constexpr int STAT_COUNT = 8;   // HP, MP, Serang, Tahan, Ilmu, Tolak, Gesit, Untung
+    int  statBonus(int stat) const { return (stat >= 0 && stat < STAT_COUNT) ? statBonus_[stat] : 0; }
+    void addStatBonus(int stat, int delta);
+    void grantLevel();                    // naik level tanpa sukma
+    void setWeaponLevel(int lv);
+    bool cheatGod() const { return cheatGod_; }
+    bool cheatOneHit() const { return cheatOneHit_; }
+    void setCheatGod(bool on) { cheatGod_ = on; cheated_ = true; }
+    void setCheatOneHit(bool on) { cheatOneHit_ = on; cheated_ = true; }
+    bool cheated() const { return cheated_; }   // pernah memakai cheat (tampil di layar tamat)
+    void markCheated() { cheated_ = true; }
+
     // ---- pedagang: beli dengan sukma; sebagian barang stoknya terbatas
     enum BuyResult { BUY_OK = 0, BUY_SOLD_OUT, BUY_NO_SUKMA, BUY_FULL };
     int  shopStock(int entry) const;      // sisa stok, -1 = tak terbatas
@@ -125,6 +138,9 @@ private:
     int     weaponLevel_ = 0;
     static constexpr int MAX_SHOP = 16;
     int     shopBought_[MAX_SHOP] = {};
+
+    int     statBonus_[STAT_COUNT] = {};
+    bool    cheatGod_ = false, cheatOneHit_ = false, cheated_ = false;
 
     void refreshHeroStats();   // pasang ulang stat (level + senjata) tanpa mengubah HP/MP
 };

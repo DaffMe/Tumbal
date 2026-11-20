@@ -128,12 +128,51 @@ bool GameState::levelUp() {
 
 // ------------------------------------------------------------------ pandai besi & pedagang
 
+static int& statRef(Stats& s, int i) {
+    switch (i) {
+        case 0: return s.mhp;
+        case 1: return s.mmp;
+        case 2: return s.atk;
+        case 3: return s.def;
+        case 4: return s.mag;
+        case 5: return s.res;
+        case 6: return s.agi;
+        default: return s.luk;
+    }
+}
+
 Stats GameState::heroStats(int level) const {
     Stats s = statsAtLevel(classId_, level);
     const WeaponDef& w = weaponDef(classId_);
     s.atk += w.atk[weaponLevel_];
     s.mag += w.mag[weaponLevel_];
+    for (int i = 0; i < STAT_COUNT; ++i) statRef(s, i) += statBonus_[i];
     return s;
+}
+
+void GameState::addStatBonus(int stat, int delta) {
+    if (stat < 0 || stat >= STAT_COUNT) return;
+    statBonus_[stat] += delta;
+    cheated_ = true;
+    int hpGain = stat == 0 ? delta : 0, mpGain = stat == 1 ? delta : 0;
+    refreshHeroStats();
+    hero_.hp += hpGain;
+    hero_.mp += mpGain;
+    refreshHeroStats();   // jepit lagi ke maksimum
+}
+
+void GameState::grantLevel() {
+    ++level_;
+    cheated_ = true;
+    hero_.stats = heroStats(level_);
+    hero_.hp = hero_.stats.mhp;
+    hero_.mp = hero_.stats.mmp;
+}
+
+void GameState::setWeaponLevel(int lv) {
+    weaponLevel_ = lv < 0 ? 0 : (lv > WEAPON_MAX ? WEAPON_MAX : lv);
+    cheated_ = true;
+    refreshHeroStats();
 }
 
 void GameState::refreshHeroStats() {
@@ -269,6 +308,10 @@ std::string GameState::toJson() const {
     o += ",\"companion\":[" + std::to_string(companionJoined_ ? 1 : 0) + "," + std::to_string(companionActive_ ? 1 : 0) +
          "," + std::to_string(companionLevel_) + "],";
     writeBattler(o, "companionState", companion_);
+    o += ",\"cheat\":[" + std::to_string(cheatGod_ ? 1 : 0) + "," + std::to_string(cheatOneHit_ ? 1 : 0) + "," +
+         std::to_string(cheated_ ? 1 : 0) + "],\"bonus\":[";
+    for (int i = 0; i < STAT_COUNT; ++i) o += (i ? "," : "") + std::to_string(statBonus_[i]);
+    o += "]";
     o += ",\"weapon\":" + std::to_string(weaponLevel_) + ",\"shop\":[";
     for (int i = 0; i < MAX_SHOP; ++i) o += (i ? "," : "") + std::to_string(shopBought_[i]);
     o += "]}";
@@ -293,6 +336,15 @@ bool GameState::fromJson(const JsonValue* v) {
     level_ = v->getInt("level", 1);
     hero_ = makeHeroBattler("Tumbal", classId_, level_);
     weaponLevel_ = v->getInt("weapon", 0);
+    if (const JsonValue* b = v->get("bonus")) {
+        int i = 0;
+        for (const JsonValue* c = b->first(); c != nullptr && i < STAT_COUNT; c = c->next(), ++i) statBonus_[i] = c->asInt();
+    }
+    if (const JsonValue* c = v->get("cheat")) {
+        cheatGod_ = c->at(0) && c->at(0)->asInt() != 0;
+        cheatOneHit_ = c->at(1) && c->at(1)->asInt() != 0;
+        cheated_ = c->at(2) && c->at(2)->asInt() != 0;
+    }
     if (weaponLevel_ < 0 || weaponLevel_ > WEAPON_MAX) weaponLevel_ = 0;
     refreshHeroStats();
     readBattler(v->get("hero"), hero_);

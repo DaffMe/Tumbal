@@ -78,6 +78,24 @@ public:
     // Pendamping: naik level dengan sukma, atau panggil/lepas.
     std::string companionLevelUp();
     std::string toggleCompanion();
+    // ---- mode curang (menu cheat). Semua aturan di core agar GUI & console sama.
+    enum CheatId {
+        CH_SUKMA = 0,   // sukma +1000
+        CH_LEVEL,       // naik level tanpa sukma
+        CH_STAT,        // tambah stat (arg = 0..7: HP, MP, Serang, Tahan, Ilmu, Tolak, Gesit, Untung)
+        CH_HEAL,        // pulih penuh + jamu terisi
+        CH_ITEMS,       // bekal barang (+5 barang pakai, +6 Bijih Besi)
+        CH_WEAPON,      // senjata langsung +3
+        CH_GOD,         // kebal (nyala/mati)
+        CH_ONEHIT,      // sekali pukul tumbang (nyala/mati)
+        CH_OPEN,        // buka semua jalan & nyalakan semua Tungku (warp ke mana saja)
+        CH_COMPANION,   // Timun Mas bergabung sekarang
+        CH_COUNT
+    };
+    static const char* cheatName(int id);
+    // Jalankan cheat; mengembalikan pesan hasil. Menandai simpanan sebagai "curang".
+    std::string cheat(int id, int arg = 0);
+
     // ---- pedagang & pandai besi (dibuka oleh perintah event "shop")
     enum ShopKind { SHOP_NONE = 0, SHOP_DAGANG, SHOP_TEMPA };
     int  shopMenu() const { return shopMenu_; }

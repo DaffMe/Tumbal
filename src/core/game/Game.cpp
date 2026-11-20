@@ -168,6 +168,7 @@ void Game::setupBattle(BattleSystem& bs, std::uint32_t seed) {
     bs.setup(party, n, battleTroop_, static_cast<Initiative>(battleInit_), seed);
     bs.setInventory(&state_);
     bs.setCanEscape(battleEnemyIndex_ >= 0);   // battle dari event (boss) tidak bisa dikabur
+    bs.setCheats(state_.cheatGod(), state_.cheatOneHit());
 }
 
 void Game::endBattle(const BattleSystem& bs) {
@@ -256,6 +257,61 @@ void Game::hostUnlock(int a, int b) {
 }
 
 void Game::hostHeal() { state_.rest(); }
+
+// ------------------------------------------------------------------ mode curang
+
+const char* Game::cheatName(int id) {
+    static const char* names[CH_COUNT] = {"Sukma +1000", "Naik level (gratis)", "Tambah stat", "Pulih penuh",
+                                          "Bekal barang", "Senjata +3", "Kebal", "Sekali pukul tumbang",
+                                          "Buka semua jalan & Tungku", "Panggil Timun Mas"};
+    return (id >= 0 && id < CH_COUNT) ? names[id] : "?";
+}
+
+std::string Game::cheat(int id, int arg) {
+    state_.markCheated();
+    static const char* statNames[GameState::STAT_COUNT] = {"HP", "MP", "Serang", "Tahan", "Ilmu", "Tolak", "Gesit", "Untung"};
+    switch (id) {
+        case CH_SUKMA:
+            state_.addSukma(1000);
+            return "Sukma +1000 (" + std::to_string(state_.sukma()) + ").";
+        case CH_LEVEL:
+            state_.grantLevel();
+            return "Naik ke level " + std::to_string(state_.level()) + ".";
+        case CH_STAT: {
+            if (arg < 0 || arg >= GameState::STAT_COUNT) return "";
+            int amount = arg == 0 ? 50 : (arg == 1 ? 20 : 5);
+            state_.addStatBonus(arg, amount);
+            return std::string(statNames[arg]) + " +" + std::to_string(amount) + ".";
+        }
+        case CH_HEAL:
+            state_.rest();
+            return "Tubuhmu pulih sepenuhnya.";
+        case CH_ITEMS:
+            for (int it : {IT_PENAWAR, IT_BOM_MINYAK, IT_ABU_PULANG, IT_SUKMA_KECIL}) state_.addItem(it, 5);
+            state_.addItem(IT_BIJIH_BESI, 6);
+            return "Bekal barang ditambahkan.";
+        case CH_WEAPON:
+            state_.setWeaponLevel(WEAPON_MAX);
+            return std::string(weaponDef(state_.classId()).name) + " menjadi +" + std::to_string(WEAPON_MAX) + ".";
+        case CH_GOD:
+            state_.setCheatGod(!state_.cheatGod());
+            return state_.cheatGod() ? "Kebal: NYALA." : "Kebal: MATI.";
+        case CH_ONEHIT:
+            state_.setCheatOneHit(!state_.cheatOneHit());
+            return state_.cheatOneHit() ? "Sekali pukul: NYALA." : "Sekali pukul: MATI.";
+        case CH_OPEN: {
+            int n = world_.openEverything();
+            return "Semua jalan terbuka (" + std::to_string(n) + ") dan semua Tungku menyala.";
+        }
+        case CH_COMPANION:
+            if (state_.companionJoined()) return "Timun Mas sudah bersamamu.";
+            state_.joinCompanion();
+            state_.setFlag("timun_bergabung", 1);
+            return "Timun Mas bergabung.";
+        default:
+            return "";
+    }
+}
 
 void Game::hostOpenShop(const std::string& kind) { shopMenu_ = kind == "tempa" ? SHOP_TEMPA : SHOP_DAGANG; }
 

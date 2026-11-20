@@ -83,6 +83,9 @@ public:
 
     // Nyalakan Tungku di peta (setelah pemain beristirahat di sana).
     void lightTungku(int mapId);
+    // Mode curang: buka setiap edge terkunci (traversal semua vertex & edge Graph) dan
+    // nyalakan semua Tungku sehingga warp bisa ke mana saja. Mengembalikan jumlah edge dibuka.
+    int openEverything();
     // M2 subprogram: daftar Tungku menyala yang TERJANGKAU dari fromMap
     // lewat jalan terbuka (BFS). outMap/outDepth diisi berurutan dari yang
     // terdekat; mengembalikan jumlahnya. Tungku di wilayah yang jalannya

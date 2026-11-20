@@ -7,8 +7,10 @@
 
 static bool confirm() { return IsKeyPressed(KEY_Z) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE); }
 static bool cancel() { return IsKeyPressed(KEY_X) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE); }
-static const char* ROOT[] = {"Barang", "Status", "Simpan", "Tutup"};
-static constexpr int ROOT_N = 4;
+static const char* ROOT[] = {"Barang", "Status", "Simpan", "Cheat", "Keluar", "Tutup"};
+static constexpr int ROOT_N = 6;
+static const char* EXIT_OPT[] = {"Kembali ke layar judul", "Keluar dari game", "Batal"};
+static const char* STAT_NAMES[] = {"HP", "MP", "Serang", "Tahan", "Ilmu", "Tolak", "Gesit", "Untung"};
 
 void MenuView::refreshItems(const Game& game) {
     itemCount_ = 0;
@@ -31,7 +33,37 @@ std::string MenuView::update(Game& game) {
             else if (index_ == 2) {
                 page_ = Save;
                 for (int i = 0; i < 3; ++i) slotInfo_[i] = Game::describeSave(TitleView::slotPath(i + 1));
-            } else open_ = false;
+            } else if (index_ == 3) { page_ = Cheat; }
+            else if (index_ == 4) { page_ = Exit; exitIndex_ = 0; }
+            else open_ = false;
+        }
+        return "";
+    }
+    if (page_ == Exit) {
+        if (up) exitIndex_ = (exitIndex_ + 2) % 3;
+        if (down) exitIndex_ = (exitIndex_ + 1) % 3;
+        if (cancel()) page_ = Root;
+        if (confirm()) {
+            if (exitIndex_ == 2) { page_ = Root; return ""; }
+            exitRequest_ = exitIndex_ + 1;
+            open_ = false;
+            page_ = Root;
+        }
+        return "";
+    }
+    if (page_ == Cheat) {
+        int n = Game::CH_COUNT;
+        if (up) cheatIndex_ = (cheatIndex_ + n - 1) % n;
+        if (down) cheatIndex_ = (cheatIndex_ + 1) % n;
+        if (cheatIndex_ == Game::CH_STAT) {
+            if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) statIndex_ = (statIndex_ + 7) % 8;
+            if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) statIndex_ = (statIndex_ + 1) % 8;
+        }
+        if (cancel()) page_ = Root;
+        if (confirm()) {
+            std::string r = game.cheat(cheatIndex_, statIndex_);
+            if (game.transferPending()) open_ = false;
+            return r;
         }
         return "";
     }
@@ -70,7 +102,7 @@ std::string MenuView::update(Game& game) {
 void MenuView::draw(const Game& game, double time) {
     if (!open_) return;
     DrawRectangle(0, 0, 640, 360, Fade(BLACK, 0.45f));
-    Rectangle rw{16, 16, 130, 104};
+    Rectangle rw{16, 16, 130, 148};
     ui::window(rw, 0.95f);
     for (int i = 0; i < ROOT_N; ++i) {
         float y = rw.y + 8 + i * 22;
@@ -81,7 +113,7 @@ void MenuView::draw(const Game& game, double time) {
     // ringkasan selalu tampil: sukma & HP
     const GameState& gs = game.state();
     const Battler& h = gs.hero();
-    Rectangle sw{16, 126, 130, 72};
+    Rectangle sw{16, 170, 130, 72};
     ui::window(sw, 0.95f);
     ui::text("Sukma", sw.x + 10, sw.y + 6, ui::DIM);
     ui::textRight(std::to_string(gs.sukma()), sw.x + sw.width - 10, sw.y + 6, ui::AMBER);
@@ -121,6 +153,36 @@ void MenuView::draw(const Game& game, double time) {
             ui::text(label, w.x + 30, y, sel ? ui::AMBER : ui::BONE);
             if (sel) ui::cursor(w.x + 14, y + 8, time);
         }
+    }
+    if (page_ == Exit) {
+        Rectangle w{156, 16, 468, 118};
+        ui::window(w, 0.95f);
+        ui::text("Kemajuan sejak terakhir menyimpan akan hilang.", w.x + 14, w.y + 10, ui::BLOOD);
+        for (int i = 0; i < 3; ++i) {
+            float y = w.y + 40 + i * 24;
+            bool sel = i == exitIndex_;
+            ui::text(EXIT_OPT[i], w.x + 30, y, sel ? ui::AMBER : ui::BONE);
+            if (sel) ui::cursor(w.x + 14, y + 8, time);
+        }
+    }
+    if (page_ == Cheat) {
+        Rectangle w{156, 16, 468, 300};
+        ui::window(w, 0.95f);
+        ui::text("CHEAT  -  untuk uji coba / cepat tamat (layar tamat mencatat kamu curang)", w.x + 14, w.y + 8, ui::DIM, 10);
+        for (int i = 0; i < Game::CH_COUNT; ++i) {
+            float y = w.y + 26 + i * 22;
+            bool sel = i == cheatIndex_;
+            std::string label = Game::cheatName(i);
+            if (i == Game::CH_STAT) label += std::string(":  < ") + STAT_NAMES[statIndex_] + " >";
+            ui::text(label, w.x + 30, y, sel ? ui::AMBER : ui::BONE);
+            if (i == Game::CH_GOD || i == Game::CH_ONEHIT) {
+                bool on = i == Game::CH_GOD ? gs.cheatGod() : gs.cheatOneHit();
+                ui::textRight(on ? "NYALA" : "mati", w.x + w.width - 16, y, on ? Color{150, 220, 150, 255} : ui::DIM);
+            }
+            if (sel) ui::cursor(w.x + 14, y + 8, time);
+        }
+        ui::text(cheatIndex_ == Game::CH_STAT ? "[Z] pakai   [kiri/kanan] pilih stat   [X] kembali" : "[Z] pakai   [X] kembali",
+                 w.x + 14, w.y + w.height - 22, ui::DIM, 10);
     }
     if (page_ == Status) {
         Rectangle stw{156, 16, 468, 248};

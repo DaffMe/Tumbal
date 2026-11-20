@@ -361,7 +361,75 @@ static void testShopEvent() {
     CHECK(g.buy(0).find("Dibeli") != std::string::npos);
 }
 
+static void testCheats() {
+    SECTION("Mode curang: level/stat/senjata/buka jalan, tersimpan, dan kebal/sekali pukul di battle");
+    Game g;
+    std::string err;
+    std::string root = std::string(worldPath()).substr(0, std::string(worldPath()).find("maps/world.json"));
+    std::string ev[] = {root + "events/akhir.json"};
+    CHECK(g.load(worldPath(), ev, 1, &err));
+    g.newGame("Tumbal", KL_PENDEKAR);
+    CHECK(!g.state().cheated());
+    int atk = g.state().hero().stats.atk;
+    g.cheat(Game::CH_LEVEL);
+    CHECK(g.state().level() == 2 && g.state().sukma() == 0 && g.state().cheated());
+    g.cheat(Game::CH_STAT, 2);                              // Serang +5
+    CHECK(g.state().hero().stats.atk == statsAtLevel(KL_PENDEKAR, 2).atk + 5);
+    CHECK(g.state().hero().stats.atk > atk);
+    int mhp = g.state().hero().stats.mhp;
+    g.cheat(Game::CH_STAT, 0);                              // HP +50, langsung terisi
+    CHECK(g.state().hero().stats.mhp == mhp + 50 && g.state().hero().hp == g.state().hero().stats.mhp);
+    g.cheat(Game::CH_WEAPON);
+    CHECK(g.state().weaponLevel() == WEAPON_MAX);
+    g.cheat(Game::CH_SUKMA);
+    CHECK(g.state().sukma() == 1000);
+    // naik level sungguhan tetap membawa bonus stat & senjata
+    CHECK(g.state().levelUp());
+    CHECK(g.state().hero().stats.atk == statsAtLevel(KL_PENDEKAR, 3).atk + 5 + weaponDef(KL_PENDEKAR).atk[WEAPON_MAX]);
+    // buka semua jalan: gerbang Memedi & jalan pintas bambu terbuka, semua Tungku bisa dituju
+    CHECK(!g.world().graph().isOpen(4, 5) && !g.world().graph().isOpen(3, 5));
+    g.cheat(Game::CH_OPEN);
+    CHECK(g.world().graph().isOpen(4, 5) && g.world().graph().isOpen(3, 5));
+    CHECK(!g.world().graph().isOpen(8, 7));                  // jalan satu arah tetap satu arah
+    int maps[16], depth[16];
+    int lit = 0;
+    g.world().graph().forEachVertex([&](World::MapGraph::Vertex* v) { if (v->data.hasTungku) ++lit; });
+    CHECK(g.world().warpTargets(3, maps, depth, 16) == lit);
+    g.cheat(Game::CH_COMPANION);
+    CHECK(g.state().companionJoined());
+    g.cheat(Game::CH_GOD);
+    g.cheat(Game::CH_ONEHIT);
+    CHECK(g.state().cheatGod() && g.state().cheatOneHit());
+    // simpan/muat membawa semuanya
+    JsonValue* v = JsonValue::parse(g.state().toJson(), &err);
+    GameState back;
+    CHECK(v != nullptr && back.fromJson(v));
+    delete v;
+    CHECK(back.cheated() && back.cheatGod() && back.cheatOneHit() && back.statBonus(2) == 5 && back.statBonus(0) == 50);
+    CHECK(back.hero().stats.atk == g.state().hero().stats.atk);
+    // battle: lawan Buto, party kebal dan menumbangkan sekali pukul
+    Battler party[4];
+    int n = g.state().party(party);
+    BattleSystem bs;
+    bs.setup(party, n, TR_BUTO, INIT_NORMAL, 5);
+    bs.setCheats(true, true);
+    int hp0 = bs.battler(0).hp;
+    for (int guard = 0; guard < 300 && !bs.over(); ++guard) {
+        if (bs.phase() == BattleSystem::Input) {
+            int target = -1;
+            for (int i = bs.partyCount(); i < bs.count(); ++i)
+                if (bs.battler(i).alive() && bs.battler(i).def && bs.battler(i).def->core) target = i;
+            bs.submit(BattleAction{SKL_SERANG, target, 0});
+        } else {
+            bs.advanceToNextActor();
+        }
+        CHECK(bs.battler(0).hp == hp0);
+    }
+    CHECK(bs.phase() == BattleSystem::Victory);
+}
+
 void runWorldTests() {
+    testCheats();
     testForgeAndShop();
     testShopEvent();
     testWideEventAndNpc();

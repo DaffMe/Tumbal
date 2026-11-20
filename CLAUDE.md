@@ -38,7 +38,8 @@ bin/tumbal.exe --balance   # simulasi kesulitan (kelas x troop x level), lihat d
 ```
 
 Toolchain: MSYS2 UCRT64 (g++, raylib 6 dari pacman, Python + Pillow). Makefile jalan dari bash maupun PowerShell.
-GUI: F1 = Inspector struktur data, F3 = tampilkan collision. Shift = lari, Z = aksi/konfirmasi, X = batal.
+GUI: F1 = Inspector struktur data, F3 = tampilkan collision, F9 = menu cheat. Shift = lari, Z = aksi/konfirmasi,
+X = batal/menu (Barang, Status, Simpan, Cheat, Keluar). Console: perintah `cheat`.
 
 ## Konvensi kode
 

@@ -205,6 +205,7 @@ bool BattleSystem::startOfTurn(Battler& b) {
         if (d.dotPct > 0.0f) {
             int dmg = static_cast<int>(b.stats.mhp * d.dotPct);
             if (dmg < 1) dmg = 1;
+            if (cheatGod_ && !b.enemy) dmg = 0;
             b.hp -= dmg;
             emit(BattleEvent::Damage, -1, b.slot, dmg, b.name + " menderita karena " + d.name + ".", 0, s);
             if (b.hp <= 0) { kill(b); return false; }
@@ -312,6 +313,7 @@ void BattleSystem::useItem(Battler& user, const BattleAction& a) {
             raw *= 0.9f + rng_.unit() * 0.2f;
             int dmg = static_cast<int>(raw);
             if (dmg < 1) dmg = 1;
+            dmg = cheatDamage(user, t, dmg);
             t.hp -= dmg;
             emit(BattleEvent::Damage, user.slot, t.slot, dmg);
             if (t.hp <= 0) { kill(t); break; }
@@ -433,6 +435,13 @@ int BattleSystem::computeDamage(const Battler& u, const Battler& t, const SkillD
     return d < 1 ? 1 : d;
 }
 
+// Damage setelah mode curang: party kebal (0) / serangan party menumbangkan sekali pukul.
+int BattleSystem::cheatDamage(const Battler& user, const Battler& target, int dmg) const {
+    if (cheatGod_ && !target.enemy) return 0;
+    if (cheatOneHit_ && !user.enemy && target.enemy) return target.hp > dmg ? target.hp : dmg;
+    return dmg;
+}
+
 void BattleSystem::hit(Battler& user, Battler& target, const SkillDef& s) {
     bool offensive = (user.enemy != target.enemy);
     if (s.formula == FM_PULIH) {
@@ -451,7 +460,7 @@ void BattleSystem::hit(Battler& user, Battler& target, const SkillDef& s) {
         // tangkis: serangan dibatalkan, target membalas x1.5
         const SkillDef* atk = skillDef(SKL_SERANG);
         bool crit = false;
-        int dmg = static_cast<int>(computeDamage(target, user, *atk, crit) * 1.5f);
+        int dmg = cheatDamage(target, user, static_cast<int>(computeDamage(target, user, *atk, crit) * 1.5f));
         emit(BattleEvent::Counter, user.slot, target.slot, 0, target.name + " menangkis dan membalas!");
         user.hp -= dmg;
         emit(BattleEvent::Damage, target.slot, user.slot, dmg);
@@ -460,7 +469,7 @@ void BattleSystem::hit(Battler& user, Battler& target, const SkillDef& s) {
     }
     if (s.formula != FM_NONE) {
         bool crit = false;
-        int dmg = computeDamage(user, target, s, crit);
+        int dmg = cheatDamage(user, target, computeDamage(user, target, s, crit));
         target.hp -= dmg;
         BattleEvent e;
         e.kind = BattleEvent::Damage;
@@ -473,6 +482,7 @@ void BattleSystem::hit(Battler& user, Battler& target, const SkillDef& s) {
         if (target.hp <= 0) { kill(target); return; }
         if (target.has(ST_TIDUR)) removeStatus(target, ST_TIDUR);
     }
+    if (cheatGod_ && !target.enemy && offensive) return;   // kebal: tanpa status & tunda dari musuh
     if (s.status != ST_NONE && rng_.range(1, 100) <= s.statusChance) addStatus(target, s.status);
     if (s.delayPct > 0) applyDelay(target, s.delayPct);
 }
