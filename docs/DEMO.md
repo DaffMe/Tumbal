@@ -1,7 +1,8 @@
 # Panduan Demo TUMBAL
 
 Dokumen teknis untuk uji coba dan presentasi: rute permainan, titik untuk memperlihatkan tiap struktur data,
-dan cara cepat mengecek game.
+dan cara cepat mengecek game. Nama di bawah memakai istilah Indonesia (sumber); di game versi English (bawaan)
+istilahnya: sukma = Souls, Tungku = Hearth, tumbal = Offering. Bahasa diganti di **Settings**.
 
 ## Rute lengkap (±45–60 menit)
 
@@ -40,7 +41,8 @@ lewat playtest** sebelum Buto dilemahkan; Pendekar paling terdampak.
 - **F1 Inspector** (GUI): isi Timeline DLL (saat battle), kedalaman Stack interpreter, Graph dunia dengan status
   edge terbuka/TERKUNCI, dan jejak operasi `dsOp` terbaru secara langsung. Queue terlihat lewat notifikasi yang
   muncul satu per satu dan animasi battle yang diputar berurutan.
-- **Battle**: strip "Giliran" di atas = `Timeline::predictTurns` (simulasi pada salinan DLL).
+- **Battle**: strip "Giliran" / "Turns" di atas = `Timeline::predictTurns` (simulasi pada salinan DLL).
+  Telegraf: `BattleSystem::threatOn` menandai anggota party yang diincar jurus rapalan musuh.
 - **Tungku → Warp**: daftar tujuan = BFS dari peta sekarang, hanya Tungku menyala yang terjangkau lewat edge terbuka.
 - **Console** (`bin/tumbal.exe --console`): perintah `graph` mencetak adjacency list; setiap operasi ADT tercetak
   sebagai baris `[DS]`. Perintah `simpan 1` / `muat 1` memakai format save yang sama dengan GUI.
@@ -57,12 +59,16 @@ Timun Mas. Pemakaian cheat tersimpan di berkas simpan dan disebut di layar tamat
 ## Cek cepat
 
 ```bash
-mingw32-make test            # 332 unit test
-bin/tumbal.exe --shots       # screenshot otomatis: judul, 8 peta, dialog, battle biasa, menu, battle Buto
+mingw32-make test            # 377 unit test (termasuk cakupan terjemahan)
+bin/tumbal.exe --shots       # screenshot otomatis: judul, 8 peta, dialog + potret, battle, menu, cheat, toko, tempa, Buto
+/c/msys64/ucrt64/bin/python.exe tools/lang_keys.py     # cek semua teks punya terjemahan Inggris
 /c/msys64/ucrt64/bin/python.exe tools/render_maps.py   # pratinjau seluruh peta -> docs/map_preview/*.png
 bin/tumbal.exe --console     # mode teks
 bin/tumbal.exe --balance     # simulasi kesulitan: level menang 50%/90% per troop & kurva Buto (senjata +0/+3)
 ```
 
 Audio: musik per peta (property peta `musik`) dengan crossfade, musik battle/boss, efek suara menu & battle
-(`src/gui/Audio.cpp`). Semua berkas CC0, lihat `CREDITS.md`.
+(`src/gui/Audio.cpp`). Musik pihak ketiga CC0; musik Desa = gending gamelan orisinal (`tools/make_gamelan.py`).
+Lihat `CREDITS.md`.
+
+Screenshot versi English untuk README ada di `docs/screenshots/` (salinan hasil `--shots`).

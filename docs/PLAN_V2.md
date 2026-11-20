@@ -1,6 +1,6 @@
 # Rencana v2 — TUMBAL
 
-> Status: **disetujui 2026-11-19; fase 1–13 selesai; tersisa playtest penuh oleh pemilik proyek & tabel tim README** (demo lengkap 8 peta sampai tamat sudah dapat dimainkan; lihat docs/DEMO.md dan bagian 8). Disusun 2026-11-19 dari brainstorming dan
+> Status: **disetujui 2026-11-19; fase 1–14 selesai; tersisa playtest penuh oleh pemilik proyek, keputusan kesulitan Buto, & tabel tim README** (demo lengkap 8 peta sampai tamat sudah dapat dimainkan; lihat docs/DEMO.md dan bagian 8). Disusun 2026-11-19 dari brainstorming dan
 > [bedah sistem Black Souls 1](research/black-souls-1-analysis.md).
 > Judul game: **TUMBAL** (disepakati 2026-11-19).
 
@@ -65,6 +65,12 @@ Judul → Nama → Pilih kelas (Pendekar / Maling / Pawang) → Hadiah awal (1 d
 ```
 Target kepadatan per peta: 10–20 kilau loot, 5–10 musuh terlihat, 1–3 NPC/rahasia, 1 jalan pintas.
 
+**Realisasi (dipakai di game sekarang):** 8 peta — Sel Tumbal → Lorong Lumbung (●Tungku, boss kecil Penjaga
+Lumbung) → Desa Karangtumbal (●Tungku, hub: Mbok Srini, penumbuk lesung, Empu Karta, pedagang) → Ladang Timun
+Busuk (●Tungku, Memedi Sawah membuka jalan ke timur) → Hutan Bambu Jarum (●Tungku, tebas bambu = jalan pintas ke
+desa) → Laut Garam (Timun Mas di dermaga bergabung) → Rawa Terasi (●Tungku, pemuda desa) → Sarang Buto (satu arah,
+boss Buto Ijo) → layar tamat. Rincian rute: [DEMO.md](DEMO.md).
+
 ---
 
 ## 4. Mekanik yang dinilai & struktur data
@@ -80,8 +86,8 @@ di luar operasi primitif, semua di `src/core/` tanpa raylib.
 - **Operasi:** `insertSorted` (masuk battle, summon), `remove` (mati/kabur), `updateAV` +
   `reposition` (stun menunda, haste mempercepat, rapal memasang waktu tunggu), `popFront` (giliran),
   salinan list untuk prediksi.
-- **Subprogram M1:** `advanceToNextActor()`, `startChant()`, `applyDelay()` (stun/sapuan),
-  `predictTurns(n)` (isi panel antrean), `resolveAction()`.
+- **Subprogram M1:** `advanceTime()` / `advanceToNextActor()`, `startChant()`, `applyDelay()` (stun/sapuan),
+  `predictTurns(n)` (isi panel antrean), `resolveAction()`, `threatOn()` (telegraf jurus besar).
 - **Pendukung linear:** `Queue<BattleEvent>` untuk urutan animasi/log (sudah ada di v1).
 
 ### M2 — Dunia saling terhubung & Tungku *(BS1: hub + rantai peta + bonfire/warp)*
@@ -90,13 +96,15 @@ di luar operasi primitif, semua di `src/core/` tanpa raylib.
 - **Operasi:** `addVertex/addEdge` (muat dunia), `findEdge` (pindah peta), update status edge (buka jalan
   pintas), BFS (atlas/peta dunia, cari Tungku terdekat), traversal penuh (respawn musuh semua peta).
 - **Subprogram M2:** `travel(exit)`, `unlockShortcut()`, `restAtTungku()` (traversal: pulihkan + hidupkan
-  musuh di setiap vertex), `nearestTungku()` (BFS), `warpTo(tungku)`.
+  musuh di setiap vertex), `nearestTungku()` (BFS), `warpTargets()` (BFS), `warpTo(tungku)`.
 
 ### M3 — Interpreter event & dialog *(BS1: daftar perintah event RPG Maker)*
 - **Struktur data:** **Stack** frame eksekusi (event memanggil event lain / cabang pilihan, seperti
   interpreter RPG Maker) + **Queue** pesan dan pop-up "barang didapat".
-- **Perintah event:** teks, pilihan, beri/ambil barang, sukma, battle, pindah peta, set flag, panggil event.
-- **Subprogram M3:** `runEvent()`, `stepInterpreter()`, `branchOnChoice()`, `enqueuePopup()`.
+- **Perintah event:** teks, pilihan, beri/ambil barang, sukma, battle, pindah peta, set flag, if flag/barang,
+  panggil event, pulihkan, buka jalan, notifikasi, gabung pendamping (`join`), buka toko/tempa (`shop`).
+- **Subprogram M3 (realisasi):** `runEvent()`, `update()` (jalankan sampai menunggu), `choose()` (masuk cabang =
+  push), `execute()` (satu perintah).
 
 > Inventaris sengaja **bukan** linked list "gear" (mirip contoh terlarang di PDF): cukup array jumlah per
 > ID barang. Pohon skill juga tidak dipakai (contoh terlarang kedua).
@@ -105,39 +113,40 @@ di luar operasi primitif, semua di `src/core/` tanpa raylib.
 
 ## 5. Sistem game (non-ADT, tetap di core)
 
-| Sistem | Isi demo |
-|---|---|
-| Stat | HP, MP, ATK, DEF, MAG, RES, AGI, LCK. Rumus BS1: fisik `atk*4 − def*2`, sihir `dasar + mag*5 − res*2`, variance 20%. |
-| Kelas | Pendekar (ATK/DEF), Maling (AGI, +sukma awal), Pawang (MAG, jurus sihir). |
-| Jurus | ±12 jurus pemain (+ Elak, Tangkis), rapal lambat untuk jurus kuat, elemen (api, air, angin, tanah, gaib). |
-| Status | Racun, Berdarah, Terbakar, Lumpuh, Tidur, Bisu, Takut, Rapuh, Cepat/Lambat. |
-| Barang | Ramuan Jamu (isi ulang di Tungku), penawar, bom, **4 bekal Timun Mas** sebagai barang battle sekali pakai yang memanipulasi antrean. |
-| Senjata | 4 tipe (golok, tombak, keris, tongkat), masing-masing 3 tingkat, upgrade dengan bijih di pandai besi. |
-| Level | Tukar sukma → EXP di Tungku (persis BS1). |
-| Pendamping | Timun Mas; dipanggil di Tungku; naik level dengan diberi sukma. |
-| Musuh | ±10 jenis + 2 mini-boss + boss Buto Ijo (3 bagian, telegraf serangan besar). |
-| AI musuh | Pola aksi + kondisi; pendukung menyembuhkan rekan (seperti AI BS1). |
-| Save | Beberapa slot berkas, simpan di mana saja. |
+| Sistem | Rencana | Realisasi |
+|---|---|---|
+| Stat | HP, MP, ATK, DEF, MAG, RES, AGI, LCK; rumus BS1 | Sesuai rencana (fisik `atk*4 − def*2`, ilmu `dasar + mag*5 − res*2`, variance 20%) |
+| Kelas | Pendekar, Maling, Pawang | Sesuai rencana (+ Timun Mas sebagai kelas pendamping) |
+| Jurus | ±12 jurus pemain + Elak, Tangkis; rapal; elemen | 7 jurus pemain + Serang/Bertahan/Elak/Tangkis, 2 jurus Timun Mas, 24 jurus musuh; rapal & tunda |
+| Status | 10 status | Racun, Berdarah, Terbakar, Lumpuh, Tidur, Bisu, Takut, Rapuh, Cepat, Lambat (+ Bertahan/Elak/Tangkis) |
+| Barang | Jamu, penawar, bom, 4 bekal sebagai barang battle | Jamu, penawar, bom, sukma, Abu Tungku, Bijih Besi, Kendi Jamu; **4 bekal jadi barang cerita** (bukan barang battle) |
+| Senjata | 4 tipe × 3 tingkat | **1 senjata per kelas**, ditempa +0..+3 (sukma + Bijih Besi) di Empu Karta |
+| Level | Tukar sukma di Tungku | Sesuai rencana |
+| Pendamping | Timun Mas, dipanggil di Tungku | Sesuai rencana (naik level dengan sukma, panggil/lepas) |
+| Musuh | ±10 jenis + 2 mini-boss + Buto | 13 musuh biasa + Penjaga Lumbung + Memedi Sawah + Buto Ijo (kepala + 2 tangan, telegraf) |
+| AI musuh | Pola aksi + kondisi; pendukung menyembuhkan | Pola aksi berbobot + syarat HP; **belum ada musuh penyembuh** |
+| Save | Beberapa slot, simpan di mana saja | 3 slot, mati tidak menyimpan; tambahan: menu cheat, bahasa EN/ID |
 
 ---
 
 ## 6. Arsitektur
 
+Struktur yang dipakai sekarang:
+
 ```
-src/core/            (tanpa raylib — bisa dites & jalan di console)
-  adt/               Timeline (DLL), Queue, Stack, Graph   ← dipakai ulang dari v1
-  data/              definisi kelas, jurus, status, barang, musuh, troop (tabel C++)
-  battle/            Battler, BattleSystem (ATB wait), AI, rumus damage, BattleEvent
-  world/             World (Graph peta), MapData (layer tile + objek dari Tiled), Entity,
-                     SymbolEnemy (deteksi 3/5 tile, kejar, arah kontak), collision
-  event/             Interpreter (Stack frame), Command, MessageQueue
-  game/              GameState (party, inventaris, sukma, flag, Tungku), Save/Load
-  util/              Rng, Json (parser kecil untuk berkas Tiled)
-src/gui/             (raylib) scene: Title, Map, Battle, Menu, Shop, Dialog;
-                     tilemap renderer, kamera, cahaya/fog shader, animasi, audio
-src/console/         --console: battle + perjalanan dunia versi teks (bukti logika di C++)
-assets/maps/         peta Tiled (.tmj) + tileset
-tests/               unit test core (framework CHECK v1)
+src/core/            (tanpa raylib & tanpa container STL — bisa dites & jalan di console)
+  adt/               Timeline (DLL), Queue, Stack, Graph
+  data/              GameData: kelas, jurus, status, barang, musuh, troop, senjata, dagangan
+  battle/            Battler, BattleSystem (ATB wait, AI, rumus, telegraf, cheat), BattleEvent
+  world/             World (Graph peta + Tungku), TileMap (Tiled), Field (gerak, musuh terlihat)
+  event/             Script (perintah JSON), Interpreter (Stack frame + Queue notifikasi)
+  game/              Game (perangkai), GameState (party, inventaris, sukma, flag, simpan/muat)
+  util/              Json, Lang (kamus EN/ID), Rng, DsTrace
+src/gui/             (raylib) Title, Map, Battle, Dialog, Menu, Tungku, Shop, Settings, Audio, Ui
+src/console/         --console (versi teks) dan --balance (simulasi kesulitan)
+assets/              maps/, events/, lang/, tiles/, props/, chars/, battlers/, faces/, audio/, fonts/
+tools/               generator aset, peta, pratinjau, musik, terjemahan
+tests/               unit test core (framework CHECK)
 ```
 - **Peta dibuat di Tiled** (gratis). Objek di layer khusus: `tungku`, `loot`, `enemy(troop)`, `door(to,edge)`,
   `npc(event)`, `lever(shortcut)`. Anggota tim non-programmer bisa ikut membuat peta.
@@ -190,7 +199,8 @@ Diperiksa saat aset diunduh pada hari 1.
 ## 8. Fase pengerjaan
 
 Semula ditulis sebagai jadwal 14 hari, tetapi pengerjaan berjalan per fase (fase 1–11 selesai dalam satu
-hari kerja, 2026-11-19). Status di bawah dicocokkan dengan kode pada commit `e030b0c`.
+hari kerja, 2026-11-19). Fase 14 dikerjakan 2026-11-20 dari catatan playtest pertama. Status dicocokkan dengan
+kode terbaru (377 unit test lulus).
 
 | Fase | Target | Hasil yang bisa dicoba | Status |
 |---|---|---|---|
@@ -207,6 +217,7 @@ hari kerja, 2026-11-19). Status di bawah dicocokkan dengan kode pada commit `e03
 | 11 | Polish visual tiap wilayah, kejelasan battle, teks cerita reaktif | — | Selesai |
 | 12 | Balancing, playtest penuh, perbaikan | — | `--balance` selesai (Buto ternyata ±1–3 level lebih berat dari kurva untuk bot); **playtest penuh belum** |
 | 13 | README, dokumentasi struktur data, skrip demo, bahan Pendampingan | — | `docs/DEMO.md` (rute & titik demo) dan `docs/STRUKTUR_DATA.md` (ADT, kompleksitas, subprogram, tanya-jawab Pendampingan) selesai; **tabel tim README diisi tim** |
+| 14 | Perbaikan dari playtest & polish lanjutan | — | Selesai: gerak mulus & garis hitam (skala bulat, kamera piksel), pakaian karakter tertutup, menu Keluar & Cheat, Mulai Baru mereset dunia, pilih kelas kiri/kanan, potret dialog dari sprite, musik gamelan, rumah Jawa, **bahasa English (bawaan) + Indonesia**, font kecil terbaca, README publik |
 
 
 ---

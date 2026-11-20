@@ -10,10 +10,10 @@ Lisensi diperiksa di halaman aslinya pada 2026-11-19.
 | Evil Dungeon Asset Pack | Sevarihk (Aurora-Sprites) | https://opengameart.org/content/evil-dungeon-asset-pack | CC-BY 4.0 | tileset lumbung, autotile tembok |
 | Dead Swamp Tileset | Sevarihk | https://opengameart.org/content/dead-swamp-tileset | CC-BY 4.0 | tileset rawa |
 | Bamboo Tiles | Sevarihk | https://opengameart.org/content/bamboo-tiles | CC-BY 4.0 | hutan bambu |
-| Batak House | Sevarihk | https://opengameart.org/content/batak-house-pixel-tileset | CC-BY 4.0 | rumah desa (sementara) |
+| Batak House | Sevarihk | https://opengameart.org/content/batak-house-pixel-tileset | CC-BY 4.0 | disalin ke `assets/tiles`, tidak dipakai di peta saat ini |
 | Ground and Foliage Autotiles | Sevarihk | https://opengameart.org/content/ground-and-foliage-autotiles | CC-BY 4.0 | rumput, semak |
 | Animated Water Tiles | Sevarihk | https://opengameart.org/content/animated-water-tiles-0 | CC-BY 4.0 | air |
-| Fisher's Hut / Tree Trunk / Palm | Sevarihk | https://opengameart.org/users/sevarihk | CC-BY 4.0 | rumah panggung desa (dipotong, digelapkan), properti peta |
+| Fisher's Hut / Tree Trunk / Palm | Sevarihk | https://opengameart.org/users/sevarihk | CC-BY 4.0 | rumah nelayan Laut Garam, dermaga, tong, jemuran jala, tunggul rawa, semanggi & batu (dipotong, digelapkan) |
 | Tribal Hide and Wood UI | Sevarihk | https://opengameart.org/content/tribal-hide-and-wood-ui | CC-BY 4.0 | bingkai UI |
 | Aurora Character Generator (potongan sprite) | Sevarihk; generator oleh RedoxGames | https://redoxgames.itch.io/aurora-character-generator | CC-BY 4.0 | sprite karakter (dirakit & diwarnai ulang oleh `tools/build_assets.py`) |
 | 10 Basic RPG Enemies, 6 More RPG Enemies, More RPG Enemies, Fossil Undead | Stephen "Redshrike" Challener (beberapa sprite hasil edit dari karya Blarumyrran & LordNeo) | https://opengameart.org/users/redshrike | CC-BY 3.0 | battler musuh (dipotong & diperbesar) |
@@ -27,8 +27,9 @@ diproses (latar dibuang, grid piksel dikembalikan, diskalakan) oleh `tools/build
 
 | Aset | Dipakai di |
 |---|---|
-| Memedi Sawah (battler + sprite peta) | boss Ladang Timun Busuk |
+| Memedi Sawah (battler + sprite peta + potret) | boss Ladang Timun Busuk |
 | Timun Busuk (battler) | musuh ladang |
+| Buto Ijo: kepala + tangan kiri + tangan kanan (battler, sprite peta, potret) (`PROMPT_buto.md`) | boss akhir Sarang Buto |
 | Props ladang: ajir timun, ajir roboh, gubuk sawah, tumpukan timun, ember, cangkul, pagar bambu | peta ladang |
 | Rumah adat Jawa: rumah limasan & rumah kampung tua yang runtuh (`PROMPT_rumah.md`) | peta Desa Karangtumbal |
 

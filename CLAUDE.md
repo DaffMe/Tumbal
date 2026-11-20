@@ -35,6 +35,9 @@ bin/tumbal.exe --balance   # simulasi kesulitan (kelas x troop x level), lihat d
 /c/msys64/ucrt64/bin/python.exe tools/build_assets.py   # assets/src → assets/tiles, assets/chars
 /c/msys64/ucrt64/bin/python.exe tools/make_maps.py      # tata letak ASCII → assets/maps/*.tmj + world.json
 /c/msys64/ucrt64/bin/python.exe tools/render_maps.py    # pratinjau seluruh peta → docs/map_preview/*.png
+/c/msys64/ucrt64/bin/python.exe tools/lang_en.py        # kamus Inggris → assets/lang/en.json
+/c/msys64/ucrt64/bin/python.exe tools/lang_keys.py      # cek cakupan terjemahan (harus 0 belum)
+/c/msys64/ucrt64/bin/python.exe tools/make_gamelan.py   # musik Desa (butuh numpy + ffmpeg)
 ```
 
 Toolchain: MSYS2 UCRT64 (g++, raylib 6 dari pacman, Python + Pillow). Makefile jalan dari bash maupun PowerShell.
@@ -75,7 +78,7 @@ X = batal/menu (Barang, Status, Simpan, Cheat, Keluar). Console: perintah `cheat
 - Objek peta lain: `npc` (`event`, `walker`, `dir`, `once`, `after`), `event` (`event`, `trigger` = action/touch/auto,
   `once` = flag yang menandai sudah terjadi), `loot` (`item` + `n`, atau `event`), `enemy` (`troop`, `walker`, `dir`).
 - Skrip event = JSON di `assets/events/*.json` (perintah: text, choice, item, sukma, flag, if_flag, if_item, battle,
-  call, heal, unlock, transfer, notice, end). Teks cerita ditulis orisinal; jangan menyalin teks Black Souls.
+  call, heal, unlock, transfer, notice, end, join, shop `kind`=dagang/tempa). Teks cerita ditulis orisinal; jangan menyalin teks Black Souls.
 - Logika permainan dirangkai di `src/core/game/Game` (dipakai GUI dan console). App/console hanya meneruskan input.
 - Peta saat ini dibuat oleh `tools/make_maps.py`. Peta yang disunting manual di Tiled harus dikeluarkan dari generator.
 - Aset utama: CC-BY 4.0 (Sevarihk/Aurora) & CC0 dari internet. **Setiap aset baru wajib dicatat di `CREDITS.md`**
@@ -87,6 +90,12 @@ X = batal/menu (Barang, Status, Simpan, Cheat, Keluar). Console: perintah `cheat
   gaya sesuai gambar referensi. Hasil diproses `build_codex()` (deteksi grid piksel, buang magenta, skala) dan
   dicatat di bagian "Aset buatan AI" di `CREDITS.md`.
 - Unduhan mentah disimpan di luar repo; yang dipakai disalin ke `assets/src/` lalu diproses `tools/build_assets.py`.
+
+## Dokumentasi
+
+- `README.md` = halaman publik (English, format ala template open source); `docs/*.md` = dokumen tim (Indonesia).
+- Setelah fitur/fase selesai, perbarui `docs/PLAN_V2.md` (status fase), `docs/DEMO.md` (rute & cek), README
+  (angka test, fitur), dan screenshot `docs/screenshots/` bila tampilan berubah.
 
 ## Git
 

@@ -47,7 +47,7 @@ menelusuri ulang dari head.
 **Pendukung linear:** `Queue<BattleEvent>` — logika battle meng-enqueue kejadian (damage, rapal, buyar, menang),
 GUI men-dequeue satu per satu untuk animasi; console mencetaknya sebagai teks. Logika tidak menunggu animasi.
 
-**Di demo:** strip "Giliran" di atas layar battle = hasil `predictTurns`. Pakai jurus tunda/Serangan Guncang pada
+**Di demo:** strip "Giliran" ("Turns" di versi English) di atas layar battle = hasil `predictTurns`. Pakai jurus tunda/Serangan Guncang pada
 musuh yang merapal: namanya mundur di strip dan muncul "BUYAR!". F1 menampilkan isi DLL (`HEAD <-> ...`) dengan
 `av` tiap node.
 
@@ -113,12 +113,14 @@ setelah Memedi kalah dan Timun Mas bergabung — `if_flag` bersarang di dalam `i
   melarang linked list "gear".
 - **Progresi** = tukar sukma menjadi level di Tungku dan tempa senjata +0..+3, **bukan pohon skill** (contoh terlarang
   kedua di PDF).
-- Flag cerita, stok pedagang = array berukuran tetap.
+- Flag cerita, stok pedagang, bonus stat cheat = array berukuran tetap.
+- Kamus bahasa (`src/core/util/Lang`) = tabel hash open addressing di array mentah (kunci = teks Indonesia,
+  nilai = teks Inggris). Ini utilitas, bukan ADT yang dinilai.
 
 ## Bukti & pengujian
 
-- `mingw32-make test`: unit test ADT (`tests/test_adt.cpp`), battle (`test_battle.cpp`), event (`test_event.cpp`),
-  dunia/game (`test_world.cpp`).
+- `mingw32-make test` (377 lulus): unit test ADT (`tests/test_adt.cpp`), battle (`test_battle.cpp`), event
+  (`test_event.cpp`), dunia/game/simpan/cheat/toko (`test_world.cpp`), bahasa & cakupan terjemahan (`test_lang.cpp`).
 - Setiap operasi ADT di mekanik dicatat `dsOp(...)` ([DsTrace.hpp](../src/core/util/DsTrace.hpp)): baris `[DS]` di
   console dan panel "Operasi struktur data terbaru" di Inspector F1.
 - `bin/tumbal.exe --console`: permainan yang sama tanpa GUI (bukti logika lepas dari raylib).
