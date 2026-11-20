@@ -59,9 +59,10 @@ def build_characters():
                          ('human_arms!na.png', skin), ('human_head!nh.png', skin),
                          ('human_ears!ne.png', skin)]
     # Tokoh utama: tumbal kurus, cawat dan baju karung kusam, rambut kusut.
+    # (celana panjang + baju; sengaja tidak terbuka)
     character('tumbal.png', body(KULIT_SAWO) + [
-        ('loincloth+nl+nt.png', KAIN_COKLAT),
-        ('medieval_wide_shirt+nt+na+sb.png', KAIN_KUSAM),
+        ('plain_pants+nl-tt.png', KAIN_COKLAT),
+        ('medievalshirt+nt+nl+na+0b.png', KAIN_KUSAM),
         ('rogue_hair.png', RAMBUT_HITAM),
     ])
     # Warga desa (sementara, untuk uji NPC)
@@ -74,8 +75,13 @@ def build_characters():
     thick0 = lambda skin: [('human_legs_thick!tl.png', skin), ('human_torso_thick!tt.png', skin),
                            ('human_arms_beefy!ba.png', skin), ('human_head!nh.png', skin),
                            ('human_ears!ne.png', skin)]
-    character('empu_karta.png', thick0((150, 104, 72)) + [
-        ('great_kilt+tt+ba-sl.png', (52, 44, 40)),
+    kekar = lambda skin: [('human_legs!nl.png', skin), ('human_torso!nt.png', skin),
+                          ('human_arms_beefy!ba.png', skin), ('human_head!nh.png', skin),
+                          ('human_ears!ne.png', skin)]
+    character('empu_karta.png', kekar((150, 104, 72)) + [
+        ('plain_pants+nl-tt.png', (46, 40, 36)),
+        ('medievalshirt+nt+nl+ba+0b.png', (70, 58, 50)),
+        ('great_kilt+nt+ba-sl.png', (52, 44, 40)),
         ('full_beard.png', (120, 116, 108)),
     ])
     # Pedagang keliling: celana longgar, baju lurik, ikat kepala merah tua
@@ -86,7 +92,8 @@ def build_characters():
     ])
     # Lelaki Tua: tumbal lama yang dibiarkan membusuk di sel
     character('lelaki_tua.png', body((150, 128, 104)) + [
-        ('loincloth+nl+nt.png', (84, 70, 52)),
+        ('plain_pants+nl-tt.png', (84, 70, 52)),
+        ('medievalshirt+nt+nl+na+0b.png', (110, 104, 92)),
         ('full_beard.png', (190, 186, 176)),
         ('short_receding.png', (190, 186, 176)),
     ])
@@ -99,14 +106,17 @@ def build_characters():
     # Musuh di peta (sprite simbol)
     KULIT_MAYAT = (128, 138, 112)
     character('tumbal_gagal.png', body(KULIT_MAYAT) + [
-        ('loincloth+nl+nt.png', (70, 60, 46)),
+        ('plain_pants+nl-tt.png', (70, 60, 46)),
+        ('medievalshirt+nt+nl+na+0b.png', (92, 86, 70)),
         ('short_receding.png', (40, 40, 36)),
     ])
     thick = lambda skin: [('human_legs_thick!tl.png', skin), ('human_torso_thick!tt.png', skin),
                           ('human_arms_beefy!ba.png', skin), ('human_head!nh.png', skin),
                           ('human_ears!ne.png', skin)]
-    character('penjaga_lumbung.png', thick((150, 150, 132)) + [
-        ('great_kilt+tt+ba-sl.png', (60, 40, 36)),
+    character('penjaga_lumbung.png', kekar((150, 150, 132)) + [
+        ('plain_pants+nl-tt.png', (48, 36, 32)),
+        ('medievalshirt+nt+nl+ba+0b.png', (64, 54, 46)),
+        ('great_kilt+nt+ba-sl.png', (60, 40, 36)),
         ('shoulder_pads+ba.png', (90, 70, 50)),
         ('nordic_helmet.png', (120, 96, 72)),
     ])
