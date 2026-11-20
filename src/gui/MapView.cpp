@@ -68,7 +68,25 @@ Vector2 MapView::targetFor(const Field& field) const {
     return {tx, ty};
 }
 
-void MapView::snapCamera(const Field& field) { cam_ = targetFor(field); }
+void MapView::snapCamera(const Field& field) {
+    cam_ = targetFor(field);
+    if (field.mapId() != preloadedMap_) preload(field);
+}
+
+void MapView::preload(const Field& field) {
+    const TileMap* m = field.map();
+    if (m == nullptr) return;
+    preloadedMap_ = field.mapId();
+    Assets& a = Assets::get();
+    for (const Tileset* ts = m->tilesets(); ts != nullptr; ts = ts->next) a.texture(ts->image);
+    for (const MapObject* o = m->objects(); o != nullptr; o = o->next) {
+        std::string img = o->props.getString("image"), walker = o->props.getString("walker");
+        if (!img.empty()) a.texture(img);
+        if (!walker.empty()) a.texture(walker);
+    }
+    for (int i = 0; i < field.enemyCount(); ++i) a.texture(field.enemy(i).walker);
+    a.texture("assets/chars/tumbal.png");
+}
 
 void MapView::updateCamera(const Field& field, float dt) {
     // kamera terkunci ke pemain seperti RPG Maker (tanpa pelambatan yang membuat pemain

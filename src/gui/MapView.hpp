@@ -18,6 +18,7 @@ public:
 
     // Kamera mengikuti pemain, dijepit ke batas peta.
     void updateCamera(const Field& field, float dt);
+    // Juga memuat lebih dulu semua gambar peta (lihat preload) saat peta berganti.
     void snapCamera(const Field& field);
     // Siapkan lightmap (kegelapan + cahaya). Panggil SEBELUM BeginTextureMode
     // layar utama: raylib tidak mendukung render-texture bersarang.
@@ -41,6 +42,10 @@ private:
     void drawLighting(const Field& field, double time);
     void drawFog(const Field& field, double time);   // property peta "kabut" (0..1)
     bool lightReady_ = false;
+    int  preloadedMap_ = -1;
+    // Muat semua tekstur peta (tileset, props, sprite NPC & musuh) sekaligus saat pindah peta, ketika layar
+    // masih gelap, supaya tidak ada patah sesaat waktu gambar baru pertama kali masuk layar (HDD lambat).
+    void preload(const Field& field);
     const GameState* gs_ = nullptr;
     bool hidden(const MapObject* o) const {
         return gs_ != nullptr && gs_->hidden(o->props.getString("hideIf"), o->props.getString("showIf"));
