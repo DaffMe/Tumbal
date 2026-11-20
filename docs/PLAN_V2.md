@@ -236,5 +236,7 @@ kode terbaru (377 unit test lulus).
 ## 10. Yang masih perlu diputuskan
 1. ~~Judul game~~ → **TUMBAL** (sudah dipilih).
 2. **Repo**: tetap `DaffMe/Cinderwake` lalu ganti nama setelah judul dipilih, atau repo baru.
-3. **Pembagian tim**: usul — kamu: kode; teman planning: peta Tiled + teks dialog/deskripsi barang;
-   teman laporan: laporan + catat keputusan desain sejak sekarang.
+3. ~~Pembagian tim~~ → **Kelompok 12** (sudah ditetapkan):
+   Adi Tia Ragil Saputra (109102500015) — Ketua Kelompok & Perancang Game;
+   Daffa Asqalany (109102500013) — Programmer Utama;
+   Dina Aulia Rizky (109102500011) — Penulis Laporan & Dokumentasi.
