@@ -4,7 +4,8 @@ Dibaca otomatis oleh AI agent di setiap sesi. Proyek ini adalah **Tugas Besar St
 JRPG turn-based bernuansa cerita rakyat Nusantara versi kelam, dalam C++17 + raylib. Acuan mekanik: Black Souls 1.
 Ketentuan resmi: [Konteks-Tugas/](Konteks-Tugas/). Rencana v2: [docs/PLAN_V2.md](docs/PLAN_V2.md).
 Bedah sistem Black Souls: [docs/research/black-souls-1-analysis.md](docs/research/black-souls-1-analysis.md).
-Versi lama (Cinderwake v1) ada di branch `legacy/cinderwake-v1` / tag `v1-cinderwake`; jangan diubah.
+Prototipe pertama (TUMBAL v1) ada di branch `legacy/tumbal-v1` / tag `tumbal-v1`; jangan diubah.
+Jangan memakai nama lama "Cinderwake" di commit, dokumen, atau nama branch/tag baru.
 
 ## Aturan yang TIDAK boleh dilanggar (ketentuan dosen)
 
@@ -100,6 +101,12 @@ X = batal/menu (Barang, Status, Simpan, Cheat, Pengaturan, Keluar; pengaturan di
 
 ## Git
 
-- Repo: https://github.com/DaffMe/Tumbal (public, branch `main`; dulu bernama Cinderwake).
-- Commit **bertahap per bagian logis** (bukan satu commit besar), pesan bahasa Indonesia gaya `feat(x): ...`,
-  diakhiri baris `Co-Authored-By` AI. Commit/push hanya bila diminta.
+- Repo: https://github.com/DaffMe/Tumbal (public, branch `main`).
+- Commit **bertahap per bagian logis** (bukan satu commit besar), diakhiri baris `Co-Authored-By` AI.
+  Commit/push hanya bila diminta.
+- Format pesan: `tipe(lingkup): deskripsi`. Tipe Conventional Commits saja (feat, fix, perf, refactor, docs, test,
+  build, chore). Lingkup = modul (adt, battle, core, event, gui, peta, aset, audio, bahasa, tools, rilis, readme, ...),
+  bukan nomor fase. Deskripsi bahasa Indonesia baku (EYD V), diawali verba dasar (tambah, perbaiki, ganti, perbarui,
+  hapus), huruf kecil di awal, tanpa titik di akhir, tanpa `&` atau tanda pisah. Contoh:
+  `feat(battle): tambah telegraf serangan besar Buto Ijo`. Rincian panjang ditaruh di badan commit.
+- Riwayat pesan commit lengkap (sebelum dan sesudah dirapikan) ada di `Laporan/riwayat-commit.md` (tidak di-commit).
